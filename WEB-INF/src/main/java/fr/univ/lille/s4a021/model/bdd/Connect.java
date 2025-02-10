@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class Connect {
     // Class to getConnection for DAO constructor
-    private static final String DB_URL = "jdbc:mysql://thebdd.qgroget.com:5432/db";
+    private static final String DB_URL = "jdbc:postgresql://thebdd.qgroget.com:5432/db";
     private static final String DB_USER = "user1";
     private static final String DB_PASSWORD = "your_password";
 
