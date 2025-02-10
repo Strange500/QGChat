@@ -2,6 +2,7 @@ package fr.univ.lille.s4a021.dao;
 
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.model.bdd.Connect;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,8 +11,8 @@ import java.util.List;
 public class ChannelDAO {
     private Connection connection;
 
-    public ChannelDAO(Connection connection) {
-        this.connection = connection;
+    public ChannelDAO() throws SQLException {
+        this.connection = Connect.getConnection();
     }
 
     // Création d'un canal

@@ -1,14 +1,15 @@
 package fr.univ.lille.s4a021.dao;
 
 import fr.univ.lille.s4a021.dto.User;
+import fr.univ.lille.s4a021.model.bdd.Connect;
 
 import java.sql.*;
 
 public class UserDAO {
     private Connection connection;
 
-    public UserDAO(Connection connection) {
-        this.connection = connection;
+    public UserDAO() throws SQLException {
+        this.connection = Connect.getConnection();
     }
 
     // Création d'un utilisateur
@@ -36,7 +37,7 @@ public class UserDAO {
         return false;
     }
 
-    // Récupération d'un utilisateur par son mail, return -1 si pas de User trouver
+    // Récupération d'un utilisateur par son mail, return -1 si pas de User trouvé
     public int getUserIdByMail(String mail) throws SQLException {
         String query = "SELECT uid FROM User WHERE mail = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -51,14 +52,15 @@ public class UserDAO {
 
     // Récupération des informations d'un utilisateur par son ID
     public User getUserById(int uid) throws SQLException {
-        String query = "SELECT username, mail FROM User WHERE uid = ?";
+        String query = "SELECT username, mail, password FROM User WHERE uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, uid);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String username = rs.getString("username");
                 String mail = rs.getString("mail");
-                return new User(uid, username, mail);
+                String password = rs.getString("password");
+                return new User(uid, username, mail, password);
             }
         }
         return null; // Retourne null si l'utilisateur n'est pas trouvé

@@ -4,12 +4,14 @@ public class User {
     private int uid;
     private String username;
     private String mail;
+    private String pwd;
 
     // Constructeur
-    public User(int uid, String username, String mail) {
+    public User(int uid, String username, String mail, String pwd) {
         this.uid = uid;
         this.username = username;
         this.mail = mail;
+        this.pwd = pwd;
     }
 
     // Getters
