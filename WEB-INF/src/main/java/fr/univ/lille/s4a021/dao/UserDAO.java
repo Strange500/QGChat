@@ -1,5 +1,87 @@
 package fr.univ.lille.s4a021.dao;
 
-public class UserDAO {
+import fr.univ.lille.s4a021.dto.User;
 
+import java.sql.*;
+
+public class UserDAO {
+    private Connection connection;
+
+    public UserDAO(Connection connection) {
+        this.connection = connection;
+    }
+
+    // Création d'un utilisateur
+    public void createUser(String username, String mail, String password) throws SQLException {
+        String query = "INSERT INTO User (username, mail, password) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, username);
+            stmt.setString(2, mail);
+            stmt.setString(3, password);
+            stmt.executeUpdate();
+        }
+    }
+
+    // Authentification d'un utilisateur
+    public boolean authenticateUser(String mail, String password) throws SQLException {
+        String query = "SELECT COUNT(*) FROM User WHERE mail = ? AND password = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, mail);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
+
+    // Récupération d'un utilisateur par son mail, return -1 si pas de User trouver
+    public int getUserIdByMail(String mail) throws SQLException {
+        String query = "SELECT uid FROM User WHERE mail = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, mail);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("uid");
+            }
+        }
+        return -1;
+    }
+
+    // Récupération des informations d'un utilisateur par son ID
+    public User getUserById(int uid) throws SQLException {
+        String query = "SELECT username, mail FROM User WHERE uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String username = rs.getString("username");
+                String mail = rs.getString("mail");
+                return new User(uid, username, mail);
+            }
+        }
+        return null; // Retourne null si l'utilisateur n'est pas trouvé
+    }
+
+    // Suppression d'un utilisateur par son ID
+    public void deleteUser(int uid) throws SQLException {
+        String query = "DELETE FROM User WHERE uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            stmt.executeUpdate();
+        }
+    }
+
+    // Mise à jour des informations d'un utilisateur
+    public void updateUser(int uid, String newUsername, String newMail, String newPassword) throws SQLException {
+        String query = "UPDATE User SET username = ?, mail = ?, password = ? WHERE uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, newUsername);
+            stmt.setString(2, newMail);
+            stmt.setString(3, newPassword);
+            stmt.setInt(4, uid);
+            stmt.executeUpdate();
+        }
+    }
 }
