@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 
+import fr.univ.lille.s4a021.dto.User;
+import fr.univ.lille.s4a021.model.bdd.Authent;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -23,8 +25,9 @@ public class Auth extends HttpServlet {
         }
 
         if (fr.univ.lille.s4a021.model.bdd.Authent.authenticateUser(mail, password)) {
+            User usr = Authent.getUser(mail, password);
             HttpSession session = req.getSession();
-            session.setAttribute("mail", mail);
+            session.setAttribute("id", usr.getUid());
             res.sendRedirect("home.jsp");
         } else {
             res.sendRedirect("error.jsp");

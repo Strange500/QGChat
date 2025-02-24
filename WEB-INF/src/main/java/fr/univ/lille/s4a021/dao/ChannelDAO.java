@@ -32,7 +32,9 @@ public class ChannelDAO {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String name = rs.getString("name");
-                return new Channel(cid, name);
+                Channel ch = new Channel(cid, name);
+                ch.setMessages(new MessageDAO().getMessagesByChannelId(cid));
+                return ch;
             }
         }
         return null; // Retourne null si le canal n'est pas trouvé
@@ -74,9 +76,9 @@ public class ChannelDAO {
 
     public static void main(String[] args) throws SQLException {
         ChannelDAO dao = new ChannelDAO();
-        dao.createChannel("test");
-        System.out.println(dao.getChannelById(1));
-        dao.deleteChannel(1);
-        System.out.println(dao.getAllChannels());
+        List<Message> messages = dao.getChannelById(2).getMessages();
+        for (Message message : messages) {
+            System.out.println(message);
+        }
     }
 }
