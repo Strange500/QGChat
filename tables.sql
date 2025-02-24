@@ -1,6 +1,13 @@
--- Création de la table User
-CREATE TABLE User (
-                      uid INT PRIMARY KEY AUTO_INCREMENT,
+DROP TABLE IF EXISTS estAbonne;
+DROP TABLE IF EXISTS aEnvoyer;
+DROP TABLE IF EXISTS contient;
+DROP TABLE IF EXISTS Utilisateur;
+DROP TABLE IF EXISTS Channel;
+DROP TABLE IF EXISTS Message;
+
+
+CREATE TABLE Utilisateur (
+                      uid SERIAL PRIMARY KEY,
                       username VARCHAR(1024) NOT NULL,
                       mail VARCHAR(1024) NOT NULL UNIQUE,
                       password VARCHAR(1024) NOT NULL
@@ -8,13 +15,13 @@ CREATE TABLE User (
 
 -- Création de la table Channel
 CREATE TABLE Channel (
-                         cid INT PRIMARY KEY AUTO_INCREMENT,
+                         cid SERIAL PRIMARY KEY,
                          name VARCHAR(1024) NOT NULL
 );
 
 -- Création de la table Message
 CREATE TABLE Message (
-                         mid INT PRIMARY KEY AUTO_INCREMENT,
+                         mid SERIAL PRIMARY KEY ,
                          contenu VARCHAR(1024) NOT NULL
 );
 
@@ -23,7 +30,7 @@ CREATE TABLE estAbonne (
                            uid INT,
                            cid INT,
                            PRIMARY KEY (uid, cid),
-                           FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE,
+                           FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
                            FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
@@ -32,7 +39,7 @@ CREATE TABLE aEnvoyer (
                           uid INT,
                           mid INT,
                           PRIMARY KEY (uid, mid),
-                          FOREIGN KEY (uid) REFERENCES User(uid) ON DELETE CASCADE,
+                          FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
                           FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE
 );
 

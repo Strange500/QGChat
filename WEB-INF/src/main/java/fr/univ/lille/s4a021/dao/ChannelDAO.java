@@ -71,4 +71,12 @@ public class ChannelDAO {
         }
         return channels;
     }
+
+    public static void main(String[] args) throws SQLException {
+        ChannelDAO dao = new ChannelDAO();
+        dao.createChannel("test");
+        System.out.println(dao.getChannelById(1));
+        dao.deleteChannel(1);
+        System.out.println(dao.getAllChannels());
+    }
 }
