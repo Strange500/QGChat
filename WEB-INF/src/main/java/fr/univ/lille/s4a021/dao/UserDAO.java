@@ -14,7 +14,8 @@ public class UserDAO {
 
     // Création d'un utilisateur
     public void createUser(String username, String mail, String password) throws SQLException {
-        String query = "INSERT INTO User (username, mail, password) VALUES (?, ?, ?)";
+        String query = "INSERT INTO Utilisateur (username, mail, password) VALUES (?, ?, ?)";
+        System.out.println("Creating user: " + username + " " + mail + " " + password);
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, username);
             stmt.setString(2, mail);
@@ -25,7 +26,7 @@ public class UserDAO {
 
     // Authentification d'un utilisateur
     public boolean authenticateUser(String mail, String password) throws SQLException {
-        String query = "SELECT COUNT(*) FROM User WHERE mail = ? AND password = ?";
+        String query = "SELECT COUNT(*) FROM Utilisateur WHERE mail = ? AND password = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, mail);
             stmt.setString(2, password);
@@ -39,7 +40,7 @@ public class UserDAO {
 
     // Récupération d'un utilisateur par son mail, return -1 si pas de User trouvé
     public int getUserIdByMail(String mail) throws SQLException {
-        String query = "SELECT uid FROM User WHERE mail = ?";
+        String query = "SELECT uid FROM Utilisateur WHERE mail = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, mail);
             ResultSet rs = stmt.executeQuery();
@@ -52,7 +53,7 @@ public class UserDAO {
 
     // Récupération des informations d'un utilisateur par son ID
     public User getUserById(int uid) throws SQLException {
-        String query = "SELECT username, mail, password FROM User WHERE uid = ?";
+        String query = "SELECT username, mail, password FROM Utilisateur WHERE uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, uid);
             ResultSet rs = stmt.executeQuery();
@@ -68,7 +69,7 @@ public class UserDAO {
 
     // Suppression d'un utilisateur par son ID
     public void deleteUser(int uid) throws SQLException {
-        String query = "DELETE FROM User WHERE uid = ?";
+        String query = "DELETE FROM Utilisateur WHERE uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, uid);
             stmt.executeUpdate();
@@ -77,7 +78,7 @@ public class UserDAO {
 
     // Mise à jour des informations d'un utilisateur
     public void updateUser(int uid, String newUsername, String newMail, String newPassword) throws SQLException {
-        String query = "UPDATE User SET username = ?, mail = ?, password = ? WHERE uid = ?";
+        String query = "UPDATE Utilisateur SET username = ?, mail = ?, password = ? WHERE uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, newUsername);
             stmt.setString(2, newMail);
