@@ -11,7 +11,18 @@
 
     <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
+
     <%@ page import="java.util.List" %>
+    <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
+
+    <%
+        if (!Util.userIsConnected(session)) {
+            response.sendRedirect("index.jsp");
+        }
+    %>
+
+    <a href="logout">Logout</a>
+
 
     <H1>Channels</H1>
     <%
