@@ -25,6 +25,7 @@
 
 
     <H1>Channels</H1>
+    <a href="createChannel.jsp">Create a channel</a>
     <%
         ChannelDAO channelDAO = new ChannelDAO();
         List<Channel> channels = channelDAO.getAllChannels();
