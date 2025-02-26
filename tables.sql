@@ -51,3 +51,33 @@ CREATE TABLE contient (
                           FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE,
                           FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE
 );
+
+INSERT INTO Utilisateur (username, mail, password) VALUES
+('user1', 'user1@example.com', MD5('password1')),
+('user2', 'user2@example.com', MD5('password2')),
+('user3', 'user3@example.com', MD5('password3'));
+
+INSERT INTO Channel (name) VALUES
+('General'),
+('Random'),
+('Announcements');
+
+INSERT INTO Message (contenu) VALUES
+('Welcome to the General channel!'),
+('This is a random message.'),
+('Important announcement: Meeting at 3 PM.');
+
+INSERT INTO estAbonne (uid, cid) VALUES
+(1, 1),
+(2, 1),
+(3, 2);
+
+INSERT INTO aEnvoyer (uid, mid) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
+
+INSERT INTO contient (cid, mid) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
