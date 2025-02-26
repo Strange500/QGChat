@@ -6,8 +6,10 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <!-- import bootstreap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-<body>
+<body class="container mt-5">
 
     <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
@@ -24,7 +26,9 @@
         }
     %>
 
-    <H1>Channels</H1>
+    <a href="home.jsp" class="btn btn-primary mb-3">Back</a>
+
+    <h1 class="mb-4">Channel</h1>
     <%
         String channelIdParam = request.getParameter("channelID");
         if (channelIdParam != null) {
@@ -42,7 +46,7 @@
             Channel channel = channelDAO.getChannelById(channelID);
             if (channel != null) {
     %>
-        <h2><%=channel.getName()%></h2>
+        <h2 class="mb-4"><%=channel.getName()%></h2>
     <%
                 List<Message> messages = channel.getMessages();
                 if (messages != null) {
@@ -54,9 +58,9 @@
                             response.sendRedirect("home.jsp");
                         }
             %>
-            <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-                <span style="font-weight: bold; color: #333;"><%=user.getUsername()%></span>
-                <p style="margin: 5px 0; color: #555;"><%=message.getContenu()%></p>
+            <div class="border p-3 mb-3 rounded">
+                <span class="font-weight-bold text-dark"><%=user.getUsername()%></span>
+                <p class="my-2 text-muted"><%=message.getContenu()%></p>
             </div>
 
             <%
@@ -64,17 +68,17 @@
                 }
             }
     %>
-        <form action="send" method="POST">
+        <form action="send" method="POST" class="mt-4">
             <input type="hidden" name="channelID" value="<%=channelID%>">
 
-            <input type="text" name="message" placeholder="Enter your message">
-            <input type="submit" value="Afficher">
+            <div class="form-group">
+                <input type="text" class="form-control" name="message" placeholder="Enter your message">
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
         </form>
     <%
         }
     %>
-
-
 
 </body>
 </html>

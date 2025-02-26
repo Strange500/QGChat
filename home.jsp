@@ -6,8 +6,10 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <!-- import bootstreap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-<body>
+<body class="container">
 
     <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
@@ -24,11 +26,11 @@
         }
     %>
 
-    <a href="logout">Logout</a>
+    <a href="logout" class="btn btn-danger">Logout</a>
 
 
-    <H1>Channels</H1>
-    <a href="createChannel.jsp">Create a channel</a>
+    <H1 class="mt-4">Channels</H1>
+    <a href="createChannel.jsp" class="btn btn-primary mb-3">Create a channel</a>
     <%
         ChannelDAO channelDAO = new ChannelDAO();
         List<Channel> channels = channelDAO.getAllChannels();
@@ -47,9 +49,9 @@
                     continue;
                 }
     %>
-        <a href="channel.jsp?channelID=<%=channel.getCid()%>">
-            <h2><%=channel.getName()%></h2>
-        </a>
+    <a href="channel.jsp?channelID=<%=channel.getCid()%>" class="list-group-item list-group-item-action">
+        <h2 class="h5"><%=channel.getName()%></h2>
+    </a>
     <%
             }
         }

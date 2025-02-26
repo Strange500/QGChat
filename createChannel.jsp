@@ -6,8 +6,10 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <!-- import bootstreap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-<body>
+<body class="container mt-5">
 
 <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
@@ -31,35 +33,39 @@
     } catch (SQLException e) {
         response.sendRedirect("/error.jsp");
     }
-
-
 %>
 
-<a href="logout">Logout</a>
+<a href="logout" class="btn btn-danger mb-3">Logout</a>
+
+<h1 class="mb-4">Create a Channel</h1>
 
 <form action="channel" method="get">
     <input type="hidden" name="action" value="create">
 
-    <input type="text" name="name" placeholder="Enter the name of the channel">
+    <div class="form-group">
+        <label for="channelName">Channel Name</label>
+        <input type="text" class="form-control" id="channelName" name="name" placeholder="Enter the name of the channel">
+    </div>
 
-    <select name="users" multiple>
-        <%
-            for (User user : users) {
-                if (user.getUid() == (int) session.getAttribute("id")) {
-                    continue;
+    <div class="form-group">
+        <label for="users">Select Users</label>
+        <select class="form-control" id="users" name="users" multiple>
+            <%
+                for (User user : users) {
+                    if (user.getUid() == (int) session.getAttribute("id")) {
+                        continue;
+                    }
+            %>
+                <option value="<%=user.getUid()%>"><%=user.getUsername()%></option>
+            <%
                 }
-        %>
+            %>
+        </select>
+    </div>
 
-            <option value="<%=user.getUid()%>"><%=user.getUsername()%></option>
-        <%
-            }
-        %>
-    </select>
-
-
-    <input type="submit" value="Create">
-
+    <button type="submit" class="btn btn-primary">Create</button>
 </form>
 
 </body>
+
 </html>
