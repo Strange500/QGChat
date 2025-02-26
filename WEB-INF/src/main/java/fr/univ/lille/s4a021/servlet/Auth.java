@@ -19,6 +19,9 @@ public class Auth extends HttpServlet {
         String mail = req.getParameter("mail");
         String password = req.getParameter("password");
 
+        System.out.println("mail: " + mail);
+        System.out.println("password: " + password);
+
         if (mail == null || password == null) {
             res.sendRedirect("index.jsp");
             return;

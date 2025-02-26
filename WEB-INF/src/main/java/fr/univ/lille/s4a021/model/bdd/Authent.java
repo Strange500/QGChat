@@ -12,7 +12,7 @@ public class Authent {
 
     // Méthode pour vérifier les identifiants de l'utilisateur
     public static boolean authenticateUser(String usernameOrEmail, String password) {
-        String query = "SELECT * FROM Utilisateur WHERE (username = ? OR mail = ?) AND password = ?";
+        String query = "SELECT * FROM Utilisateur WHERE (username = ? OR mail = ?) AND password = MD5(?)";
 
         try (Connection conn = Connect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -33,7 +33,8 @@ public class Authent {
 
     // Méthode pour obtenir les informations de l'utilisateur authentifié
     public static User getUser(String usernameOrEmail, String password) {
-        String query = "SELECT * FROM Utilisateur WHERE (username = ? OR mail = ?) AND password = ?";
+        String query = "SELECT * FROM Utilisateur WHERE (username = ? OR mail = ?) AND password = MD5(?)";
+
 
         try (Connection conn = Connect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -41,6 +42,8 @@ public class Authent {
             stmt.setString(1, usernameOrEmail);
             stmt.setString(2, usernameOrEmail);
             stmt.setString(3, password);
+
+
 
             ResultSet rs = stmt.executeQuery();
 

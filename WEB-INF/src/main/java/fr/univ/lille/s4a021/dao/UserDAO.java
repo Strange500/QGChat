@@ -14,7 +14,7 @@ public class UserDAO {
 
     // Création d'un utilisateur
     public void createUser(String username, String mail, String password) throws SQLException {
-        String query = "INSERT INTO Utilisateur (username, mail, password) VALUES (?, ?, ?)";
+        String query = "INSERT INTO Utilisateur (username, mail, password) VALUES (?, ?, MD5(?))";
         System.out.println("Creating user: " + username + " " + mail + " " + password);
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, username);
@@ -26,7 +26,7 @@ public class UserDAO {
 
     // Authentification d'un utilisateur
     public boolean authenticateUser(String mail, String password) throws SQLException {
-        String query = "SELECT COUNT(*) FROM Utilisateur WHERE mail = ? AND password = ?";
+        String query = "SELECT COUNT(*) FROM Utilisateur WHERE mail = ? AND password = MD5(?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, mail);
             stmt.setString(2, password);
@@ -78,7 +78,7 @@ public class UserDAO {
 
     // Mise à jour des informations d'un utilisateur
     public void updateUser(int uid, String newUsername, String newMail, String newPassword) throws SQLException {
-        String query = "UPDATE Utilisateur SET username = ?, mail = ?, password = ? WHERE uid = ?";
+        String query = "UPDATE Utilisateur SET username = ?, mail = ?, password = MD5(?) WHERE uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, newUsername);
             stmt.setString(2, newMail);
