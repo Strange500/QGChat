@@ -16,6 +16,7 @@
     <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
     <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
     <%@ page import="java.sql.SQLException" %>
+    <%@ page import="fr.univ.lille.s4a021.dto.User" %>
 
     <%
         if (!Util.userIsConnected(session)) {
@@ -46,8 +47,18 @@
                 List<Message> messages = channel.getMessages();
                 if (messages != null) {
                     for (Message message : messages) {
+                        User user = new User(-1, "Unknown", "Unknown", "Unknown");
+                        try {
+                            user = new UserDAO().getUserById(message.getSenderId());
+                        } catch (SQLException e) {
+                            response.sendRedirect("home.jsp");
+                        }
             %>
-                <p><%=message.getContenu()%></p>
+            <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                <span style="font-weight: bold; color: #333;"><%=user.getUsername()%></span>
+                <p style="margin: 5px 0; color: #555;"><%=message.getContenu()%></p>
+            </div>
+
             <%
                     }
                 }
@@ -63,34 +74,7 @@
         }
     %>
 
-    <script>
-        function sendMessage(message, channelID) {
-            const url = "send"
-            const data = {
-                message: message,
-                channelID: channelID
-            }
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-        }
 
-        document.querySelector("#sendmsgform").addEventListener("submit", function(event){
-            event.preventDefault()
-            const formData = new FormData(event.target)
-            const message = formData.get("message")
-            const channelID = formData.get("channelID")
-            sendMessage(message, channelID)
-        })
-    </script>
 
 </body>
 </html>

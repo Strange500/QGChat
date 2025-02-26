@@ -26,7 +26,7 @@ public class Send extends HttpServlet {
             int usr = (int) req.getSession().getAttribute("id");
             MessageDAO messageDAO = new MessageDAO();
             messageDAO.createMessage(msg, usr, channel.getCid());
-            res.sendRedirect("home.jsp");
+            res.sendRedirect("channel.jsp?channelID=" + channel.getCid());
         }
         catch (SQLException e) {
             System.err.println("Error: " + e.getMessage());
