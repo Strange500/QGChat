@@ -37,6 +37,8 @@
 
 <a href="logout" class="btn btn-danger mb-3">Logout</a>
 
+<a href="home.jsp" class="btn btn-primary mb-3">Back</a>
+
 <h1 class="mb-4">Create a Channel</h1>
 
 <form action="channel" method="get">
