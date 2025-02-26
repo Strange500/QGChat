@@ -14,10 +14,13 @@
 
     <%@ page import="java.util.List" %>
     <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+    <%@ page import="java.sql.SQLException" %>
 
     <%
         if (!Util.userIsConnected(session)) {
             response.sendRedirect("index.jsp");
+            return;
         }
     %>
 
@@ -32,7 +35,17 @@
         if (channels != null) {
     %>
     <%
+            UserDAO userDAO = new UserDAO();
             for (Channel channel : channels) {
+                boolean estAbonne = false;
+                try {
+                    estAbonne = userDAO.estAbonne((int) session.getAttribute("id"), channel.getCid());
+                } catch (SQLException e) {
+                    response.sendRedirect("home.jsp");
+                }
+                if (!estAbonne) {
+                    continue;
+                }
     %>
         <a href="channel.jsp?channelID=<%=channel.getCid()%>">
             <h2><%=channel.getName()%></h2>

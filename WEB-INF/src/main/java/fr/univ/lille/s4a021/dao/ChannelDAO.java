@@ -16,12 +16,29 @@ public class ChannelDAO {
     }
 
     // Création d'un canal
-    public void createChannel(String name) throws SQLException {
+    public Channel createChannel(String name) throws SQLException {
         String query = "INSERT INTO Channel (name) VALUES (?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, name);
             stmt.executeUpdate();
         }
+
+        return getChannelByName(name);
+    }
+
+    public Channel getChannelByName(String name) throws SQLException {
+        String query = "SELECT cid FROM Channel WHERE name = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, name);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                int cid = rs.getInt("cid");
+                Channel ch = new Channel(cid, name);
+                ch.setMessages(new MessageDAO().getMessagesByChannelId(cid));
+                return ch;
+            }
+        }
+        return null; // Retourne null si le canal n'est pas trouvé
     }
 
     // Récupération d'un canal par son ID
@@ -72,6 +89,25 @@ public class ChannelDAO {
             }
         }
         return channels;
+    }
+
+    public void abonneUsers(Channel ch, List<String> users) {
+        try {
+            Connection connection = Connect.getConnection();
+            String query = "INSERT INTO estAbonne (uid, cid) VALUES (?, ?)";
+
+            for (String user : users) {
+                int uid = Integer.parseInt(user);
+                try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                    stmt.setInt(1, uid);
+                    stmt.setInt(2, ch.getCid());
+                    stmt.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
     }
 
     public static void main(String[] args) throws SQLException {

@@ -14,11 +14,25 @@
 
 <%@ page import="java.util.List" %>
 <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
+<%@ page import="fr.univ.lille.s4a021.dto.User" %>
+<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="java.sql.SQLException" %>
+<%@ page import="java.util.ArrayList" %>
 
 <%
     if (!Util.userIsConnected(session)) {
         response.sendRedirect("/index.jsp");
     }
+
+    List<User> users = new ArrayList<>();
+
+    try {
+        users.addAll(new UserDAO().getAllUsers());
+    } catch (SQLException e) {
+        response.sendRedirect("/error.jsp");
+    }
+
+
 %>
 
 <a href="logout">Logout</a>
@@ -27,6 +41,20 @@
     <input type="hidden" name="action" value="create">
 
     <input type="text" name="name" placeholder="Enter the name of the channel">
+
+    <select name="users" multiple>
+        <%
+            for (User user : users) {
+                if (user.getUid() == (int) session.getAttribute("id")) {
+                    continue;
+                }
+        %>
+
+            <option value="<%=user.getUid()%>"><%=user.getUsername()%></option>
+        <%
+            }
+        %>
+    </select>
 
 
     <input type="submit" value="Create">

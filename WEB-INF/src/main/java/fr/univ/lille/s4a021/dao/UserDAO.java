@@ -4,6 +4,8 @@ import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.model.bdd.Connect;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO {
     private Connection connection;
@@ -30,6 +32,19 @@ public class UserDAO {
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, mail);
             stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
+
+    public boolean estAbonne(int uid, int cid) throws SQLException {
+        String query = "SELECT COUNT(*) FROM estAbonne WHERE uid = ? AND cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            stmt.setInt(2, cid);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1) > 0;
@@ -85,6 +100,24 @@ public class UserDAO {
             stmt.setString(3, newPassword);
             stmt.setInt(4, uid);
             stmt.executeUpdate();
+        }
+    }
+
+    public List<User> getAllUsers() throws SQLException {
+        String query = "SELECT * FROM Utilisateur";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            ResultSet rs = stmt.executeQuery();
+            List<User> users = new ArrayList<>();
+            while (rs.next()) {
+                int uid = rs.getInt("uid");
+                String username = rs.getString("username");
+                String mail = rs.getString("mail");
+                String password = rs.getString("password");
+                users.add(new User(uid, username, mail, password));
+            }
+
+            return users;
+
         }
     }
 }

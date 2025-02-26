@@ -13,11 +13,29 @@
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
     <%@ page import="java.util.List" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Message" %>
+    <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+    <%@ page import="java.sql.SQLException" %>
+
+    <%
+        if (!Util.userIsConnected(session)) {
+            response.sendRedirect("index.jsp");
+        }
+    %>
 
     <H1>Channels</H1>
     <%
         String channelIdParam = request.getParameter("channelID");
         if (channelIdParam != null) {
+            boolean estAbonne = false;
+            try {
+                estAbonne = new UserDAO().estAbonne((int) session.getAttribute("id"), Integer.parseInt(channelIdParam));
+            } catch (SQLException e) {
+                response.sendRedirect("home.jsp");
+            }
+            if (!estAbonne) {
+                response.sendRedirect("home.jsp");
+            }
             int channelID = Integer.parseInt(channelIdParam);
             ChannelDAO channelDAO = new ChannelDAO();
             Channel channel = channelDAO.getChannelById(channelID);
