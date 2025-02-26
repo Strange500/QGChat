@@ -2,6 +2,7 @@ package fr.univ.lille.s4a021.dao;
 
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.model.bdd.Connect;
 
 import java.sql.*;
@@ -13,6 +14,33 @@ public class ChannelDAO {
 
     public ChannelDAO() throws SQLException {
         this.connection = Connect.getConnection();
+    }
+
+    public List<User> getAbonnes(int cid) {
+        List<User> users = new ArrayList<>();
+        String query = "SELECT uid FROM estAbonne WHERE cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, cid);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int uid = rs.getInt("uid");
+                users.add(new UserDAO().getUserById(uid));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    public void clearAbonnes(int cid) {
+        String query = "DELETE FROM estAbonne WHERE cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, cid);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // Création d'un canal
@@ -93,7 +121,6 @@ public class ChannelDAO {
 
     public void abonneUsers(Channel ch, List<String> users) {
         try {
-            Connection connection = Connect.getConnection();
             String query = "INSERT INTO estAbonne (uid, cid) VALUES (?, ?)";
 
             for (String user : users) {

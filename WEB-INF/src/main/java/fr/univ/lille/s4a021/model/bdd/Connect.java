@@ -10,10 +10,14 @@ public class Connect {
     private static final String DB_USER = "sae";
     private static final String DB_PASSWORD = "sae";
 
+    private static Connection connection;
+
     public static Connection getConnection() throws SQLException {
-        Connection con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        Connect.createTableIfNotExist(con);
-        return con;
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            createTableIfNotExist(connection);
+        }
+        return connection;
     }
 
 

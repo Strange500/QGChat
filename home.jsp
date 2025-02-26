@@ -85,7 +85,13 @@
                         Channel channel = channelDAO.getChannelById(channelID);
                         if (channel != null) {
                 %>
-                <h2 class="mb-4"><%=channel.getName()%></h2>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-4"><%=channel.getName()%></h2>
+                    <a id="editLink" href="ModifChannel.jsp?channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                </div>
+
 <div id="messageList" class="overflow-auto" style="max-height: 400px;">
 <%
             List<Message> messages = channel.getMessages();
