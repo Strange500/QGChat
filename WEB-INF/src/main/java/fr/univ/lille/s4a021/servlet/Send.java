@@ -12,6 +12,7 @@ import fr.univ.lille.s4a021.dto.Channel;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
+import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 @WebServlet("/send")
 public class Send extends HttpServlet {
@@ -23,6 +24,7 @@ public class Send extends HttpServlet {
             ChannelDAO channelDAO = new ChannelDAO();
             Channel channel = channelDAO.getChannelById(Integer.parseInt(req.getParameter("channelID")));
             String msg = req.getParameter("message");
+            msg = StringEscapeUtils.escapeHtml4(msg);
             int usr = (int) req.getSession().getAttribute("id");
             MessageDAO messageDAO = new MessageDAO();
             messageDAO.createMessage(msg, usr, channel.getCid());

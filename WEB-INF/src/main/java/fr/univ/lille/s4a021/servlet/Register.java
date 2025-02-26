@@ -9,6 +9,7 @@ import fr.univ.lille.s4a021.dao.UserDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
+import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 @WebServlet("/register")
 public class Register extends HttpServlet {
@@ -18,8 +19,8 @@ public class Register extends HttpServlet {
     {
         try {
             UserDAO userDAO = new UserDAO();
-            String username = req.getParameter("username");
-            String mail = req.getParameter("mail");
+            String username = StringEscapeUtils.escapeHtml4(req.getParameter("username"));
+            String mail = StringEscapeUtils.escapeHtml4(req.getParameter("mail"));
             String password = req.getParameter("password");
             userDAO.createUser(username, mail, password);
             res.sendRedirect("index.jsp");
