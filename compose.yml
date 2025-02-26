@@ -9,23 +9,37 @@ services:
       POSTGRES_USER: sae
       POSTGRES_PASSWORD: sae
       POSTGRES_DB: sae
-    volumes:
-      - ./data:/var/lib/postgresql/data
+
+
+    networks:
+      default:
+
   tomcat:
       image: tomcat
       ports:
-          - "8080:8080"
+          - "8081:8080"
       volumes:
           - ./:/usr/local/tomcat/webapps/sae
           - ./lib/postgresql-42.7.5.jar:/usr/local/tomcat/lib/postgresql-42.7.5.jar
       depends_on:
           - postgres
+      networks:
+        default:
+
   adminer:
       image: adminer
-      ports:
-          - "8081:8080"
+
       depends_on:
           - postgres
+      network_mode: "host"
+
+networks:
+    default:
+
+
+
+
+
 
 
 
