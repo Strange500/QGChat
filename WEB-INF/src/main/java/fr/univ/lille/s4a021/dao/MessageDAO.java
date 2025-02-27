@@ -45,7 +45,7 @@ public class MessageDAO {
 
     // Récupération d'un message par son ID
     public Message getMessageById(int mid) throws SQLException {
-        String query = "SELECT contenu, (SELECT uid FROM aEnvoyer WHERE mid = ?) AS senderId, (SELECT cid FROM contient WHERE mid = ?) AS channelId FROM Message WHERE mid = ?";
+        String query = "SELECT contenu, timestamp , (SELECT uid FROM aEnvoyer WHERE mid = ?) AS senderId, (SELECT cid FROM contient WHERE mid = ?) AS channelId FROM Message WHERE mid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, mid);
             stmt.setInt(2, mid);
@@ -55,7 +55,8 @@ public class MessageDAO {
                 String contenu = rs.getString("contenu");
                 int senderId = rs.getInt("senderId");
                 int channelId = rs.getInt("channelId");
-                return new Message(mid, contenu, senderId, channelId);
+                String timestamp = rs.getString("timestamp");
+                return new Message(mid, contenu, senderId, channelId,timestamp);
             }
         }
         return null; // Retourne null si le message n'est pas trouvé
@@ -83,7 +84,7 @@ public class MessageDAO {
     // Récupération de tous les messages d'un canal
     public List<Message> getMessagesByChannelId(int channelId) throws SQLException {
         List<Message> messages = new ArrayList<>();
-        String query = "SELECT m.mid, m.contenu, a.uid AS senderId FROM Message m JOIN contient c ON m.mid = c.mid JOIN aEnvoyer a ON m.mid = a.mid WHERE c.cid = ?";
+        String query = "SELECT m.mid, m.contenu, timestamp , a.uid AS senderId FROM Message m JOIN contient c ON m.mid = c.mid JOIN aEnvoyer a ON m.mid = a.mid WHERE c.cid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, channelId);
             ResultSet rs = stmt.executeQuery();
@@ -91,9 +92,11 @@ public class MessageDAO {
                 int mid = rs.getInt("mid");
                 String contenu = rs.getString("contenu");
                 int senderId = rs.getInt("senderId");
-                messages.add(new Message(mid, contenu, senderId, channelId));
+                String timestamp = rs.getString("timestamp");
+                messages.add(new Message(mid, contenu, senderId, channelId, timestamp));
             }
         }
+        messages.sort((m1, m2) -> m1.getDateSend().compareTo(m2.getDateSend()));
         return messages;
     }
 }

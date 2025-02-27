@@ -1,16 +1,28 @@
 package fr.univ.lille.s4a021.dto;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Message {
     private int mid;
     private String contenu;
     private int senderId;
     private int channelId;
 
-    public Message(int mid, String contenu, int senderId, int channelId) {
+    private Date dateSend;
+
+
+
+    public Message(int mid, String contenu, int senderId, int channelId, String timestamp) {
         this.mid = mid;
         this.contenu = contenu;
         this.senderId = senderId;
         this.channelId = channelId;
+        try {
+            this.dateSend = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(timestamp);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // Getters and Setters
@@ -45,6 +57,29 @@ public class Message {
     public void setChannelId(int channelId) {
         this.channelId = channelId;
     }
+
+    public Date getDateSend() {
+        return dateSend;
+    }
+
+    public String getTimeAgo() {
+        long diff = new Date().getTime() - dateSend.getTime();
+        long diffSeconds = diff / 1000 % 60;
+        long diffMinutes = diff / (60 * 1000) % 60;
+        long diffHours = diff / (60 * 60 * 1000) % 24;
+        long diffDays = diff / (24 * 60 * 60 * 1000);
+
+        if (diffDays > 0) {
+            return new SimpleDateFormat("dd/MM/yyyy 'à' HH:mm").format(dateSend);
+        } else if (diffHours > 0) {
+            return diffHours + " hour" + (diffHours > 1 ? "s" : "") + " ago";
+        } else if (diffMinutes > 0) {
+            return diffMinutes + " minute" + (diffMinutes > 1 ? "s" : "") + " ago";
+        } else {
+            return diffSeconds + " second" + (diffSeconds > 1 ? "s" : "") + " ago";
+        }
+    }
+
 
     @Override
     public String toString() {

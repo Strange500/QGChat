@@ -22,7 +22,8 @@ CREATE TABLE Channel (
 -- Création de la table Message
 CREATE TABLE Message (
                          mid SERIAL PRIMARY KEY ,
-                         contenu VARCHAR(1024) NOT NULL
+                         contenu VARCHAR(1024) NOT NULL,
+                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table de liaison estAbonne (User - Channel)

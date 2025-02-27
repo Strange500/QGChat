@@ -107,6 +107,7 @@
                 %>
                 <div class="border p-3 mb-3 rounded">
                     <span class="font-weight-bold text-dark"><%=user.getUsername()%></span>
+                    <small class="text-muted ml-2"><%=message.getTimeAgo()%></small>
                     <p class="my-2 text-muted"><%=message.getContenu()%></p>
                 </div>
     <%
