@@ -38,7 +38,7 @@ public class Connect {
 
             query = "CREATE TABLE IF NOT EXISTS Message (" +
                     "mid SERIAL PRIMARY KEY ," +
-                    "contenu VARCHAR(1024) NOT NULL" +
+                    "contenu TEXT NOT NULL," +
                     "timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP"+
                     ")";
             con.createStatement().executeUpdate(query);

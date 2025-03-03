@@ -83,14 +83,20 @@ public class MessageDAO {
                     aEnvoyerStmt.setInt(1, senderId);
                     aEnvoyerStmt.setInt(2, mid);
                     aEnvoyerStmt.executeUpdate();
+                }catch (SQLException e) {
+                    e.printStackTrace();
                 }
 
                 try (PreparedStatement contientStmt = connection.prepareStatement(insertContientQuery)) {
                     contientStmt.setInt(1, channelId);
                     contientStmt.setInt(2, mid);
                     contientStmt.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -171,8 +177,8 @@ public class MessageDAO {
         for (Message message : messages) {
             if (message.getContenu().startsWith("img:")) {
                 String[] parts = message.getContenu().split(":");
-                String path = parts[1];
-                imgMessages.add(new ImgMessage(message, path));
+                String content = parts[1];
+                imgMessages.add(new ImgMessage(message, content));
                 lsToRemove.add(message);
             }
         }

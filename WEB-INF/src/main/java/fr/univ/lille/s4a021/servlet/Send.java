@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 
+import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dao.UserDAO;
@@ -20,14 +21,33 @@ import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 @WebServlet("/send")
 public class Send extends HttpServlet {
 
-    public void doPost( HttpServletRequest req, HttpServletResponse res )
+    public void service( HttpServletRequest req, HttpServletResponse res )
             throws ServletException, IOException
     {
+        int channelID ;
+        String msg = req.getAttribute("message").toString();
         try {
+            channelID = Integer.parseInt(req.getAttribute("channelID").toString());
+        } catch (NumberFormatException e) {
+            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
+            req.setAttribute("message", "Channel ID is not a number");
+            req.setAttribute("errorCode", 400);
+            rd.forward(req, res);
+            return;
+        }
+
+
+        try {
+
+
+            Part imgPart = (Part) req.getAttribute("img");
+
+            System.out.println("attribute channelID: " + channelID);
+            System.out.println("attribute message: " + msg);
+
+
             ChannelDAO channelDAO = new ChannelDAO();
-            Channel channel = channelDAO.getChannelById(Integer.parseInt(req.getParameter("channelID")));
-            String msg = req.getParameter("message");
-            Part imgPart = req.getPart("img");
+            Channel channel = channelDAO.getChannelById(channelID);
             if (imgPart.getSize()>0) {
                 String imgName = UUID.randomUUID().toString() + ".jpg";
                 String imgPath = getServletContext().getRealPath("/img") + "/" + imgName;
@@ -38,11 +58,13 @@ public class Send extends HttpServlet {
             int usr = (int) req.getSession().getAttribute("id");
             MessageDAO messageDAO = new MessageDAO();
             messageDAO.createMessage(msg, usr, channel.getCid());
-            res.sendRedirect("home.jsp?channelID=" + channel.getCid());
+            System.out.println("Message sent");
+            res.sendRedirect("home?action=view&channelID=" + channel.getCid());
         }
         catch (SQLException e) {
-            System.err.println("Error: " + e.getMessage());
-            res.sendRedirect("error.jsp");
+            RequestDispatcher rd = req.getRequestDispatcher("home");
+            req.setAttribute("senderror", "Erreur lors de l'envoi du message");
+            rd.forward(req, res);
         }
     }
 

@@ -25,6 +25,7 @@
     <%@ page import="java.text.SimpleDateFormat" %>
     <%@ page import="java.io.IOException" %>
     <%@ page import="java.util.*" %>
+    <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
 
     <div id="hover-div" style="display: none"></div>
 
@@ -37,7 +38,7 @@
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
-                sb.append("<form action=\"like\" method=\"POST\" id=\"likeForm\">");
+                sb.append("<form action=\"?action=like\" method=\"POST\" id=\"likeForm\">");
                 sb.append("<div style=\"display: none\" id=\"userDiv\">");
                 List<String> whoLiked = new MessageDAO().getWhoLiked(message.getMid());
                 if (whoLiked != null && !whoLiked.isEmpty()) {
@@ -70,8 +71,8 @@
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
-                sb.append("<img src=\"img/").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
-                sb.append("<form action=\"like\" method=\"POST\" id=\"likeForm\">");
+                sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
+                sb.append("<form action=\"?action=like\" method=\"POST\" id=\"likeForm\">");
                 sb.append("<div style=\"display: none\" id=\"userDiv\">");
                 List<String> whoLiked = new MessageDAO().getWhoLiked(message.getMid());
                 if (whoLiked != null && !whoLiked.isEmpty()) {
@@ -96,25 +97,14 @@
             }
         }
 
-        private User getUserById(int userId, HttpServletResponse response) throws IOException {
-            User user = new User(-1, "Unknown", "Unknown", "Unknown");
-            try {
-                user = new UserDAO().getUserById(userId);
-            } catch (SQLException e) {
-                response.sendRedirect("home.jsp");
-            }
+        private User getUserById(int userId, HttpServletResponse response) throws SQLException {
+            User user;
+            user = new UserDAO().getUserById(userId);
             return user;
         }
     %>
 
-    <%
-        if (!Util.userIsConnected(session)) {
-            response.sendRedirect("index.jsp");
-            return;
-        }
-    %>
-
-    <a href="logout" class="btn btn-danger mb-3">Logout</a>
+    <a href="?action=logout" class="btn btn-danger mb-3">Logout</a>
 
     <div class="row">
         <div class="col-md-4">
@@ -122,7 +112,7 @@
                 <h1 class="mt-4">Channels</h1>
 
 
-                <a href="createChannel.jsp" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
+                <a href="?action=createchannel" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
                 <%
                     ChannelDAO channelDAO = new ChannelDAO();
                     List<Channel> channels = channelDAO.getAllChannels();
@@ -135,14 +125,16 @@
                         try {
                             estAbonne = userDAO.estAbonne((int) session.getAttribute("id"), channel.getCid());
                         } catch (SQLException e) {
-                            response.sendRedirect("home.jsp");
-                            return;
+                            RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
+                            request.setAttribute("message", "An error occurred while trying to get the channels");
+                            request.setAttribute("errorCode", 500);
+                            rd.forward(request, response);
                         }
                         if (!estAbonne) {
                             continue;
                         }
                 %>
-                <a href="home.jsp?channelID=<%=channel.getCid()%>" class="list-group-item list-group-item-action">
+                <a href="?action=view&channelID=<%=channel.getCid()%>" class="list-group-item list-group-item-action">
                     <h2 class="h5"><%=channel.getName()%></h2>
                 </a>
                 <%
@@ -161,19 +153,29 @@
                         try {
                             estAbonne = new UserDAO().estAbonne((int) session.getAttribute("id"), Integer.parseInt(channelIdParam));
                         } catch (SQLException e) {
-                            response.sendRedirect("home.jsp");
-                            return;
+                            RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
+                            request.setAttribute("message", "An error occurred while trying to get the channels");
+                            request.setAttribute("errorCode", 500);
+                            rd.forward(request, response);
                         }
                         if (!estAbonne) {
                             return;
                         }
                         int channelID = Integer.parseInt(channelIdParam);
-                        Channel channel = channelDAO.getChannelById(channelID);
+                        Channel channel = null;
+                        try {
+                            channel = channelDAO.getChannelById(channelID);
+                        } catch (SQLException e) {
+                            RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
+                            request.setAttribute("message", "An error occurred while trying to get the channel");
+                            request.setAttribute("errorCode", 500);
+                            rd.forward(request, response);
+                        }
                         if (channel != null) {
                 %>
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="mb-4"><%=channel.getName()%></h2>
-                    <a id="editLink" href="ModifChannel.jsp?channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                    <a id="editLink" href="?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
                         <i class="bi bi-pencil-square"></i>
                     </a>
                 </div>
@@ -199,7 +201,7 @@
     %>
     <div class="alert alert-info">No messages yet</div>
     <%
-        }}
+        }
     %>
 </div>
 <script defer>
@@ -230,7 +232,8 @@
     });
 
 </script>
-                <form action="send" method="POST" class="mt-4" enctype="multipart/form-data">
+                <form action="home" method="POST" class="mt-4" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="send">
                     <input type="hidden" name="channelID" value="<%=channelIdParam%>">
                     <div class="form-group">
                         <input type="text" class="form-control" name="message" placeholder="Enter your message">
@@ -238,9 +241,21 @@
                     <input type="file" accept="image/jpeg" class="form-control-file" name="img">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
                 </form>
+                <%
+                    }
+                %>
+
+                <% if (request.getAttribute("senderror") != null) { %>
+                    <div class="alert alert-danger mt-3" role="alert">
+                        <%= request.getAttribute("senderror") %>
+                        <% request.removeAttribute("senderror"); %>
+                    </div>
+                <% } %>
 
             </section>
         </div>
     </div>
 </body>
+
+
 </html>

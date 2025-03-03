@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 
+import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.model.bdd.Authent;
 import jakarta.servlet.*;
@@ -23,7 +24,9 @@ public class Auth extends HttpServlet {
         System.out.println("password: " + password);
 
         if (mail == null || password == null) {
-            res.sendRedirect("index.jsp");
+            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.LOGIN));
+            req.setAttribute("error", "password or mail is missing");
+            rd.forward(req, res);
             return;
         }
 
@@ -31,9 +34,11 @@ public class Auth extends HttpServlet {
             User usr = Authent.getUser(mail, password);
             HttpSession session = req.getSession();
             session.setAttribute("id", usr.getUid());
-            res.sendRedirect("home.jsp");
+            res.sendRedirect("home");
         } else {
-            res.sendRedirect("error.jsp");
+            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.LOGIN));
+            req.setAttribute("error", "Invalid credentials");
+            rd.forward(req, res);
         }
     }
 

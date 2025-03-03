@@ -11,7 +11,23 @@
 </head>
 <body class="container mt-5">
 
+<%
+    if (request.getAttribute("error") != null) {
+%>
+
+    <div class="alert alert-danger" role="alert">
+        <%= request.getAttribute("error") %>
+    </div>
+
+<%
+    }
+%>
+
+
 <h1 class="mb-4">Connection</h1>
+
+
+
 
 <form action="Auth" method="post" class="mb-4">
     <div class="form-group">
@@ -24,6 +40,18 @@
     </div>
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
+
+<%
+    if (request.getAttribute("registererror") != null) {
+%>
+
+        <div class="alert alert-danger" role="alert">
+            <%= request.getAttribute("registererror") %>
+        </div>
+
+<%
+    }
+%>
 
 <h1 class="mb-4">Registration</h1>
 

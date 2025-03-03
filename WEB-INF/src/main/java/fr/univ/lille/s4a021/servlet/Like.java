@@ -25,7 +25,7 @@ public class Like extends HttpServlet {
             throws ServletException, IOException
     {
         if (!Util.userIsConnected(req.getSession())) {
-            res.sendRedirect("index.jsp");
+            res.sendRedirect("home");
             return;
         }
 
@@ -55,7 +55,7 @@ public class Like extends HttpServlet {
             throw new RuntimeException(e);
         }
 
-        res.sendRedirect("home.jsp?channelID=" + channelId);
+        res.sendRedirect("home?action=view&channelID=" + channelId);
     }
 
 

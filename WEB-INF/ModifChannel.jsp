@@ -22,15 +22,9 @@
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
 
     <%
-        if (!Util.userIsConnected(session)) {
-            response.sendRedirect("index.jsp");
-            return;
-        }
-
         String channelID = request.getParameter("channelID");
         if (channelID == null) {
-            response.sendRedirect("home.jsp");
-            return;
+            response.sendRedirect("home");
         }
 
         ChannelDAO channelDAO = new ChannelDAO();
@@ -44,7 +38,7 @@
     <a href="logout" class="btn btn-danger mb-3">Logout</a>
 
     <section id="channel">
-        <a href="home.jsp?channelID=<%=channel.getCid()%>" class="btn btn-primary mb-3">Back</a>
+        <a href="home?action=view&channelID=<%=channel.getCid()%>" class="btn btn-primary mb-3">Back</a>
         <h1 class="mt-4">Edit <%=channel.getName()%></h1>
         <form action="channel" method="get">
             <input type="hidden" name="action" value="update">

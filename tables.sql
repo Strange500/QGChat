@@ -1,9 +1,11 @@
-DROP TABLE IF EXISTS estAbonne;
-DROP TABLE IF EXISTS aEnvoyer;
-DROP TABLE IF EXISTS contient;
-DROP TABLE IF EXISTS Utilisateur;
-DROP TABLE IF EXISTS Channel;
-DROP TABLE IF EXISTS Message;
+DROP TABLE IF EXISTS likes CASCADE;
+DROP TABLE IF EXISTS contient CASCADE;
+DROP TABLE IF EXISTS aEnvoyer CASCADE;
+DROP TABLE IF EXISTS estAbonne CASCADE;
+DROP TABLE IF EXISTS Message CASCADE;
+DROP TABLE IF EXISTS Channel CASCADE;
+DROP TABLE IF EXISTS Utilisateur CASCADE;
+
 
 
 CREATE TABLE Utilisateur (
@@ -22,7 +24,7 @@ CREATE TABLE Channel (
 -- Création de la table Message
 CREATE TABLE Message (
                          mid SERIAL PRIMARY KEY ,
-                         contenu VARCHAR(1024) NOT NULL,
+                         contenu TEXT NOT NULL,
                          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

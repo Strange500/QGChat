@@ -23,11 +23,12 @@ public class Register extends HttpServlet {
             String mail = StringEscapeUtils.escapeHtml4(req.getParameter("mail"));
             String password = req.getParameter("password");
             userDAO.createUser(username, mail, password);
-            res.sendRedirect("index.jsp");
+            res.sendRedirect("home");
         }
         catch (SQLException e) {
-            System.err.println("Error: " + e.getMessage());
-            res.sendRedirect("error.jsp");
+            RequestDispatcher rd = req.getRequestDispatcher("home");
+            req.setAttribute("registererror", "Erreur lors de l'inscription");
+            rd.forward(req, res);
         }
     }
 

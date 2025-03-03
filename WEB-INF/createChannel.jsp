@@ -20,24 +20,26 @@
 <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
 
 <%
-    if (!Util.userIsConnected(session)) {
-        response.sendRedirect("/index.jsp");
-    }
+
 
     List<User> users = new ArrayList<>();
 
     try {
         users.addAll(new UserDAO().getAllUsers());
     } catch (SQLException e) {
-        response.sendRedirect("/error.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
+        request.setAttribute("message", "An error occurred while trying to get the users");
+        request.setAttribute("errorCode", 500);
+        rd.forward(request, response);
     }
 %>
 
-<a href="logout" class="btn btn-danger mb-3">Logout</a>
+<a href="home?action=logout" class="btn btn-danger mb-3">Logout</a>
 
-<a href="home.jsp" class="btn btn-primary mb-3">Back</a>
+<a href="home" class="btn btn-primary mb-3">Back</a>
 
 <h1 class="mb-4">Create a Channel</h1>
 

@@ -7,6 +7,6 @@ public class Logout extends jakarta.servlet.http.HttpServlet {
     public void doGet(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse res)
             throws jakarta.servlet.ServletException, java.io.IOException {
         req.getSession().invalidate();
-        res.sendRedirect("index.jsp");
+        res.sendRedirect("home");
     }
 }
