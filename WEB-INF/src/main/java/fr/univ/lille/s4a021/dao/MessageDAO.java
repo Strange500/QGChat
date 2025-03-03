@@ -86,7 +86,7 @@ public class MessageDAO {
     // Récupération de tous les messages d'un canal
     public List<Message> getMessagesByChannelId(int channelId) throws SQLException {
         List<Message> messages = new ArrayList<>();
-        String query = "SELECT m.mid, m.contenu, timestamp , a.uid AS senderId FROM Message m JOIN contient c ON m.mid = c.mid JOIN aEnvoyer a ON m.mid = a.mid WHERE c.cid = ?";
+        String query = "SELECT m.mid, m.contenu, timestamp , a.uid AS senderId FROM Message m JOIN contient c ON m.mid = c.mid JOIN aEnvoyer a ON m.mid = a.mid WHERE c.cid = ? ORDER BY timestamp";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, channelId);
             ResultSet rs = stmt.executeQuery();
