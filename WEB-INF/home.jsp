@@ -160,9 +160,15 @@
                             %>
                             <div class="d-flex justify-content-between align-items-center">
                                 <h2 class="mb-4"><%=channel.getName()%></h2>
-                                <a id="editLink" href="?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
+                                <div>
+                                    <a id="editLink" href="?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a id="shareLink" href="?action=share&channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                                        <i class="bi bi-share"></i>
+                                    </a>
+                                </div>
+
                             </div>
 
                             <div id="messageList" class="overflow-auto" style="max-height: 400px;">
@@ -254,11 +260,6 @@
 
         const imgInput = document.querySelector('input[type="file"]');
         imgInput.addEventListener('change', () => {
-            if (imgInput.files[0].size > 1000000) {
-                alert('The image is too big');
-                imgInput.value = '';
-                return;
-            }
             const previewCard = document.getElementById('preview');
             preview.style.display = 'block';
             const previewImg = previewCard.querySelector('img');

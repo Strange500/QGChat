@@ -19,6 +19,7 @@ services:
       volumes:
           - ./:/usr/local/tomcat/webapps/sae
           - ./lib/postgresql-42.7.5.jar:/usr/local/tomcat/lib/postgresql-42.7.5.jar
+          - ./lib/snakeyaml-2.4.jar:/usr/local/tomcat/lib/snakeyaml-2.4.jar
       depends_on:
           - postgres
       networks:

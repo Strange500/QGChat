@@ -1,5 +1,7 @@
 package fr.univ.lille.s4a021.model.bdd;
 
+import fr.univ.lille.s4a021.Config;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -11,10 +13,13 @@ public class Connect {
     private static final String DB_PASSWORD = "sae";
 
     private static Connection connection;
+    private static final Config config = new Config();
 
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            String url = "jdbc:postgresql://" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabase();
+            System.out.println(url);
+            connection = DriverManager.getConnection(url, config.getUser(), config.getPassword());
             createTableIfNotExist(connection);
         }
         return connection;
