@@ -40,7 +40,7 @@ public class Like extends HttpServlet {
         int uid = (int) req.getSession().getAttribute("id");
 
         try {
-            if (messageDAO.isLiked(mid)) {
+            if (messageDAO.isLikedByUser(mid, uid)) {
                 messageDAO.unlikeMessage(mid, uid);
             } else {
                 messageDAO.likeMessage(mid, uid);

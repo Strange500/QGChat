@@ -29,7 +29,7 @@
     <div id="hover-div" style="display: none"></div>
 
     <%!
-        private void processMessages(List<Message> messages, Map<Date, String> resultMap, HttpServletResponse response) throws IOException, SQLException {
+        private void processMessages(List<Message> messages, Map<Date, String> resultMap, HttpServletResponse response, int uid) throws IOException, SQLException {
             for (Message message : messages) {
                 StringBuilder sb = new StringBuilder();
                 User user = getUserById(message.getSenderId(), response);
@@ -50,7 +50,7 @@
                 }
                 sb.append("</div>");
 
-                if (new MessageDAO().isLiked(message.getMid())) {
+                if (new MessageDAO().isLikedByUser(message.getMid(),uid)) {
 
                     sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
 
@@ -63,7 +63,7 @@
             }
         }
 
-        private void processImgMessages(List<ImgMessage> imgMessages, Map<Date, String> resultMap, HttpServletResponse response) throws IOException, SQLException {
+        private void processImgMessages(List<ImgMessage> imgMessages, Map<Date, String> resultMap, HttpServletResponse response, int uid) throws IOException, SQLException {
             for (ImgMessage message : imgMessages) {
                 StringBuilder sb = new StringBuilder();
                 User user = getUserById(message.getSenderId(), response);
@@ -84,7 +84,7 @@
                 }
                 sb.append("</div>");
 
-                if (new MessageDAO().isLiked(message.getMid())) {
+                if (new MessageDAO().isLikedByUser(message.getMid(), uid)) {
                     sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
 
                 } else {
@@ -184,8 +184,9 @@
         Pair<List<ImgMessage>, List<Message>> pair = new MessageDAO().separateImgFromMessage(messages);
         Map<Date, String> resultMap = new HashMap<>();
         if (messages != null && !messages.isEmpty()) {
-            processMessages(pair.getSecond(), resultMap, response);
-            processImgMessages(pair.getFirst(), resultMap, response);
+            int uid = (int) session.getAttribute("id");
+            processMessages(pair.getSecond(), resultMap, response, uid);
+            processImgMessages(pair.getFirst(), resultMap, response, uid);
 
             List<Date> sortedDates = new ArrayList<>(resultMap.keySet());
             sortedDates.sort(Date::compareTo);

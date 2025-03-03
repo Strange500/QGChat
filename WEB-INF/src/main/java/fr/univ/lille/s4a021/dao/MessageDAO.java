@@ -34,6 +34,19 @@ public class MessageDAO {
         return users;
     }
 
+    public boolean isLikedByUser(int mid, int uid) throws SQLException {
+        String query = "SELECT * FROM likes WHERE mid = ? AND uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            stmt.setInt(2, uid);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public void likeMessage(int mid, int uid) throws SQLException {
         String query = "INSERT INTO likes (mid, uid) VALUES (?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
