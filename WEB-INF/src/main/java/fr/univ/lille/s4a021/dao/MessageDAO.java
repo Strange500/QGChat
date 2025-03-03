@@ -25,6 +25,15 @@ public class MessageDAO {
         }
     }
 
+    public void unlikeMessage(int mid, int uid) throws SQLException {
+        String query = "DELETE FROM likes WHERE mid = ? AND uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            stmt.setInt(2, uid);
+            stmt.executeUpdate();
+        }
+    }
+
     // Création d'un message
     public void createMessage(String contenu, int senderId, int channelId) throws SQLException {
         String insertMessageQuery = "INSERT INTO Message (contenu) VALUES (?)";

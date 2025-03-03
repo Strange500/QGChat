@@ -29,17 +29,28 @@ public class Like extends HttpServlet {
             return;
         }
 
+        MessageDAO messageDAO = null;
+        try {
+            messageDAO = new MessageDAO();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         int mid = Integer.parseInt(req.getParameter("mid"));
         int uid = (int) req.getSession().getAttribute("id");
+
         try {
-            MessageDAO messageDAO = new MessageDAO();
-            messageDAO.likeMessage(mid, uid);
+            if (messageDAO.isLiked(mid)) {
+                messageDAO.unlikeMessage(mid, uid);
+            } else {
+                messageDAO.likeMessage(mid, uid);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         int channelId = 0;
         try {
-            channelId = new MessageDAO().getChannelByMessageId(mid);
+            channelId = messageDAO.getChannelByMessageId(mid);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
