@@ -20,7 +20,6 @@ public class Connect {
         return connection;
     }
 
-
     public static void createTableIfNotExist(Connection con) {
         try {
             String query = "CREATE TABLE IF NOT EXISTS Utilisateur (" +
@@ -69,6 +68,16 @@ public class Connect {
                     "FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE" +
                     ")";
             con.createStatement().executeUpdate(query);
+
+            query = "CREATE TABLE IF NOT EXISTS likes (" +
+                    "mid INT," +
+                    "uid INT," +
+                    "PRIMARY KEY (mid, uid)," +
+                    "CONSTRAINT fk_likes_message FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE," +
+                    "CONSTRAINT fk_likes_utilisateur FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE" +
+                    ")";
+
+            con.createStatement().executeUpdate(query);    
         } catch (SQLException e) {
             e.printStackTrace();
         }

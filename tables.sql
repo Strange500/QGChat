@@ -53,6 +53,15 @@ CREATE TABLE contient (
                           FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE
 );
 
+-- Tabme de liaison likes (Message - Utilisateur)
+CREATE TABLE likes (
+                          mid INT,
+                          uid INT,
+                          PRIMARY KEY (mid, uid),
+                          CONSTRAINT fk_likes_message FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE,
+                          CONSTRAINT fk_likes_utilisateur FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE
+);
+
 INSERT INTO Utilisateur (username, mail, password) VALUES
 ('user1', 'user1@example.com', MD5('password1')),
 ('user2', 'user2@example.com', MD5('password2')),
