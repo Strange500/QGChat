@@ -31,6 +31,8 @@ public class Authent {
         }
     }
 
+
+
     // Méthode pour obtenir les informations de l'utilisateur authentifié
     public static User getUser(String usernameOrEmail, String password) {
         String query = "SELECT * FROM Utilisateur WHERE (username = ? OR mail = ?) AND password = MD5(?)";

@@ -16,6 +16,15 @@ public class MessageDAO {
         this.connection = Connect.getConnection();
     }
 
+    public void likeMessage(int mid, int uid) throws SQLException {
+        String query = "INSERT INTO likes (mid, uid) VALUES (?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            stmt.setInt(2, uid);
+            stmt.executeUpdate();
+        }
+    }
+
     // Création d'un message
     public void createMessage(String contenu, int senderId, int channelId) throws SQLException {
         String insertMessageQuery = "INSERT INTO Message (contenu) VALUES (?)";
@@ -43,6 +52,20 @@ public class MessageDAO {
                 }
             }
         }
+    }
+
+    public int getChannelByMessageId(int mid) throws SQLException {
+        String query = "SELECT cid FROM contient WHERE mid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                int channelId = rs.getInt("cid");
+                return channelId;
+            }
+        }
+        return -1;
+
     }
 
     // Récupération d'un message par son ID
@@ -115,5 +138,14 @@ public class MessageDAO {
         }
         messages.removeAll(lsToRemove);
         return new Pair<>(imgMessages, messages);
+    }
+
+    public boolean isLiked(int mid) throws SQLException {
+        String query = "SELECT * FROM likes WHERE mid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        }
     }
 }
