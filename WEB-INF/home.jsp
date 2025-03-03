@@ -194,9 +194,21 @@
                             <input type="hidden" name="action" value="send">
                             <input type="hidden" name="channelID" value="<%=channelIdParam%>">
                             <div class="form-group">
+                                <div class="card" style="max-width: 100px; display: none" id="preview">
+                                    <div class="card-body p-0">
+                                        <a class="position-absolute top-0 end-0 p-1">
+                                            <i class="bi bi-x-octagon"></i>
+                                        </a>
+                                        <img src="" alt="preview" class="img-fluid" >
+                                    </div>
+                                </div>
+
                                 <input type="text" class="form-control" name="message" placeholder="Enter your message">
                             </div>
-                            <input type="file" accept="image/jpeg" class="form-control-file" name="img">
+                            <input type="file" accept="image/jpeg" class="form-control-file" name="img" id="imgInput" style="display: none;">
+                            <a class="btn btn-secondary" onclick="document.getElementById('imgInput').click();">
+                                <i class="bi bi-paperclip"></i>
+                            </a>
                             <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
                         </form>
                 <%
@@ -238,6 +250,33 @@
                 document.getElementById('hover-div').style.display = 'none';
             });
 
+        });
+
+        const imgInput = document.querySelector('input[type="file"]');
+        imgInput.addEventListener('change', () => {
+            if (imgInput.files[0].size > 1000000) {
+                alert('The image is too big');
+                imgInput.value = '';
+                return;
+            }
+            const previewCard = document.getElementById('preview');
+            preview.style.display = 'block';
+            const previewImg = previewCard.querySelector('img');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+            };
+            reader.readAsDataURL(imgInput.files[0]);
+
+        });
+
+        const previewCardCancelBtn = document.querySelector('#preview a');
+        previewCardCancelBtn.addEventListener('click', () => {
+            const previewCard = document.getElementById('preview');
+            previewCard.style.display = 'none';
+            const imgInput = document.querySelector('input[type="file"]');
+            imgInput.value = '';
         });
 
     </script>
