@@ -2,6 +2,7 @@ package fr.univ.lille.s4a021.dao;
 
 import fr.univ.lille.s4a021.dto.ImgMessage;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.model.bdd.Connect;
 import fr.univ.lille.s4a021.util.Pair;
 
@@ -14,6 +15,23 @@ public class MessageDAO {
 
     public MessageDAO() throws SQLException {
         this.connection = Connect.getConnection();
+    }
+
+    public List<String> getWhoLiked(int mid) throws SQLException {
+        List<String> users = new ArrayList<>();
+        String query = "SELECT u.username FROM likes l JOIN utilisateur u ON l.uid = u.uid WHERE mid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String username = rs.getString("username");
+                users.add(username);
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
     }
 
     public void likeMessage(int mid, int uid) throws SQLException {

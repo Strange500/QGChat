@@ -26,6 +26,8 @@
     <%@ page import="java.io.IOException" %>
     <%@ page import="java.util.*" %>
 
+    <div id="hover-div" style="display: none"></div>
+
     <%!
         private void processMessages(List<Message> messages, Map<Date, String> resultMap, HttpServletResponse response) throws IOException, SQLException {
             for (Message message : messages) {
@@ -35,8 +37,21 @@
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
-                sb.append("<form action=\"like\" method=\"POST\">");
+                sb.append("<form action=\"like\" method=\"POST\" id=\"likeForm\">");
+                sb.append("<div style=\"display: none\" id=\"userDiv\">");
+                List<String> whoLiked = new MessageDAO().getWhoLiked(message.getMid());
+                if (whoLiked != null && !whoLiked.isEmpty()) {
+                    sb.append("<span class=\"text-muted\">Liked by: ");
+                    for (String u : whoLiked) {
+                        sb.append(u).append(", ");
+                    }
+                    sb.delete(sb.length() - 2, sb.length());
+                    sb.append("</span>");
+                }
+                sb.append("</div>");
+
                 if (new MessageDAO().isLiked(message.getMid())) {
+
                     sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
 
                 } else {
@@ -56,7 +71,19 @@
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 sb.append("<img src=\"img/").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
-                sb.append("<form action=\"like\" method=\"POST\">");
+                sb.append("<form action=\"like\" method=\"POST\" id=\"likeForm\">");
+                sb.append("<div style=\"display: none\" id=\"userDiv\">");
+                List<String> whoLiked = new MessageDAO().getWhoLiked(message.getMid());
+                if (whoLiked != null && !whoLiked.isEmpty()) {
+                    sb.append("<span class=\"text-muted\">Liked by: ");
+                    for (String u : whoLiked) {
+                        sb.append(u).append(", ");
+                    }
+                    sb.delete(sb.length() - 2, sb.length());
+                    sb.append("</span>");
+                }
+                sb.append("</div>");
+
                 if (new MessageDAO().isLiked(message.getMid())) {
                     sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
 
@@ -174,9 +201,33 @@
         }}
     %>
 </div>
-<script>
+<script defer>
     const messageList = document.getElementById('messageList');
     messageList.scrollTop = messageList.scrollHeight;
+
+    const likeForms = document.querySelectorAll('#likeForm');
+    likeForms.forEach(form => {
+        form.addEventListener('mouseenter', (event) => {
+            document.getElementById('hover-div').style.display = 'block';
+            document.getElementById('hover-div').style.position = 'absolute';
+
+            const rect = form.getBoundingClientRect();
+            document.getElementById('hover-div').style.top = rect.top + 'px';
+            document.getElementById('hover-div').style.left = rect.left + 20 + 'px';
+            document.getElementById('hover-div').style.width = rect.width + 'px';
+            document.getElementById('hover-div').style.height = rect.height + 'px';
+
+            const hoverDiv = document.getElementById('hover-div');
+            hoverDiv.innerHTML = form.querySelector('#userDiv').innerHTML;
+
+        });
+
+        form.addEventListener('mouseleave', () => {
+            document.getElementById('hover-div').style.display = 'none';
+        });
+
+    });
+
 </script>
                 <form action="send" method="POST" class="mt-4" enctype="multipart/form-data">
                     <input type="hidden" name="channelID" value="<%=channelIdParam%>">
