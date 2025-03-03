@@ -14,12 +14,17 @@
 <body class="container">
     <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-    <%@ page import="java.util.List" %>
     <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
     <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
     <%@ page import="java.sql.SQLException" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Message" %>
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
+    <%@ page import="fr.univ.lille.s4a021.dto.ImgMessage" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.MessageDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
+    <%@ page import="java.text.SimpleDateFormat" %>
+    <%@ page import="java.io.IOException" %>
+    <%@ page import="java.util.*" %>
 
     <%
         if (!Util.userIsConnected(session)) {
@@ -93,42 +98,72 @@
                 </div>
 
 <div id="messageList" class="overflow-auto" style="max-height: 400px;">
-<%
-            List<Message> messages = channel.getMessages();
-            if (messages != null && !messages.isEmpty()) {
-                for (Message message : messages) {
-                    User user = new User(-1, "Unknown", "Unknown", "Unknown");
-                    try {
-                        user = new UserDAO().getUserById(message.getSenderId());
-                    } catch (SQLException e) {
-                        response.sendRedirect("home.jsp");
-                        return;
-                    }
-                %>
-                <div class="border p-3 mb-3 rounded">
-                    <span class="font-weight-bold text-dark"><%=user.getUsername()%></span>
-                    <small class="text-muted ml-2"><%=message.getTimeAgo()%></small>
-                    <p class="my-2 text-muted"><%=message.getContenu()%></p>
-                </div>
     <%
-        }
-    } else {
+        List<Message> messages = channel.getMessages();
+        Pair<List<ImgMessage>, List<Message>> pair = new MessageDAO().separateImgFromMessage(messages);
+        Map<Date, String> resultMap = new HashMap<>();
+        if (messages != null && !messages.isEmpty()) {
+            for (Message message : pair.getSecond()) {
+                StringBuilder sb = new StringBuilder();
+
+                User user = new User(-1, "Unknown", "Unknown", "Unknown");
+                try {
+                    user = new UserDAO().getUserById(message.getSenderId());
+                } catch (SQLException e) {
+                    response.sendRedirect("home.jsp");
+                    return;
+                }
+
+                sb.append("<div class=\"border p-3 mb-3 rounded\">");
+                sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
+                sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
+                sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
+                sb.append("</div>");
+                resultMap.put(message.getDateSend(), sb.toString());
+            }
+
+            for (ImgMessage message : pair.getFirst()) {
+                StringBuilder sb = new StringBuilder();
+
+                User user = new User(-1, "Unknown", "Unknown", "Unknown");
+                try {
+                    user = new UserDAO().getUserById(message.getSenderId());
+                } catch (SQLException e) {
+                    response.sendRedirect("home.jsp");
+                    return;
+                }
+
+                sb.append("<div class=\"border p-3 mb-3 rounded\">");
+                sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
+                sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
+                sb.append("<img src=\"img/").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
+                sb.append("</div>");
+                resultMap.put(message.getDateSend(), sb.toString());
+            }
+
+            List<Date> sortedDates = new ArrayList<>(resultMap.keySet());
+            sortedDates.sort(Date::compareTo);
+            for (Date date : sortedDates) {
+                out.println(resultMap.get(date));
+            }
+
+        } else {
     %>
     <div class="alert alert-info">No messages yet</div>
     <%
-            }
-        }
+        }}
     %>
 </div>
 <script>
     const messageList = document.getElementById('messageList');
     messageList.scrollTop = messageList.scrollHeight;
 </script>
-                <form action="send" method="POST" class="mt-4">
+                <form action="send" method="POST" class="mt-4" enctype="multipart/form-data">
                     <input type="hidden" name="channelID" value="<%=channelID%>">
                     <div class="form-group">
                         <input type="text" class="form-control" name="message" placeholder="Enter your message">
                     </div>
+                    <input type="file" accept="image/jpeg" class="form-control-file" name="img">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
                 </form>
                 <%

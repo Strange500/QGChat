@@ -8,6 +8,7 @@ public class Message {
     private String contenu;
     private int senderId;
     private int channelId;
+    private String timestamp;
 
     private Date dateSend;
 
@@ -18,6 +19,7 @@ public class Message {
         this.contenu = contenu;
         this.senderId = senderId;
         this.channelId = channelId;
+        this.timestamp = timestamp;
         try {
             this.dateSend = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(timestamp);
         } catch (Exception e) {
@@ -61,6 +63,11 @@ public class Message {
     public Date getDateSend() {
         return dateSend;
     }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
 
     public String getTimeAgo() {
         long diff = new Date().getTime() - dateSend.getTime();

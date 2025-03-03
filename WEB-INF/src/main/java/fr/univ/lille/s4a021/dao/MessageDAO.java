@@ -1,7 +1,9 @@
 package fr.univ.lille.s4a021.dao;
 
+import fr.univ.lille.s4a021.dto.ImgMessage;
 import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.model.bdd.Connect;
+import fr.univ.lille.s4a021.util.Pair;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -96,7 +98,22 @@ public class MessageDAO {
                 messages.add(new Message(mid, contenu, senderId, channelId, timestamp));
             }
         }
-        messages.sort((m1, m2) -> m1.getDateSend().compareTo(m2.getDateSend()));
         return messages;
+    }
+
+    public Pair<List<ImgMessage>,List<Message>> separateImgFromMessage(List<Message> listMessage) {
+        List<Message> messages = new ArrayList<>(listMessage);
+        List<Message> lsToRemove = new ArrayList<>();
+        List<ImgMessage> imgMessages = new ArrayList<>();
+        for (Message message : messages) {
+            if (message.getContenu().startsWith("img:")) {
+                String[] parts = message.getContenu().split(":");
+                String path = parts[1];
+                imgMessages.add(new ImgMessage(message, path));
+                lsToRemove.add(message);
+            }
+        }
+        messages.removeAll(lsToRemove);
+        return new Pair<>(imgMessages, messages);
     }
 }
