@@ -20,9 +20,6 @@ public class Auth extends HttpServlet {
         String mail = req.getParameter("mail");
         String password = req.getParameter("password");
 
-        System.out.println("mail: " + mail);
-        System.out.println("password: " + password);
-
         if (mail == null || password == null) {
             RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.LOGIN));
             req.setAttribute("error", "password or mail is missing");

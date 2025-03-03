@@ -35,11 +35,9 @@ public class Channel extends jakarta.servlet.http.HttpServlet {
         if (channelDAO == null) {
             try {
                 channelDAO = new ChannelDAO();
-            } catch (java.sql.SQLException e) {
-                RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-                req.setAttribute("message", e.getMessage());
-                req.setAttribute("errorCode", 500);
-                rd.forward(req, res);
+            } catch (SQLException e) {
+                MainController.sendErrorPage(500, e.getMessage(), req, res);
+                return;
             }
         }
 
@@ -61,10 +59,8 @@ public class Channel extends jakarta.servlet.http.HttpServlet {
                     channelDAO.abonneUsers(ch, abonnees);
                     res.sendRedirect("home?action=view&channelID=" + ch.getCid());
                 } catch (SQLException e) {
-                    RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-                    req.setAttribute("message", e.getMessage());
-                    req.setAttribute("errorCode", 500);
-                    rd.forward(req, res);
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
                 }
                 break;
             case "delete":
@@ -73,10 +69,8 @@ public class Channel extends jakarta.servlet.http.HttpServlet {
                     channelDAO.deleteChannel(cid);
                     res.sendRedirect("home");
                 } catch (SQLException e) {
-                    RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-                    req.setAttribute("message", e.getMessage());
-                    req.setAttribute("errorCode", 500);
-                    rd.forward(req, res);
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
                 }
                 break;
             case "update":
@@ -97,11 +91,9 @@ public class Channel extends jakarta.servlet.http.HttpServlet {
                     channelDAO.clearAbonnes(cid2);
                     channelDAO.abonneUsers(ch, abonnees2);
                     res.sendRedirect("home?action=view&channelID=" + cid2);
-                } catch (java.sql.SQLException e) {
-                    RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-                    req.setAttribute("message", e.getMessage());
-                    req.setAttribute("errorCode", 500);
-                    rd.forward(req, res);
+                } catch (SQLException e) {
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
                 }
                 break;
             default:

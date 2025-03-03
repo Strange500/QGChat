@@ -21,7 +21,6 @@ import java.util.UUID;
 @WebServlet("/home")
 public class MainController extends HttpServlet {
 
-    public final static String HERE = "home";
     public final static String LOGIN = "login.jsp";
     public final static String HOME = "home.jsp";
     public final static String ERROR = "error.jsp";
@@ -39,9 +38,6 @@ public class MainController extends HttpServlet {
 
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
-
-
-
 
         if (Util.userIsConnected(session)) {
             if (action == null) {
@@ -131,5 +127,12 @@ public class MainController extends HttpServlet {
 
     public static void main(String[] args) {
         System.out.println("Hello, World!");
+    }
+
+    public static void sendErrorPage(int errorCode, String msg, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        req.setAttribute("errorCode", errorCode);
+        req.setAttribute("message", msg);
+        RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(ERROR));
+        rd.forward(req, res);
     }
 }

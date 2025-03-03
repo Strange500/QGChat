@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 
 
+import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.UserDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -26,7 +27,7 @@ public class Register extends HttpServlet {
             res.sendRedirect("home");
         }
         catch (SQLException e) {
-            RequestDispatcher rd = req.getRequestDispatcher("home");
+            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.LOGIN));
             req.setAttribute("registererror", "Erreur lors de l'inscription");
             rd.forward(req, res);
         }

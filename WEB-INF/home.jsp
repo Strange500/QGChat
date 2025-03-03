@@ -33,32 +33,12 @@
         private void processMessages(List<Message> messages, Map<Date, String> resultMap, HttpServletResponse response, int uid) throws IOException, SQLException {
             for (Message message : messages) {
                 StringBuilder sb = new StringBuilder();
-                User user = getUserById(message.getSenderId(), response);
+                User user = new UserDAO().getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
-                sb.append("<form action=\"?action=like\" method=\"POST\" id=\"likeForm\">");
-                sb.append("<div style=\"display: none\" id=\"userDiv\">");
-                List<String> whoLiked = new MessageDAO().getWhoLiked(message.getMid());
-                if (whoLiked != null && !whoLiked.isEmpty()) {
-                    sb.append("<span class=\"text-muted\">Liked by: ");
-                    for (String u : whoLiked) {
-                        sb.append(u).append(", ");
-                    }
-                    sb.delete(sb.length() - 2, sb.length());
-                    sb.append("</span>");
-                }
-                sb.append("</div>");
-
-                if (new MessageDAO().isLikedByUser(message.getMid(),uid)) {
-
-                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
-
-                } else {
-                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star\"></i></button>");
-                }
-                sb.append("</form>");
+                appendLikeForm(sb, message.getMid(), uid);
                 sb.append("</div>");
                 resultMap.put(message.getDateSend(), sb.toString());
             }
@@ -67,37 +47,40 @@
         private void processImgMessages(List<ImgMessage> imgMessages, Map<Date, String> resultMap, HttpServletResponse response, int uid) throws IOException, SQLException {
             for (ImgMessage message : imgMessages) {
                 StringBuilder sb = new StringBuilder();
-                User user = getUserById(message.getSenderId(), response);
+                User user = new UserDAO().getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
-                sb.append("<form action=\"?action=like\" method=\"POST\" id=\"likeForm\">");
-                sb.append("<div style=\"display: none\" id=\"userDiv\">");
-                List<String> whoLiked = new MessageDAO().getWhoLiked(message.getMid());
-                if (whoLiked != null && !whoLiked.isEmpty()) {
-                    sb.append("<span class=\"text-muted\">Liked by: ");
-                    for (String u : whoLiked) {
-                        sb.append(u).append(", ");
-                    }
-                    sb.delete(sb.length() - 2, sb.length());
-                    sb.append("</span>");
-                }
-                sb.append("</div>");
-
-                if (new MessageDAO().isLikedByUser(message.getMid(), uid)) {
-                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
-
-                } else {
-                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star\"></i></button>");
-                }
-                sb.append("</form>");
+                appendLikeForm(sb, message.getMid(), uid);
                 sb.append("</div>");
                 resultMap.put(message.getDateSend(), sb.toString());
             }
         }
 
-        private User getUserById(int userId, HttpServletResponse response) throws SQLException {
+        private void appendLikeForm(StringBuilder sb, int mid, int uid) throws SQLException {
+            sb.append("<form action=\"?action=like\" method=\"POST\" id=\"likeForm\">");
+            sb.append("<div style=\"display: none\" id=\"userDiv\">");
+            List<String> whoLiked = new MessageDAO().getWhoLiked(mid);
+            if (whoLiked != null && !whoLiked.isEmpty()) {
+                sb.append("<span class=\"text-muted\">Liked by: ");
+                for (String u : whoLiked) {
+                    sb.append(u).append(", ");
+                }
+                sb.delete(sb.length() - 2, sb.length());
+                sb.append("</span>");
+            }
+            sb.append("</div>");
+
+            if (new MessageDAO().isLikedByUser(mid, uid)) {
+                sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
+            } else {
+                sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star\"></i></button>");
+            }
+            sb.append("</form>");
+        }
+
+        private User getUserById(int userId) throws SQLException {
             User user;
             user = new UserDAO().getUserById(userId);
             return user;
@@ -117,30 +100,25 @@
                     ChannelDAO channelDAO = new ChannelDAO();
                     List<Channel> channels = channelDAO.getAllChannels();
                     if (channels != null) {
-                %>
-                <%
                     UserDAO userDAO = new UserDAO();
                     for (Channel channel : channels) {
                         boolean estAbonne = false;
                         try {
                             estAbonne = userDAO.estAbonne((int) session.getAttribute("id"), channel.getCid());
                         } catch (SQLException e) {
-                            RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-                            request.setAttribute("message", "An error occurred while trying to get the channels");
-                            request.setAttribute("errorCode", 500);
-                            rd.forward(request, response);
+                            MainController.sendErrorPage(500, "An error occurred while trying to get the channels", request, response);
                         }
                         if (!estAbonne) {
                             continue;
                         }
-                %>
-                <a href="?action=view&channelID=<%=channel.getCid()%>" class="list-group-item list-group-item-action">
-                    <h2 class="h5"><%=channel.getName()%></h2>
-                </a>
-                <%
+                        %>
+                            <a href="?action=view&channelID=<%=channel.getCid()%>" class="list-group-item list-group-item-action">
+                                <h2 class="h5"><%=channel.getName()%></h2>
+                            </a>
+                        <%
+                        }
                     }
-                }
-                %>
+                    %>
             </section>
         </div>
 
@@ -153,10 +131,8 @@
                         try {
                             estAbonne = new UserDAO().estAbonne((int) session.getAttribute("id"), Integer.parseInt(channelIdParam));
                         } catch (SQLException e) {
-                            RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-                            request.setAttribute("message", "An error occurred while trying to get the channels");
-                            request.setAttribute("errorCode", 500);
-                            rd.forward(request, response);
+                            MainController.sendErrorPage(500, "An error occurred while trying to get the channel", request, response);
+                            return;
                         }
                         if (!estAbonne) {
                             return;
@@ -165,82 +141,53 @@
                         Channel channel = null;
                         try {
                             channel = channelDAO.getChannelById(channelID);
-                        } catch (SQLException e) {
-                            RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-                            request.setAttribute("message", "An error occurred while trying to get the channel");
-                            request.setAttribute("errorCode", 500);
-                            rd.forward(request, response);
+                        }catch (SQLException e) {
+                            MainController.sendErrorPage(500, "An error occurred while trying to get the channel", request, response);
+                            return;
                         }
                         if (channel != null) {
-                %>
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="mb-4"><%=channel.getName()%></h2>
-                    <a id="editLink" href="?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
-                        <i class="bi bi-pencil-square"></i>
-                    </a>
-                </div>
+                            %>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2 class="mb-4"><%=channel.getName()%></h2>
+                                <a id="editLink" href="?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </div>
 
-<div id="messageList" class="overflow-auto" style="max-height: 400px;">
-    <%
-        List<Message> messages = channel.getMessages();
-        Pair<List<ImgMessage>, List<Message>> pair = new MessageDAO().separateImgFromMessage(messages);
-        Map<Date, String> resultMap = new HashMap<>();
-        if (messages != null && !messages.isEmpty()) {
-            int uid = (int) session.getAttribute("id");
-            processMessages(pair.getSecond(), resultMap, response, uid);
-            processImgMessages(pair.getFirst(), resultMap, response, uid);
+                            <div id="messageList" class="overflow-auto" style="max-height: 400px;">
+                                <%
+                                    List<Message> messages = channel.getMessages();
+                                    Pair<List<ImgMessage>, List<Message>> pair = new MessageDAO().separateImgFromMessage(messages);
+                                    Map<Date, String> resultMap = new HashMap<>();
+                                    if (messages != null && !messages.isEmpty()) {
+                                        int uid = (int) session.getAttribute("id");
+                                        processMessages(pair.getSecond(), resultMap, response, uid);
+                                        processImgMessages(pair.getFirst(), resultMap, response, uid);
 
-            List<Date> sortedDates = new ArrayList<>(resultMap.keySet());
-            sortedDates.sort(Date::compareTo);
-            for (Date date : sortedDates) {
-                out.println(resultMap.get(date));
-            }
-        }
+                                        List<Date> sortedDates = new ArrayList<>(resultMap.keySet());
+                                        sortedDates.sort(Date::compareTo);
+                                        for (Date date : sortedDates) {
+                                            out.println(resultMap.get(date));
+                                        }
+                                    }
 
-        } else {
-    %>
-    <div class="alert alert-info">No messages yet</div>
-    <%
-        }
-    %>
-</div>
-<script defer>
-    const messageList = document.getElementById('messageList');
-    messageList.scrollTop = messageList.scrollHeight;
+                        } else {
+                            %>
+                            <div class="alert alert-info">No messages yet</div>
+                            <%
+                        }
+                    %>
+                        </div>
 
-    const likeForms = document.querySelectorAll('#likeForm');
-    likeForms.forEach(form => {
-        form.addEventListener('mouseenter', (event) => {
-            document.getElementById('hover-div').style.display = 'block';
-            document.getElementById('hover-div').style.position = 'absolute';
-
-            const rect = form.getBoundingClientRect();
-            document.getElementById('hover-div').style.top = rect.top + 'px';
-            document.getElementById('hover-div').style.left = rect.left + 20 + 'px';
-            document.getElementById('hover-div').style.width = rect.width + 'px';
-            document.getElementById('hover-div').style.height = rect.height + 'px';
-
-            const hoverDiv = document.getElementById('hover-div');
-            hoverDiv.innerHTML = form.querySelector('#userDiv').innerHTML;
-
-        });
-
-        form.addEventListener('mouseleave', () => {
-            document.getElementById('hover-div').style.display = 'none';
-        });
-
-    });
-
-</script>
-                <form action="home" method="POST" class="mt-4" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="send">
-                    <input type="hidden" name="channelID" value="<%=channelIdParam%>">
-                    <div class="form-group">
-                        <input type="text" class="form-control" name="message" placeholder="Enter your message">
-                    </div>
-                    <input type="file" accept="image/jpeg" class="form-control-file" name="img">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
-                </form>
+                        <form action="home" method="POST" class="mt-4" enctype="multipart/form-data">
+                            <input type="hidden" name="action" value="send">
+                            <input type="hidden" name="channelID" value="<%=channelIdParam%>">
+                            <div class="form-group">
+                                <input type="text" class="form-control" name="message" placeholder="Enter your message">
+                            </div>
+                            <input type="file" accept="image/jpeg" class="form-control-file" name="img">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
+                        </form>
                 <%
                     }
                 %>
@@ -255,6 +202,36 @@
             </section>
         </div>
     </div>
+
+
+    <script defer>
+        const messageList = document.getElementById('messageList');
+        messageList.scrollTop = messageList.scrollHeight;
+
+        const likeForms = document.querySelectorAll('#likeForm');
+        likeForms.forEach(form => {
+            form.addEventListener('mouseenter', (event) => {
+                document.getElementById('hover-div').style.display = 'block';
+                document.getElementById('hover-div').style.position = 'absolute';
+
+                const rect = form.getBoundingClientRect();
+                document.getElementById('hover-div').style.top = rect.top + 'px';
+                document.getElementById('hover-div').style.left = rect.left + 20 + 'px';
+                document.getElementById('hover-div').style.width = rect.width + 'px';
+                document.getElementById('hover-div').style.height = rect.height + 'px';
+
+                const hoverDiv = document.getElementById('hover-div');
+                hoverDiv.innerHTML = form.querySelector('#userDiv').innerHTML;
+
+            });
+
+            form.addEventListener('mouseleave', () => {
+                document.getElementById('hover-div').style.display = 'none';
+            });
+
+        });
+
+    </script>
 </body>
 
 

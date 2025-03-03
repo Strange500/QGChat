@@ -29,10 +29,7 @@ public class Send extends HttpServlet {
         try {
             channelID = Integer.parseInt(req.getAttribute("channelID").toString());
         } catch (NumberFormatException e) {
-            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-            req.setAttribute("message", "Channel ID is not a number");
-            req.setAttribute("errorCode", 400);
-            rd.forward(req, res);
+            MainController.sendErrorPage(400, "Bad request: channelID is not a number", req, res);
             return;
         }
 
@@ -62,7 +59,7 @@ public class Send extends HttpServlet {
             res.sendRedirect("home?action=view&channelID=" + channel.getCid());
         }
         catch (SQLException e) {
-            RequestDispatcher rd = req.getRequestDispatcher("home");
+            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.HOME));
             req.setAttribute("senderror", "Erreur lors de l'envoi du message");
             rd.forward(req, res);
         }

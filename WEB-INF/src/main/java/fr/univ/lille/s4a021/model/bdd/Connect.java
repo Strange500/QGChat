@@ -27,6 +27,9 @@ public class Connect {
                     "username VARCHAR(1024) NOT NULL," +
                     "mail VARCHAR(1024) NOT NULL UNIQUE," +
                     "password VARCHAR(1024) NOT NULL" +
+                    "CONSTRAINT check_mail_not_empty CHECK (mail <> '')," +
+                    "CONSTRAINT check_username_not_empty CHECK (username <> '')," +
+                    "CONSTRAINT check_password_not_empty CHECK (password <> '')" +
                     ")";
             con.createStatement().executeUpdate(query);
 

@@ -21,6 +21,7 @@
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+<%@ page import="org.eclipse.jdt.internal.compiler.batch.Main" %>
 
 <%
 
@@ -30,10 +31,7 @@
     try {
         users.addAll(new UserDAO().getAllUsers());
     } catch (SQLException e) {
-        RequestDispatcher rd = request.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
-        request.setAttribute("message", "An error occurred while trying to get the users");
-        request.setAttribute("errorCode", 500);
-        rd.forward(request, response);
+        MainController.sendErrorPage(500, "Internal Server Error: An error occurred while trying to get the users from the database", request, response);
     }
 %>
 
