@@ -27,7 +27,10 @@
     <%@ page import="java.util.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
 
-    <div id="hover-div" style="display: none"></div>
+    <div id="hover-div"
+         class="popover bs-popover-top shadow bg-white rounded"
+         style="display: none; position: absolute; z-index: 1000;">
+    </div>
 
     <%!
         private void processMessages(List<Message> messages, Map<Date, String> resultMap, HttpServletResponse response, int uid) throws IOException, SQLException {
@@ -63,12 +66,20 @@
             sb.append("<div style=\"display: none\" id=\"userDiv\">");
             List<String> whoLiked = new MessageDAO().getWhoLiked(mid);
             if (whoLiked != null && !whoLiked.isEmpty()) {
+                if (whoLiked.size() > 3) {
+                    int size = whoLiked.size();
+                    whoLiked = whoLiked.subList(whoLiked.size() - 3, whoLiked.size());
+                    whoLiked.add("<br>and " + (size - 3) + " more");
+                }
                 sb.append("<span class=\"text-muted\">Liked by: ");
                 for (String u : whoLiked) {
                     sb.append(u).append(", ");
                 }
                 sb.delete(sb.length() - 2, sb.length());
                 sb.append("</span>");
+            }
+            else {
+                sb.append("<span class=\"text-muted\">No likes yet</span>");
             }
             sb.append("</div>");
 
@@ -217,8 +228,6 @@
                 const rect = form.getBoundingClientRect();
                 document.getElementById('hover-div').style.top = rect.top + 'px';
                 document.getElementById('hover-div').style.left = rect.left + 20 + 'px';
-                document.getElementById('hover-div').style.width = rect.width + 'px';
-                document.getElementById('hover-div').style.height = rect.height + 'px';
 
                 const hoverDiv = document.getElementById('hover-div');
                 hoverDiv.innerHTML = form.querySelector('#userDiv').innerHTML;
