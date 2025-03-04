@@ -171,6 +171,9 @@
                                     <a id="shareLink" href="channel?action=share&channelID=<%=channelID%>" class="btn btn-primary mb-3">
                                         <i class="bi bi-share"></i>
                                     </a>
+                                    <a id="quitLink" href="channel?action=quit&channelID=<%=channelID%>" class="btn btn-danger mb-3">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                    </a>
                                 </div>
 
                             </div>

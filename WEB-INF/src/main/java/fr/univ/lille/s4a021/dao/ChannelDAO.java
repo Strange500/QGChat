@@ -69,6 +69,15 @@ public class ChannelDAO {
         return null; // Retourne null si le canal n'est pas trouvé
     }
 
+    public void unsubscribeUser(int uid, int cid) throws SQLException {
+        String query = "DELETE FROM estAbonne WHERE uid = ? AND cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            stmt.setInt(2, cid);
+            stmt.executeUpdate();
+        }
+    }
+
     // Récupération d'un canal par son ID
     public Channel getChannelById(int cid) throws SQLException {
         String query = "SELECT name FROM Channel WHERE cid = ?";

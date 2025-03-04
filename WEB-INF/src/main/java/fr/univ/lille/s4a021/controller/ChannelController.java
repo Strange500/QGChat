@@ -127,6 +127,16 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 RequestDispatcher rd7 = req.getRequestDispatcher(getJSPPath(INVITE));
                 rd7.forward(req, res);
                 break;
+            case "quit":
+                int cid3 = Integer.parseInt(req.getParameter("channelID"));
+                try {
+                    channelDAO.unsubscribeUser(Util.getUid(session), cid3);
+                    res.sendRedirect("home");
+                } catch (SQLException e) {
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
+                }
+                break;
             default:
                 res.sendRedirect("home");
 
