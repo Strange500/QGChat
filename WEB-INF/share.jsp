@@ -42,7 +42,7 @@
 
   String token = new JwtManager().createJwtForChannelLink(userID, chanelID);
 
-  String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/home?action=join&token=" + token;
+  String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/channel?action=join&token=" + token;
 
 %>
 

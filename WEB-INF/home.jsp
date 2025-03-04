@@ -38,7 +38,10 @@
                 StringBuilder sb = new StringBuilder();
                 User user = new UserDAO().getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
+                sb.append("<div class=\"d-flex justify-content-between align-items-center\">");
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
+                appendDeleteForm(sb, message.getMid());
+                sb.append("</div>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
                 appendLikeForm(sb, message.getMid(), uid);
@@ -52,8 +55,10 @@
                 StringBuilder sb = new StringBuilder();
                 User user = new UserDAO().getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
+                sb.append("<div class=\"d-flex justify-content-between align-items-center\">");
                 sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
-                sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
+                appendDeleteForm(sb, message.getMid());
+                sb.append("</div>");
                 sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
                 appendLikeForm(sb, message.getMid(), uid);
                 sb.append("</div>");
@@ -62,7 +67,7 @@
         }
 
         private void appendLikeForm(StringBuilder sb, int mid, int uid) throws SQLException {
-            sb.append("<form action=\"?action=like\" method=\"POST\" id=\"likeForm\">");
+            sb.append("<form action=\"message?action=like\" method=\"POST\" id=\"likeForm\">");
             sb.append("<div style=\"display: none\" id=\"userDiv\">");
             List<String> whoLiked = new MessageDAO().getWhoLiked(mid);
             if (whoLiked != null && !whoLiked.isEmpty()) {
@@ -91,6 +96,12 @@
             sb.append("</form>");
         }
 
+        private void appendDeleteForm(StringBuilder sb, int mid) {
+            sb.append("<form action=\"message?action=delete\" method=\"POST\">");
+            sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">");
+            sb.append("<button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-trash\"></i></button>");
+            sb.append("</form>");
+        }
         private User getUserById(int userId) throws SQLException {
             User user;
             user = new UserDAO().getUserById(userId);
@@ -106,7 +117,7 @@
                 <h1 class="mt-4">Channels</h1>
 
 
-                <a href="?action=createchannel" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
+                <a href="channel?action=createchannel" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
                 <%
                     ChannelDAO channelDAO = new ChannelDAO();
                     List<Channel> channels = channelDAO.getAllChannels();
@@ -161,10 +172,10 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <h2 class="mb-4"><%=channel.getName()%></h2>
                                 <div>
-                                    <a id="editLink" href="?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                                    <a id="editLink" href="channel?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <a id="shareLink" href="?action=share&channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                                    <a id="shareLink" href="channel?action=share&channelID=<%=channelID%>" class="btn btn-primary mb-3">
                                         <i class="bi bi-share"></i>
                                     </a>
                                 </div>
@@ -196,7 +207,7 @@
                     %>
                         </div>
 
-                        <form action="home" method="POST" class="mt-4" enctype="multipart/form-data">
+                        <form action="message" method="POST" class="mt-4" enctype="multipart/form-data">
                             <input type="hidden" name="action" value="send">
                             <input type="hidden" name="channelID" value="<%=channelIdParam%>">
                             <div class="form-group">

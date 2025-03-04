@@ -1,27 +1,36 @@
-package fr.univ.lille.s4a021.servlet;
+package fr.univ.lille.s4a021.controller;
 
-import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
+import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.annotation.WebServlet;
-import org.eclipse.jdt.internal.compiler.batch.Main;
+import jakarta.servlet.http.HttpSession;
 
 import java.sql.SQLException;
 import java.util.List;
 
+import static fr.univ.lille.s4a021.controller.MainController.getJSPPath;
+
 @WebServlet("/channel")
-public class Channel extends jakarta.servlet.http.HttpServlet {
+public class ChannelController extends jakarta.servlet.http.HttpServlet {
+
+    public final static String MODIFY_CHANNEL = "ModifChannel.jsp";
+    public final static String CREATE_CHANNEL = "createChannel.jsp";
+    public final static String SHARE = "share.jsp";
+    public final static String INVITE = "join.jsp";
 
 
-    public void doGet(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse res)
+
+    public void service(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse res)
             throws jakarta.servlet.ServletException, java.io.IOException {
 
+        HttpSession session = req.getSession();
         String action = req.getParameter("action");
         ChannelDAO channelDAO = null;
         try {
             channelDAO = new ChannelDAO();
         } catch (SQLException e) {
-            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.ERROR));
+            RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(MainController.ERROR));
             req.setAttribute("message", e.getMessage());
             req.setAttribute("errorCode", 500);
             rd.forward(req, res);
@@ -39,6 +48,10 @@ public class Channel extends jakarta.servlet.http.HttpServlet {
                 MainController.sendErrorPage(500, e.getMessage(), req, res);
                 return;
             }
+        }
+        if (!Util.userIsConnected(session)) {
+            res.sendRedirect("home");
+            return;
         }
 
         switch (action) {
@@ -95,6 +108,24 @@ public class Channel extends jakarta.servlet.http.HttpServlet {
                     MainController.sendErrorPage(500, e.getMessage(), req, res);
                     return;
                 }
+                break;
+            case "modifchannel":
+                RequestDispatcher rd3 = req.getRequestDispatcher(getJSPPath(MODIFY_CHANNEL));
+                rd3.forward(req, res);
+                break;
+            case "createchannel":
+                RequestDispatcher rd1 = req.getRequestDispatcher(getJSPPath(CREATE_CHANNEL));
+                rd1.forward(req, res);
+                break;
+            case "share":
+                String channelID2 = req.getParameter("channelID");
+                req.setAttribute("channelID", channelID2);
+                RequestDispatcher rd5 = req.getRequestDispatcher(getJSPPath(SHARE));
+                rd5.forward(req, res);
+                break;
+            case "join":
+                RequestDispatcher rd7 = req.getRequestDispatcher(getJSPPath(INVITE));
+                rd7.forward(req, res);
                 break;
             default:
                 res.sendRedirect("home");
