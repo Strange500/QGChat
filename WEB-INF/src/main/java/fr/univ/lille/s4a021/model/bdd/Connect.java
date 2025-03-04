@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import static java.lang.System.exit;
+
 public class Connect {
     // Class to getConnection for DAO constructor
     private static final String DB_URL = "jdbc:postgresql://postgres:5432/sae";
@@ -17,6 +19,12 @@ public class Connect {
 
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
+            try {
+                Class.forName("org.postgresql.Driver");
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                exit(1);
+            }
             String url = "jdbc:postgresql://" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabase();
             System.out.println(url);
             connection = DriverManager.getConnection(url, config.getUser(), config.getPassword());

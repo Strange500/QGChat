@@ -17,9 +17,7 @@ services:
       ports:
           - "8081:8080"
       volumes:
-          - ./:/usr/local/tomcat/webapps/sae
-          - ./lib/postgresql-42.7.5.jar:/usr/local/tomcat/lib/postgresql-42.7.5.jar
-          - ./lib/snakeyaml-2.4.jar:/usr/local/tomcat/lib/snakeyaml-2.4.jar
+        - ./:/usr/local/tomcat/webapps/sae
       depends_on:
           - postgres
       networks:
