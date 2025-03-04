@@ -36,15 +36,26 @@
     <canvas style="display: none; position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1000;"></canvas>
 
     <%!
-        private String processMessages(List<? extends Message> messages, int uid) throws IOException, SQLException {
+        private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin) throws IOException, SQLException {
             StringBuilder sb = new StringBuilder();
             for (Message message : messages) {
 
                 User user = new UserDAO().getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
                 sb.append("<div class=\"d-flex justify-content-between align-items-center\">");
-                sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
-                appendDeleteForm(sb, message.getMid());
+                sb.append("<span class=\"font-weight-bold text-dark\">");
+                if (user.getUid() == uid) {
+                    sb.append("You");
+                } else {
+                    sb.append(user.getUsername());
+                }
+                if (new ChannelDAO().userIsAdmin(user.getUid(), channelID)) {
+                    sb.append("<div class=\"badge badge-warning ml-2\">Admin</div>");
+                }
+                sb.append("</span>");
+                if (isAdmin || message.getSenderId() == uid) {
+                    appendDeleteForm(sb, message.getMid());
+                }
                 sb.append("</div>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 if (message.getImg() != null) {
@@ -141,6 +152,8 @@
             <section id="conversation">
                 <%
                     String channelIdParam = request.getParameter("channelID");
+
+
                     if (channelIdParam != null) {
                         boolean estAbonne = false;
                         try {
@@ -160,21 +173,40 @@
                             MainController.sendErrorPage(500, "An error occurred while trying to get the channel", request, response);
                             return;
                         }
+
+                        boolean isAdmin = false;
+                        try {
+                            isAdmin = new ChannelDAO().userIsAdmin(Util.getUid(session), channelID);
+                        } catch (SQLException e) {
+                            MainController.sendErrorPage(500, "An error occurred while trying to get the channel", request, response);
+                            return;
+                        }
+
                         if (channel != null) {
                             %>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     <h2 class="mb-4"><%=channel.getName()%></h2>
-                                    <a href="channel?action=deletechannel&channelID=<%=channelID%>" class="btn btn-danger mb-3">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                    <%
+                                        if (isAdmin) {
+                                    %>
+                                            <a href="channel?action=deletechannel&channelID=<%=channelID%>" class="btn btn-danger mb-3">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+
+                                    <%
+                                        }
+                                    %>
                                 </div>
 
 
                                 <div>
-                                    <a id="editLink" href="channel?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
+                                    <% if (isAdmin) { %>
+
+                                        <a id="editLink" href="channel?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    <% } %>
                                     <a id="shareLink" href="channel?action=share&channelID=<%=channelID%>" class="btn btn-primary mb-3">
                                         <i class="bi bi-share"></i>
                                     </a>
@@ -193,7 +225,7 @@
                                     messages.sort(Comparator.comparing(Message::getDateSend));
                                     if (messages != null && !messages.isEmpty()) {
                                         int uid = (int) session.getAttribute("id");
-                                        out.print(processMessages(messagesList, uid));
+                                        out.print(processMessages(messagesList, uid, channelID, isAdmin));
                                     }
 
                         } else {

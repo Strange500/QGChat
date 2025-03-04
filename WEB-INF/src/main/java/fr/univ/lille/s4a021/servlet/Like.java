@@ -1,5 +1,6 @@
 package fr.univ.lille.s4a021.servlet;
 
+import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dto.Channel;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
+import org.eclipse.jdt.internal.compiler.batch.Main;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -21,7 +23,7 @@ import java.util.UUID;
 @WebServlet("/like")
 public class Like extends HttpServlet {
 
-    public void doPost( HttpServletRequest req, HttpServletResponse res )
+    public void service( HttpServletRequest req, HttpServletResponse res )
             throws ServletException, IOException
     {
         if (!Util.userIsConnected(req.getSession())) {
@@ -38,6 +40,23 @@ public class Like extends HttpServlet {
 
         int mid = Integer.parseInt(req.getParameter("mid"));
         int uid = (int) req.getSession().getAttribute("id");
+        int channelId = 0;
+        try {
+            channelId = new MessageDAO().getChannelByMessageId(mid);
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, "Internal server error", req, res);
+            return;
+        }
+
+        try {
+            if (!new ChannelDAO().isAbonne(uid, channelId)) {
+                MainController.sendErrorPage(401, "Unauthorized", req, res);
+                return;
+            }
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, "Internal server error", req, res);
+            return;
+        }
 
         try {
             if (messageDAO.isLikedByUser(mid, uid)) {
@@ -47,12 +66,6 @@ public class Like extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-        int channelId = 0;
-        try {
-            channelId = messageDAO.getChannelByMessageId(mid);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
 
         res.sendRedirect("home?action=view&channelID=" + channelId);

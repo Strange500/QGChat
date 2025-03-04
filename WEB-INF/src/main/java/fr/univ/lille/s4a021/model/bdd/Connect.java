@@ -36,19 +36,22 @@ public class Connect {
     public static void createTableIfNotExist(Connection con) {
         try {
             String query = "CREATE TABLE IF NOT EXISTS Utilisateur (" +
-                    "uid SERIAL PRIMARY KEY," +
-                    "username VARCHAR(1024) NOT NULL," +
-                    "mail VARCHAR(1024) NOT NULL UNIQUE," +
-                    "password VARCHAR(1024) NOT NULL" +
-                    "CONSTRAINT check_mail_not_empty CHECK (mail <> '')," +
-                    "CONSTRAINT check_username_not_empty CHECK (username <> '')," +
-                    "CONSTRAINT check_password_not_empty CHECK (password <> '')" +
-                    ")";
+                            "uid SERIAL PRIMARY KEY," +
+                            "username VARCHAR(1024) NOT NULL," +
+                            "mail VARCHAR(1024) NOT NULL UNIQUE," +
+                            "password VARCHAR(1024) NOT NULL," +
+                            "CONSTRAINT check_mail_not_empty CHECK (mail <> '')," +
+                            "CONSTRAINT check_username_not_empty CHECK (username <> '')," +
+                            "CONSTRAINT check_password_not_empty CHECK (password <> '')" +
+                            ")";
             con.createStatement().executeUpdate(query);
 
-            query = "CREATE TABLE IF NOT EXISTS Channel (" +
-                    "cid SERIAL PRIMARY KEY," +
-                    "name VARCHAR(1024) NOT NULL" +
+            query = "CREATE TABLE IF NOT EXISTS isAdmin (" +
+                    "uid INT," +
+                    "cid INT," +
+                    "PRIMARY KEY (uid, cid)," +
+                    "FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE," +
+                    "FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE" +
                     ")";
             con.createStatement().executeUpdate(query);
 

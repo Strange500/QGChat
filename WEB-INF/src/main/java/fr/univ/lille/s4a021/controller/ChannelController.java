@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpSession;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import static fr.univ.lille.s4a021.controller.MainController.getJSPPath;
@@ -54,6 +55,8 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
             return;
         }
 
+        int uid = Util.getUid(session);
+
         switch (action) {
             case "create":
                 String name = req.getParameter("name");
@@ -66,10 +69,10 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 }
                 abonnees.add(req.getSession().getAttribute("id").toString());
 
-
                 try {
                     fr.univ.lille.s4a021.dto.Channel ch = channelDAO.createChannel(name);
                     channelDAO.abonneUsers(ch, abonnees);
+                    channelDAO.setAdmin(ch, uid);
                     res.sendRedirect("home?action=view&channelID=" + ch.getCid());
                 } catch (SQLException e) {
                     MainController.sendErrorPage(500, e.getMessage(), req, res);
@@ -78,6 +81,15 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 break;
             case "delete":
                 int cid = Integer.parseInt(req.getParameter("channelID"));
+                try {
+                    if (!channelDAO.userIsAdmin(uid, cid)) {
+                        MainController.sendErrorPage(403, "Forbidden", req, res);
+                        return;
+                    }
+                } catch (SQLException e) {
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
+                }
                 try {
                     channelDAO.deleteChannel(cid);
                     res.sendRedirect("home");
@@ -88,21 +100,37 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 break;
             case "update":
                 int cid2 = Integer.parseInt(req.getParameter("channelID"));
+                try {
+                    if (!channelDAO.userIsAdmin(uid, cid2)) {
+                        MainController.sendErrorPage(403, "Forbidden", req, res);
+                        return;
+                    }
+                } catch (SQLException e) {
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
+                }
                 String newName = req.getParameter("name");
                 String[] abonneesArray2 = req.getParameterValues("users");
                 List<String> abonnees2 = new java.util.ArrayList<>();
                 if (abonneesArray2 != null) {
-                    for (String abonnee : abonneesArray2) {
-                        abonnees2.add(abonnee);
-                    }
+                    abonnees2.addAll(Arrays.asList(abonneesArray2));
                 }
-                abonnees2.add(req.getSession().getAttribute("id").toString());
+                abonnees2.add(Util.getUid(session) + "");
+
+                String[] adminsArray = req.getParameterValues("admins");
+                List<String> admins = new java.util.ArrayList<>();
+                if (adminsArray != null) {
+                    admins.addAll(Arrays.asList(adminsArray));
+                }
+                admins.add(Util.getUid(session) + "");
 
                 try {
                     fr.univ.lille.s4a021.dto.Channel ch = channelDAO.getChannelById(cid2);
                     channelDAO.updateChannel(cid2, newName);
                     channelDAO.clearAbonnes(cid2);
                     channelDAO.abonneUsers(ch, abonnees2);
+                    channelDAO.clearAdmins(cid2);
+                    channelDAO.setAdmins(ch, admins);
                     res.sendRedirect("home?action=view&channelID=" + cid2);
                 } catch (SQLException e) {
                     MainController.sendErrorPage(500, e.getMessage(), req, res);
@@ -110,6 +138,16 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 }
                 break;
             case "modifchannel":
+                int cid3 = Integer.parseInt(req.getParameter("channelID"));
+                try {
+                    if (!channelDAO.userIsAdmin(uid, cid3)) {
+                        MainController.sendErrorPage(403, "Forbidden", req, res);
+                        return;
+                    }
+                } catch (SQLException e) {
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
+                }
                 RequestDispatcher rd3 = req.getRequestDispatcher(getJSPPath(MODIFY_CHANNEL));
                 rd3.forward(req, res);
                 break;
@@ -128,9 +166,9 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 rd7.forward(req, res);
                 break;
             case "quit":
-                int cid3 = Integer.parseInt(req.getParameter("channelID"));
+                int cid5 = Integer.parseInt(req.getParameter("channelID"));
                 try {
-                    channelDAO.unsubscribeUser(Util.getUid(session), cid3);
+                    channelDAO.unsubscribeUser(Util.getUid(session), cid5);
                     res.sendRedirect("home");
                 } catch (SQLException e) {
                     MainController.sendErrorPage(500, e.getMessage(), req, res);
@@ -139,6 +177,15 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 break;
             case "deletechannel":
                 int cid4 = Integer.parseInt(req.getParameter("channelID"));
+                try {
+                    if (!channelDAO.userIsAdmin(uid, cid4)) {
+                        MainController.sendErrorPage(403, "Forbidden", req, res);
+                        return;
+                    }
+                } catch (SQLException e) {
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
+                }
                 try {
                     channelDAO.deleteChannel(cid4);
                     res.sendRedirect("home");

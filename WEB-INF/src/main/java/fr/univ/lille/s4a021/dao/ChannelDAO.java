@@ -54,6 +54,45 @@ public class ChannelDAO {
         return getChannelByName(name);
     }
 
+    public void setAdmin(Channel ch, int uid) {
+        String query = "INSERT INTO isAdmin (uid, cid) VALUES (?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            stmt.setInt(2, ch.getCid());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clearAdmins(int cid) {
+        String query = "DELETE FROM isAdmin WHERE cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, cid);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setAdmins(Channel ch, List<String> users) {
+        try {
+            String query = "INSERT INTO isAdmin (uid, cid) VALUES (?, ?)";
+
+            for (String user : users) {
+                int uid = Integer.parseInt(user);
+                try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                    stmt.setInt(1, uid);
+                    stmt.setInt(2, ch.getCid());
+                    stmt.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+    }
+
     public Channel getChannelByName(String name) throws SQLException {
         String query = "SELECT cid FROM Channel WHERE name = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -75,6 +114,42 @@ public class ChannelDAO {
             stmt.setInt(1, uid);
             stmt.setInt(2, cid);
             stmt.executeUpdate();
+        }
+    }
+
+    public boolean userIsAdmin(int uid, int cid) throws SQLException {
+        String query = "SELECT * FROM isAdmin WHERE uid = ? AND cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            stmt.setInt(2, cid);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        }
+    }
+
+    public List<User> getAdmins(int cid) {
+        List<User> users = new ArrayList<>();
+        String query = "SELECT uid FROM isAdmin WHERE cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, cid);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int uid = rs.getInt("uid");
+                users.add(new UserDAO().getUserById(uid));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public boolean isAbonne(int uid, int cid) throws SQLException {
+        String query = "SELECT * FROM estAbonne WHERE uid = ? AND cid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            stmt.setInt(2, cid);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
         }
     }
 

@@ -73,6 +73,33 @@
 
             </div>
 
+            <div id="adminList">
+                <%
+                List<User> admins = channelDAO.getAdmins(channel.getCid());
+                %>
+
+                <h2>Admins</h2>
+                <ul>
+                    <% for (User user : users) {
+                        if (user.getUid() == (int) session.getAttribute("id")) {
+                            continue;
+                        }
+
+                    %>
+
+                        <li>
+                            <input type="checkbox" name="admins" value="<%=user.getUid()%>"
+                                <% for (User admin : admins) {
+                                    if (admin.getUid() == user.getUid()) {
+                                        out.print("checked");
+                                    }
+                                } %>
+                            >
+                            <%=user.getUsername()%>
+                        </li>
+                    <% } %>
+            </div>
+
 
             <button type="submit" class="btn btn-primary">Submit</button>
             <a href="channel?action=delete&channelID=<%=channel.getCid()%>" class="btn btn-danger">Delete</a>

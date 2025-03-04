@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS contient CASCADE;
 DROP TABLE IF EXISTS aEnvoyer CASCADE;
 DROP TABLE IF EXISTS estAbonne CASCADE;
 DROP TABLE IF EXISTS Message CASCADE;
+DROP TABLE IF EXISTS isAdmin CASCADE;
 DROP TABLE IF EXISTS Channel CASCADE;
 DROP TABLE IF EXISTS Utilisateur CASCADE;
 
@@ -33,6 +34,14 @@ CREATE TABLE Message (
 
 -- Table de liaison estAbonne (User - Channel)
 CREATE TABLE estAbonne (
+                           uid INT,
+                           cid INT,
+                           PRIMARY KEY (uid, cid),
+                           FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+                           FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
+);
+
+CREATE TABLE isAdmin (
                            uid INT,
                            cid INT,
                            PRIMARY KEY (uid, cid),
@@ -77,6 +86,11 @@ INSERT INTO Channel (name) VALUES
 ('Random'),
 ('Announcements');
 
+INSERT INTO isAdmin (uid, cid) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
+
 INSERT INTO Message (contenu) VALUES
 ('Welcome to the General channel!'),
 ('This is a random message.'),
@@ -85,6 +99,7 @@ INSERT INTO Message (contenu) VALUES
 INSERT INTO estAbonne (uid, cid) VALUES
 (1, 1),
 (2, 1),
+(2,3),
 (3, 2);
 
 INSERT INTO aEnvoyer (uid, mid) VALUES

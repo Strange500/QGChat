@@ -11,6 +11,7 @@ import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.Channel;
+import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.*;
@@ -33,16 +34,27 @@ public class Send extends HttpServlet {
             return;
         }
 
+        if (!Util.userIsConnected(req.getSession())) {
+            res.sendRedirect("home");
+            return;
+        }
+
+        try {
+            if (!new ChannelDAO().isAbonne(Util.getUid(req.getSession()), channelID)) {
+                MainController.sendErrorPage(401, "Unauthorized", req, res);
+                return;
+            }
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, "Internal server error", req, res);
+            return;
+        }
+
+
 
         try {
 
 
             Part imgPart = (Part) req.getAttribute("img");
-
-            System.out.println("attribute channelID: " + channelID);
-            System.out.println("attribute message: " + msg);
-
-
             ChannelDAO channelDAO = new ChannelDAO();
             Channel channel = channelDAO.getChannelById(channelID);
             if (imgPart.getSize()>0) {

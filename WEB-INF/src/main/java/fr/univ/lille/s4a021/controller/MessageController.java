@@ -3,6 +3,7 @@ package fr.univ.lille.s4a021.controller;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dto.Channel;
+import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -47,6 +48,11 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
             switch (action) {
                 case "send":
                     String channelID = req.getParameter("channelID");
+                    if (!new ChannelDAO().isAbonne(Util.getUid(session), Integer.parseInt(channelID))) {
+                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        return;
+                    }
+
                     String msg = req.getParameter("message");
                     Part imgPart = req.getPart("img");
                     sendMessage(req, channelID, imgPart, msg);
@@ -54,11 +60,28 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                     break;
                 case "like":
                     int channelId = likeMessage(req, res);
+                    if (!new ChannelDAO().isAbonne(Util.getUid(session), channelId)) {
+                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        return;
+                    }
+
                     res.sendRedirect("home?action=view&channelID=" + channelId);
                     break;
                 case "delete":
                     int mid = Integer.parseInt(req.getParameter("mid"));
                     int cid = new MessageDAO().getChannelByMessageId(mid);
+
+                    if (!new ChannelDAO().isAbonne(Util.getUid(session), cid)) {
+                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        return;
+                    }
+
+                    Message message = new MessageDAO().getMessageById(mid);
+                    if (message.getSenderId() != Util.getUid(session) && !new ChannelDAO().userIsAdmin(Util.getUid(session), cid)) {
+                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        return;
+                    }
+
                     MessageDAO messageDAO = new MessageDAO();
                     messageDAO.deleteMessage(mid);
                     res.sendRedirect("home?action=view&channelID=" + cid);
