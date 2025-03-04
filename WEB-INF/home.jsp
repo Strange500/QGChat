@@ -163,7 +163,14 @@
                         if (channel != null) {
                             %>
                             <div class="d-flex justify-content-between align-items-center">
-                                <h2 class="mb-4"><%=channel.getName()%></h2>
+                                <div class="d-flex align-items-center">
+                                    <h2 class="mb-4"><%=channel.getName()%></h2>
+                                    <a href="channel?action=deletechannel&channelID=<%=channelID%>" class="btn btn-danger mb-3">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+
+
                                 <div>
                                     <a id="editLink" href="channel?action=modifchannel&channelID=<%=channelID%>" class="btn btn-primary mb-3">
                                         <i class="bi bi-pencil-square"></i>

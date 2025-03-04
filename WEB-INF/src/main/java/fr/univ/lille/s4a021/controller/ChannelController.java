@@ -137,6 +137,16 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                     return;
                 }
                 break;
+            case "deletechannel":
+                int cid4 = Integer.parseInt(req.getParameter("channelID"));
+                try {
+                    channelDAO.deleteChannel(cid4);
+                    res.sendRedirect("home");
+                } catch (SQLException e) {
+                    MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    return;
+                }
+                break;
             default:
                 res.sendRedirect("home");
 
