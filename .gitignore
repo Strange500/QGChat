@@ -9,5 +9,5 @@
 .idea/
 .settings/
 
-WEB-INF/classes
-lib
+WEB-INF/classes/fr
+./lib

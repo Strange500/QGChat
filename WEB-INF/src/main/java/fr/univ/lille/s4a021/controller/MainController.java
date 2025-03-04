@@ -26,10 +26,13 @@ public class MainController extends HttpServlet {
     public final static String ERROR = "error.jsp";
     public final static String CREATE_CHANNEL = "createChannel.jsp";
     public final static String MODIFY_CHANNEL = "ModifChannel.jsp";
+    public final static String SHARE = "share.jsp";
+    public final static String INVITE = "join.jsp";
+
 
 
     public static String getJSPPath(String jsp) {
-        return "./WEB-INF/" + jsp;
+        return "/WEB-INF/" + jsp;
     }
 
 
@@ -74,6 +77,16 @@ public class MainController extends HttpServlet {
                         case "modifchannel":
                             RequestDispatcher rd3 = req.getRequestDispatcher(getJSPPath(MODIFY_CHANNEL));
                             rd3.forward(req, res);
+                            break;
+                        case "share":
+                            String channelID2 = req.getParameter("channelID");
+                            req.setAttribute("channelID", channelID2);
+                            RequestDispatcher rd5 = req.getRequestDispatcher(getJSPPath(SHARE));
+                            rd5.forward(req, res);
+                            break;
+                        case "join":
+                            RequestDispatcher rd7 = req.getRequestDispatcher(getJSPPath(INVITE));
+                            rd7.forward(req, res);
                             break;
                         default:
                             RequestDispatcher rd4 = req.getRequestDispatcher(getJSPPath(ERROR));
