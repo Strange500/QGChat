@@ -10,6 +10,7 @@ public class ImgMessage extends Message {
         this.content = path;
     }
 
+    @Override
     public String getImg() {
         return this.getContenu().substring(BEGIN.length());
     }

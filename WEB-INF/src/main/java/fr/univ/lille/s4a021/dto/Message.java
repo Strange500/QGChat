@@ -97,4 +97,8 @@ public class Message {
                 ", channelId=" + channelId +
                 '}';
     }
+
+    public String getImg() {
+        return null;
+    }
 }

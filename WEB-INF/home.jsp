@@ -33,9 +33,10 @@
     </div>
 
     <%!
-        private void processMessages(List<Message> messages, Map<Date, String> resultMap, HttpServletResponse response, int uid) throws IOException, SQLException {
+        private String processMessages(List<? extends Message> messages, int uid) throws IOException, SQLException {
+            StringBuilder sb = new StringBuilder();
             for (Message message : messages) {
-                StringBuilder sb = new StringBuilder();
+
                 User user = new UserDAO().getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
                 sb.append("<div class=\"d-flex justify-content-between align-items-center\">");
@@ -43,28 +44,19 @@
                 appendDeleteForm(sb, message.getMid());
                 sb.append("</div>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
-                sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
+                if (message.getImg() != null) {
+                    sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
+                } else {
+                    sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
+                }
                 appendLikeForm(sb, message.getMid(), uid);
                 sb.append("</div>");
-                resultMap.put(message.getDateSend(), sb.toString());
             }
+            return sb.toString();
         }
+        %>
 
-        private void processImgMessages(List<ImgMessage> imgMessages, Map<Date, String> resultMap, HttpServletResponse response, int uid) throws IOException, SQLException {
-            for (ImgMessage message : imgMessages) {
-                StringBuilder sb = new StringBuilder();
-                User user = new UserDAO().getUserById(message.getSenderId());
-                sb.append("<div class=\"border p-3 mb-3 rounded\">");
-                sb.append("<div class=\"d-flex justify-content-between align-items-center\">");
-                sb.append("<span class=\"font-weight-bold text-dark\">").append(user.getUsername()).append("</span>");
-                appendDeleteForm(sb, message.getMid());
-                sb.append("</div>");
-                sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
-                appendLikeForm(sb, message.getMid(), uid);
-                sb.append("</div>");
-                resultMap.put(message.getDateSend(), sb.toString());
-            }
-        }
+        <%!
 
         private void appendLikeForm(StringBuilder sb, int mid, int uid) throws SQLException {
             sb.append("<form action=\"message?action=like\" method=\"POST\" id=\"likeForm\">");
@@ -96,12 +88,18 @@
             sb.append("</form>");
         }
 
+        %>
+
+    <%!
         private void appendDeleteForm(StringBuilder sb, int mid) {
-            sb.append("<form action=\"message?action=delete\" method=\"POST\">");
-            sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">");
-            sb.append("<button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-trash\"></i></button>");
-            sb.append("</form>");
+        sb.append("<form action=\"message?action=delete\" method=\"POST\">");
+        sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">");
+        sb.append("<button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-trash\"></i></button>");
+        sb.append("</form>");
         }
+    %>
+
+    <%!
         private User getUserById(int userId) throws SQLException {
             User user;
             user = new UserDAO().getUserById(userId);
@@ -186,17 +184,11 @@
                                 <%
                                     List<Message> messages = channel.getMessages();
                                     Pair<List<ImgMessage>, List<Message>> pair = new MessageDAO().separateImgFromMessage(messages);
-                                    Map<Date, String> resultMap = new HashMap<>();
+                                    List<Message> messagesList = new ArrayList<>(){{addAll(pair.getSecond()); addAll(pair.getFirst());}};
+                                    messages.sort(Comparator.comparing(Message::getDateSend));
                                     if (messages != null && !messages.isEmpty()) {
                                         int uid = (int) session.getAttribute("id");
-                                        processMessages(pair.getSecond(), resultMap, response, uid);
-                                        processImgMessages(pair.getFirst(), resultMap, response, uid);
-
-                                        List<Date> sortedDates = new ArrayList<>(resultMap.keySet());
-                                        sortedDates.sort(Date::compareTo);
-                                        for (Date date : sortedDates) {
-                                            out.println(resultMap.get(date));
-                                        }
+                                        out.print(processMessages(messagesList, uid));
                                     }
 
                         } else {
