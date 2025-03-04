@@ -62,15 +62,19 @@
 
 <a href="home" class="btn btn-primary mb-3">Back</a>
 
-<h1 class="mb-4">Accept Channel Invitation</h1>
-
-<p>You have been invited to join the channel "<%=channel.getName()%>" by <%=user.getUsername()%></p>
-
-<form action="join" method="get">
-    <input type="hidden" name="action" value="join">
-    <input type="hidden" name="token" value="<%=token%>">
-    <button type="submit" class="btn btn-primary">Accept</button>
-</form>
+<div class="card">
+  <div class="card-header">
+    <h1 class="mb-4">Accept Channel Invitation</h1>
+  </div>
+  <div class="card-body">
+    <p>You have been invited to join the channel "<%=channel.getName()%>" by <%=user.getUsername()%></p>
+    <form action="join" method="get">
+      <input type="hidden" name="action" value="join">
+      <input type="hidden" name="token" value="<%=token%>">
+      <button type="submit" class="btn btn-primary">Accept</button>
+    </form>
+  </div>
+</div>
 
 
 

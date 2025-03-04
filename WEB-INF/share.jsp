@@ -14,6 +14,7 @@
   <title>Document</title>
   <!-- import bootstreap -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="container mt-5">
 
@@ -39,7 +40,7 @@
   int userID = Util.getUid(session);
 
 
-  String token = new JwtManager().createJwtForChannelLink(ch.getCid(), userID);
+  String token = new JwtManager().createJwtForChannelLink(userID, chanelID);
 
   String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/home?action=join&token=" + token;
 
@@ -51,12 +52,23 @@
 
 <h1 class="mb-4">Share Channel <%=ch.getName()%></h1>
 
+<div class="alert alert-info" role="alert">
+  <strong>Share this link:</strong>
+  <input type="text" class="form-control" value="<%= url %>" readonly onclick="this.select();">
+</div>
 
-  <%= url%>
+<div id="qrcode" class="d-flex justify-content-center my-4"></div>
 
+<script defer>
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: "<%= url %>",
+        width: 256,
+        height: 256,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.Q
+    });
+</script>
 
-
-
-</body>
 
 </html>
