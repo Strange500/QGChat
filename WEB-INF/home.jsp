@@ -36,7 +36,7 @@
     <canvas style="display: none; position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1000;"></canvas>
 
     <%!
-        private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin) throws IOException, SQLException {
+        private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin, int editMid) throws IOException, SQLException {
             StringBuilder sb = new StringBuilder();
             for (Message message : messages) {
 
@@ -53,15 +53,29 @@
                     sb.append("<div class=\"badge badge-warning ml-2\">Admin</div>");
                 }
                 sb.append("</span>");
+
                 if (isAdmin || message.getSenderId() == uid) {
+                    sb.append("<div class=\"d-flex\">");
+                    if (message.getImg() == null) {
+                        sb.append("<a href=\"?channelID=").append(channelID).append("&editMid=").append(message.getMid()).append("\" class=\"btn btn-link p-0\"><i class=\"bi bi-pencil\"></i></a>");
+                    }
                     appendDeleteForm(sb, message.getMid());
+                    sb.append("</div>");
                 }
                 sb.append("</div>");
                 sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
                 if (message.getImg() != null) {
                     sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
                 } else {
-                    sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
+                    if (editMid == message.getMid() && (message.getSenderId() == uid || isAdmin)) {
+                        sb.append("<form action=\"message\" method=\"POST\" class=\"mt-4\" >");
+                            sb.append("<input type=\"hidden\" name=\"action\" value=\"edit\">");
+                            sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(message.getMid()).append("\">");
+                            sb.append("<input type=\"text\" class=\"form-control\" name=\"message\" value=\"").append(message.getContenu()).append("\">");
+                        sb.append("</form>");
+                    } else {
+                        sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
+                    }
                 }
                 appendLikeForm(sb, message.getMid(), uid);
                 sb.append("</div>");
@@ -152,6 +166,7 @@
             <section id="conversation">
                 <%
                     String channelIdParam = request.getParameter("channelID");
+                    String editMid = request.getParameter("editMid");
 
 
                     if (channelIdParam != null) {
@@ -225,7 +240,8 @@
                                     messages.sort(Comparator.comparing(Message::getDateSend));
                                     if (messages != null && !messages.isEmpty()) {
                                         int uid = (int) session.getAttribute("id");
-                                        out.print(processMessages(messagesList, uid, channelID, isAdmin));
+                                        int editMidInt = editMid == null ? -1 : Integer.parseInt(editMid);
+                                        out.print(processMessages(messagesList, uid, channelID, isAdmin, editMidInt));
                                     }
 
                         } else {

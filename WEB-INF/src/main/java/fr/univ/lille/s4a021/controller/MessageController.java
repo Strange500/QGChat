@@ -86,6 +86,26 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                     messageDAO.deleteMessage(mid);
                     res.sendRedirect("home?action=view&channelID=" + cid);
                     break;
+                case "edit":
+                    int midEdit = Integer.parseInt(req.getParameter("mid"));
+                    String newMessage = req.getParameter("message");
+                    int cidEdit = new MessageDAO().getChannelByMessageId(midEdit);
+
+                    if (!new ChannelDAO().isAbonne(Util.getUid(session), cidEdit)) {
+                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        return;
+                    }
+
+                    Message messageEdit = new MessageDAO().getMessageById(midEdit);
+                    if (messageEdit.getSenderId() != Util.getUid(session) && !new ChannelDAO().userIsAdmin(Util.getUid(session), cidEdit)) {
+                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        return;
+                    }
+
+                    messageEdit.setContenu(StringEscapeUtils.escapeHtml4(newMessage));
+                    new MessageDAO().updateMessage(messageEdit.getMid(), messageEdit.getContenu());
+                    res.sendRedirect("home?action=view&channelID=" + cidEdit);
+                    break;
 
                 default:
                     res.sendRedirect("home");
