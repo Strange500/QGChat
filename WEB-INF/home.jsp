@@ -32,6 +32,9 @@
          style="display: none; position: absolute; z-index: 1000;">
     </div>
 
+
+    <canvas style="display: none; position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1000;"></canvas>
+
     <%!
         private String processMessages(List<? extends Message> messages, int uid) throws IOException, SQLException {
             StringBuilder sb = new StringBuilder();
@@ -273,6 +276,31 @@
             previewCard.style.display = 'none';
             const imgInput = document.querySelector('input[type="file"]');
             imgInput.value = '';
+        });
+
+        function displaySheep() {
+
+            const canvas = document.querySelector('canvas');
+            canvas.style.display = 'block';
+            const ctx = canvas.getContext('2d');
+            // draw image sheep.jpg
+            const img = new Image();
+            img.src = 'sheep.jpg';
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            setTimeout(() => {
+                canvas.style.display = 'none';
+            }, 500);
+
+        }
+
+        // check if one message contains the word sheep
+        const messages = messageList.querySelectorAll('p');
+        messages.forEach(message => {
+            if (message.innerText.toLowerCase().includes('sheep')) {
+                displaySheep();
+            }
         });
 
     </script>
