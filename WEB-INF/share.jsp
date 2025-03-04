@@ -54,6 +54,7 @@
 
 <div class="alert alert-info" role="alert">
   <strong>Share this link:</strong>
+  <small>This link is valid for 1 hour, anyone with this link can join the channel</small>
   <input type="text" class="form-control" value="<%= url %>" readonly onclick="this.select();">
 </div>
 

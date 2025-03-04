@@ -99,14 +99,6 @@
         }
     %>
 
-    <%!
-        private User getUserById(int userId) throws SQLException {
-            User user;
-            user = new UserDAO().getUserById(userId);
-            return user;
-        }
-    %>
-
     <a href="?action=logout" class="btn btn-danger mb-3">Logout</a>
 
     <div class="row">
