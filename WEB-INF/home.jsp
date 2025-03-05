@@ -56,7 +56,7 @@
 
                 if (isAdmin || message.getSenderId() == uid) {
                     sb.append("<div class=\"d-flex\">");
-                    if (message.getImg() == null) {
+                    if (message.getImg() == null && message.getSenderId() == uid) {
                         sb.append("<a href=\"?channelID=").append(channelID).append("&editMid=").append(message.getMid()).append("\" class=\"btn btn-link p-0\"><i class=\"bi bi-pencil\"></i></a>");
                     }
                     appendDeleteForm(sb, message.getMid());

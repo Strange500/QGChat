@@ -97,7 +97,7 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                     }
 
                     Message messageEdit = new MessageDAO().getMessageById(midEdit);
-                    if (messageEdit.getSenderId() != Util.getUid(session) && !new ChannelDAO().userIsAdmin(Util.getUid(session), cidEdit)) {
+                    if (messageEdit.getSenderId() != Util.getUid(session)) {
                         MainController.sendErrorPage(401, "Unauthorized", req, res);
                         return;
                     }
