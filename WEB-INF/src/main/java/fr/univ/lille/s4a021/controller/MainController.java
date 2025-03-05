@@ -36,41 +36,46 @@ public class MainController extends HttpServlet {
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
 
-        if (Util.userIsConnected(session)) {
-            if (action == null) {
-                RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(HOME));
-                rd.forward(req, res);
-            } else {
-                try {
-                    switch (action) {
-                        case "logout":
-                            session.invalidate();
-                            RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(LOGIN));
-                            rd.forward(req, res);
-                            break;
-
-                        case "view":
-                            RequestDispatcher rd2 = req.getRequestDispatcher(getJSPPath(HOME));
-                            rd2.forward(req, res);
-                            break;
-                        default:
-                            RequestDispatcher rd4 = req.getRequestDispatcher(getJSPPath(ERROR));
-                            req.setAttribute("errorCode", 404);
-                            req.setAttribute("message", "Action not found");
-                            rd4.forward(req, res);
-                            break;
-
-                    }
-                } catch (Exception e) {
-                    RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(ERROR));
-                    req.setAttribute("errorCode", 500);
-                    req.setAttribute("message", e.getMessage());
+        try {
+            if (Util.userIsConnected(session)) {
+                if (action == null) {
+                    RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(HOME));
                     rd.forward(req, res);
+                } else {
+                    try {
+                        switch (action) {
+                            case "logout":
+                                session.invalidate();
+                                RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(LOGIN));
+                                rd.forward(req, res);
+                                break;
+
+                            case "view":
+                                RequestDispatcher rd2 = req.getRequestDispatcher(getJSPPath(HOME));
+                                rd2.forward(req, res);
+                                break;
+                            default:
+                                RequestDispatcher rd4 = req.getRequestDispatcher(getJSPPath(ERROR));
+                                req.setAttribute("errorCode", 404);
+                                req.setAttribute("message", "Action not found");
+                                rd4.forward(req, res);
+                                break;
+
+                        }
+                    } catch (Exception e) {
+                        RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(ERROR));
+                        req.setAttribute("errorCode", 500);
+                        req.setAttribute("message", e.getMessage());
+                        rd.forward(req, res);
+                    }
                 }
+            } else {
+                RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(LOGIN));
+                rd.forward(req, res);
             }
-        } else {
-            RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(LOGIN));
-            rd.forward(req, res);
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            return;
         }
 
     }

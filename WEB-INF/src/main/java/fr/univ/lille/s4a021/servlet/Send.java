@@ -34,9 +34,13 @@ public class Send extends HttpServlet {
             return;
         }
 
-        if (!Util.userIsConnected(req.getSession())) {
-            res.sendRedirect("home");
-            return;
+        try {
+            if (!Util.userIsConnected(req.getSession())) {
+                res.sendRedirect("home");
+                return;
+            }
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, e.getMessage(), req, res);
         }
 
         try {

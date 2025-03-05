@@ -26,9 +26,13 @@ public class Like extends HttpServlet {
     public void service( HttpServletRequest req, HttpServletResponse res )
             throws ServletException, IOException
     {
-        if (!Util.userIsConnected(req.getSession())) {
-            res.sendRedirect("home");
-            return;
+        try {
+            if (!Util.userIsConnected(req.getSession())) {
+                res.sendRedirect("home");
+                return;
+            }
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, e.getMessage(), req, res);
         }
 
         MessageDAO messageDAO = null;

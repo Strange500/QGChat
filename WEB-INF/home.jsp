@@ -39,10 +39,14 @@
         private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin, int editMid) throws IOException, SQLException {
             StringBuilder sb = new StringBuilder();
             for (Message message : messages) {
-
-                User user = new UserDAO().getUserById(message.getSenderId());
+                UserDAO userDAO = new UserDAO();
+                User user = userDAO.getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
                 sb.append("<div class=\"d-flex justify-content-between align-items-center\">");
+                sb.append("<div class=\"d-flex align-items-center justify-content-between\">");
+                String imgBase64 = userDAO.getUserProfilePicture(user.getUid());
+                sb.append("<img src=\"data:image/jpeg;base64,").append(imgBase64).append("\" alt=\"profile picture\" class=\"img-fluid rounded-circle\" style=\"width: 50px; height: 50px; object-fit: cover;\">");
+                sb.append("<div class=\"ml-3\">");
                 sb.append("<span class=\"font-weight-bold text-dark\">");
                 if (user.getUid() == uid) {
                     sb.append("You");
@@ -50,9 +54,12 @@
                     sb.append(user.getUsername());
                 }
                 if (new ChannelDAO().userIsAdmin(user.getUid(), channelID)) {
-                    sb.append("<div class=\"badge badge-warning ml-2\">Admin</div>");
+                    sb.append("<span class=\"badge badge-warning ml-2\">Admin</span>");
                 }
                 sb.append("</span>");
+                sb.append("<small class=\"text-muted d-block\">").append(message.getTimeAgo()).append("</small>");
+                sb.append("</div>");
+                sb.append("</div>");
 
                 if (isAdmin || message.getSenderId() == uid) {
                     sb.append("<div class=\"d-flex\">");
@@ -63,7 +70,7 @@
                     sb.append("</div>");
                 }
                 sb.append("</div>");
-                sb.append("<small class=\"text-muted ml-2\">").append(message.getTimeAgo()).append("</small>");
+
                 if (message.getImg() != null) {
                     sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
                 } else {
@@ -129,6 +136,22 @@
 
     <a href="?action=logout" class="btn btn-danger mb-3">Logout</a>
 
+    <section class="text-left">
+    <%
+        UserDAO userDAO = new UserDAO();
+        User user = userDAO.getUserById(Util.getUid(session));
+        String profilepicBase64 = userDAO.getUserProfilePicture(user.getUid());
+    %>
+    <div class="d-flex align-items-center">
+    <a href="user?action=edit" class="d-inline-block">
+
+        <img src="data:image/jpeg;base64,<%=profilepicBase64%>" alt="profile picture" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+
+    </a>
+    <p class="ml-3 mt-2 mb-0"><%=user.getUsername()%></p>
+</div>
+</section>
+
     <div class="row">
         <div class="col-md-4">
             <section id="channels">
@@ -140,7 +163,6 @@
                     ChannelDAO channelDAO = new ChannelDAO();
                     List<Channel> channels = channelDAO.getAllChannels();
                     if (channels != null) {
-                    UserDAO userDAO = new UserDAO();
                     for (Channel channel : channels) {
                         boolean estAbonne = false;
                         try {

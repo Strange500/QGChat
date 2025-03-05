@@ -5,6 +5,7 @@ public class User {
     private String username;
     private String mail;
     private String pwd;
+    String profilepic;
 
     // Constructeur
     public User(int uid, String username, String mail, String pwd) {
@@ -39,6 +40,11 @@ public class User {
     public void setMail(String mail) {
         this.mail = mail;
     }
+
+
+
+
+
 
     @Override
     public String toString() {

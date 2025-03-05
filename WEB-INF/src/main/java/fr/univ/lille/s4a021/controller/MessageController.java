@@ -38,9 +38,13 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
 
-        if (!Util.userIsConnected(session)) {
-            res.sendRedirect("home");
-            return;
+        try {
+            if (!Util.userIsConnected(session)) {
+                res.sendRedirect("home");
+                return;
+            }
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, e.getMessage(), req, res);
         }
         try {
 

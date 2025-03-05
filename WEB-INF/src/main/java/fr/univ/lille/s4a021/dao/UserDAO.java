@@ -15,14 +15,18 @@ public class UserDAO {
     }
 
     // Création d'un utilisateur
-    public void createUser(String username, String mail, String password) throws SQLException {
+    public int createUser(String username, String mail, String password) throws SQLException {
         String query = "INSERT INTO Utilisateur (username, mail, password) VALUES (?, ?, MD5(?))";
-        System.out.println("Creating user: " + username + " " + mail + " " + password);
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (PreparedStatement stmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, username);
             stmt.setString(2, mail);
             stmt.setString(3, password);
             stmt.executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return -1;
         }
     }
 
@@ -92,13 +96,12 @@ public class UserDAO {
     }
 
     // Mise à jour des informations d'un utilisateur
-    public void updateUser(int uid, String newUsername, String newMail, String newPassword) throws SQLException {
-        String query = "UPDATE Utilisateur SET username = ?, mail = ?, password = MD5(?) WHERE uid = ?";
+    public void updateUser(int uid, String newUsername, String newMail) throws SQLException {
+        String query = "UPDATE Utilisateur SET username = ?, mail = ? WHERE uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, newUsername);
             stmt.setString(2, newMail);
-            stmt.setString(3, newPassword);
-            stmt.setInt(4, uid);
+            stmt.setInt(3, uid);
             stmt.executeUpdate();
         }
     }
@@ -117,7 +120,28 @@ public class UserDAO {
             }
 
             return users;
-
         }
+    }
+
+
+    public void setUserProfilePicture(String base64Image, int uid) throws SQLException {
+        String query = "UPDATE Utilisateur SET profile_picture = ? WHERE uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, base64Image);
+            stmt.setInt(2, uid);
+            stmt.executeUpdate();
+        }
+    }
+
+    public String getUserProfilePicture(int uid) throws SQLException {
+        String query = "SELECT profile_picture FROM Utilisateur WHERE uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("profile_picture");
+            }
+        }
+        return null;
     }
 }

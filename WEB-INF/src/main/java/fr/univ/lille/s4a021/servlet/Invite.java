@@ -26,9 +26,13 @@ public class Invite extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        if (!Util.userIsConnected(request.getSession())) {
-            MainController.sendErrorPage(401, "Unauthorized", request, response);
-            return;
+        try {
+            if (!Util.userIsConnected(request.getSession())) {
+                MainController.sendErrorPage(401, "Unauthorized", request, response);
+                return;
+            }
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, e.getMessage(), request, response);
         }
 
         String token = request.getParameter("token");

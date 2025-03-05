@@ -50,8 +50,13 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 return;
             }
         }
-        if (!Util.userIsConnected(session)) {
-            res.sendRedirect("home");
+        try {
+            if (!Util.userIsConnected(session)) {
+                res.sendRedirect("home");
+                return;
+            }
+        } catch (SQLException e) {
+            MainController.sendErrorPage(500, e.getMessage(), req, res);
             return;
         }
 
