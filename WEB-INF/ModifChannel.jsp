@@ -80,11 +80,10 @@
 
                 <h2>Admins</h2>
                 <ul>
-                    <% for (User user : users) {
+                    <% for (User user : abonnes) {
                         if (user.getUid() == (int) session.getAttribute("id")) {
                             continue;
                         }
-
                     %>
 
                         <li>

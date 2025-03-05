@@ -120,7 +120,13 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 String[] adminsArray = req.getParameterValues("admins");
                 List<String> admins = new java.util.ArrayList<>();
                 if (adminsArray != null) {
-                    admins.addAll(Arrays.asList(adminsArray));
+                    for (String admin : adminsArray) {
+                        if (!abonnees2.contains(admin)) {
+                            MainController.sendErrorPage(400, "Admins must be abonnees", req, res);
+                            return;
+                        }
+                        admins.add(admin);
+                    }
                 }
                 admins.add(Util.getUid(session) + "");
 
