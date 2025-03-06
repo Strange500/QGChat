@@ -21,6 +21,7 @@ public class MainController extends HttpServlet {
     public final static String LOGIN = "login.jsp";
     public final static String HOME = "home.jsp";
     public final static String ERROR = "error.jsp";
+    public final static String FRIEND = "friend.jsp";
 
     public static String getJSPPath(String jsp) {
         return "/WEB-INF/" + jsp;

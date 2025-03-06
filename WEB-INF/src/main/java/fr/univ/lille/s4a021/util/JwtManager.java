@@ -12,9 +12,8 @@ public class JwtManager {
 
     public static SecretKey secret = Jwts.SIG.HS256.key().build();
 
-
     public String createJwtForChannelLink(Integer uid, Integer cid) {
-        String token = Jwts.builder()
+        return Jwts.builder()
                 .subject("Channel invite")
                 .expiration(Date.from(Instant.now().plus(1, ChronoUnit.HOURS)))
                 .issuedAt(Date.from(Instant.now()))
@@ -22,7 +21,17 @@ public class JwtManager {
                 .claim("uid", uid)
                 .signWith(secret)
                 .compact();
-        return token;
+    }
+
+    public String createJwtForFriendInvite(Integer senderUid, Integer receiverUid) {
+        return Jwts.builder()
+                .subject("Friend invite")
+                .expiration(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)))
+                .issuedAt(Date.from(Instant.now()))
+                .claim("senderUid", senderUid)
+                .claim("receiverUid", receiverUid)
+                .signWith(secret)
+                .compact();
     }
 
     public Boolean verifyJWT(String token) {
@@ -34,11 +43,13 @@ public class JwtManager {
         }
     }
 
-    public Pair<Integer,Integer> getUidAndCidFromChannelInviteToken(String token) {
+    public Pair<Integer, Integer> getUidAndCidFromChannelInviteToken(String token) {
+        var claims = Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getBody();
+        return new Pair<>(claims.get("uid", Integer.class), claims.get("cid", Integer.class));
+    }
 
-        Integer uid = Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getBody().get("uid", Integer.class);
-        Integer cid = Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getBody().get("cid", Integer.class);
-        return new Pair<>(uid, cid);
-
+    public Pair<Integer, Integer> getSenderAndReceiverFromFriendInviteToken(String token) {
+        var claims = Jwts.parser().verifyWith(secret).build().parseSignedClaims(token).getBody();
+        return new Pair<>(claims.get("senderUid", Integer.class), claims.get("receiverUid", Integer.class));
     }
 }

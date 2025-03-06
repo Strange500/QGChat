@@ -21,6 +21,7 @@ public class UserController extends HttpServlet {
     private static final int MAX_FILE_SIZE = 1024 * 1024 * 2; // 2MB
 
     public static final String EDIT = "editUser.jsp";
+    public static final String FRIEND = "friend.jsp";
 
 
 
@@ -57,6 +58,11 @@ public class UserController extends HttpServlet {
         switch (action) {
             case "edit":
                 RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(EDIT));
+                rd.forward(req, res);
+                break;
+
+            case "friend":
+                rd = req.getRequestDispatcher(getJSPPath(FRIEND));
                 rd.forward(req, res);
                 break;
 
