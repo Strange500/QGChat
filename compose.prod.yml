@@ -4,36 +4,33 @@ services:
     container_name: postgres
     image: postgres
     ports:
-      - "5432:5432"
+      - "6999:5432"
     environment:
       POSTGRES_USER: sae
       POSTGRES_PASSWORD: sae
       POSTGRES_DB: sae
     volumes:
+      - pg_data:/var/lib/postgresql/data
       - ./tables.sql:/docker-entrypoint-initdb.d/tables.sql
     networks:
       default:
 
   tomcat:
-      image: tomcat
+      build:
+        context: .
+        dockerfile: Dockerfile
       ports:
-          - "8081:8080"
-      volumes:
-        - ./:/usr/local/tomcat/webapps/sae
+          - "6998:8080"
+
       depends_on:
           - postgres
       networks:
         default:
-
-  adminer:
-      image: adminer
-
-      depends_on:
-          - postgres
-      network_mode: "host"
-
 networks:
     default:
+volumes:
+  pg_data:
+
 
 
 
