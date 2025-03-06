@@ -31,6 +31,7 @@ public class Auth extends HttpServlet {
             User usr = Authent.getUser(mail, password);
             HttpSession session = req.getSession();
             session.setAttribute("id", usr.getUid());
+            session.setMaxInactiveInterval(60 * 60);
             res.sendRedirect("home");
         } else {
             RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.LOGIN));
