@@ -1,6 +1,5 @@
 package fr.univ.lille.s4a021.controller;
 
-import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.RequestDispatcher;
@@ -11,9 +10,7 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
 
 import static fr.univ.lille.s4a021.controller.MainController.getJSPPath;
 

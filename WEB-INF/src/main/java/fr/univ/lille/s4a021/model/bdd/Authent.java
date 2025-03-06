@@ -3,7 +3,6 @@ package fr.univ.lille.s4a021.model.bdd;
 import fr.univ.lille.s4a021.dto.User;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

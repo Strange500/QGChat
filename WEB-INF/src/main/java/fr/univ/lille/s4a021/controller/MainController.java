@@ -1,21 +1,18 @@
 package fr.univ.lille.s4a021.controller;
 
 
-import fr.univ.lille.s4a021.dao.ChannelDAO;
-import fr.univ.lille.s4a021.dao.MessageDAO;
-import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Base64;
-import java.util.UUID;
 
 @MultipartConfig
 @WebServlet("/home")

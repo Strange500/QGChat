@@ -2,7 +2,6 @@ package fr.univ.lille.s4a021.util;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;

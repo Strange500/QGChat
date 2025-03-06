@@ -5,7 +5,6 @@ import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.model.bdd.Util;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +16,6 @@ import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Base64;
-import java.util.List;
-
-import static fr.univ.lille.s4a021.controller.MainController.getJSPPath;
 
 @MultipartConfig
 @WebServlet("/message")

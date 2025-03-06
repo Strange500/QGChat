@@ -3,22 +3,15 @@ package fr.univ.lille.s4a021.servlet;
 import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.MessageDAO;
-import fr.univ.lille.s4a021.dto.Channel;
-import fr.univ.lille.s4a021.model.bdd.Authent;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
-import org.eclipse.jdt.internal.compiler.batch.Main;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.UUID;
 
 @WebServlet("/like")
 public class Like extends HttpServlet {

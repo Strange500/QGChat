@@ -1,15 +1,17 @@
 package fr.univ.lille.s4a021.servlet;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-
 import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.model.bdd.Authent;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
 
 @WebServlet("/Auth")
 public class Auth extends HttpServlet {

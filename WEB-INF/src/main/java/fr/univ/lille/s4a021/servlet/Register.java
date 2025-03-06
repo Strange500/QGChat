@@ -1,19 +1,20 @@
 package fr.univ.lille.s4a021.servlet;
 
+import fr.univ.lille.s4a021.controller.MainController;
+import fr.univ.lille.s4a021.dao.UserDAO;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
+
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-
-
-import fr.univ.lille.s4a021.controller.MainController;
-import fr.univ.lille.s4a021.dao.UserDAO;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.WebServlet;
-import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 @WebServlet("/register")
 public class Register extends HttpServlet {

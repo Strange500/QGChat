@@ -2,14 +2,11 @@ package fr.univ.lille.s4a021;
 
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
-
-import static java.lang.System.exit;
 
 public class Config {
 

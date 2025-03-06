@@ -1,7 +1,6 @@
 package fr.univ.lille.s4a021.dao;
 
 import fr.univ.lille.s4a021.dto.Channel;
-import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.model.bdd.Connect;
 
