@@ -64,6 +64,14 @@
       <button type="submit" class="btn btn-primary">
         <i class="bi bi-upload"></i> Submit
       </button>
+
+    </form>
+    <form action="user" method="POST" class="mt-4">
+      <input type="hidden" name="action" value="delete">
+      <input type="hidden" name="uid" value="<%=user.getUid()%>">
+      <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Delete Account
+      </button>
     </form>
 
 
