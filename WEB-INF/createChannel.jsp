@@ -11,17 +11,13 @@
 </head>
 <body class="container mt-5">
 
-<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
-<%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
 
 <%@ page import="java.util.List" %>
-<%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
 <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
-<%@ page import="org.eclipse.jdt.internal.compiler.batch.Main" %>
 
 <%
 

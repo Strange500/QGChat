@@ -22,7 +22,6 @@
     <%@ page import="fr.univ.lille.s4a021.dto.ImgMessage" %>
     <%@ page import="fr.univ.lille.s4a021.dao.MessageDAO" %>
     <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
-    <%@ page import="java.text.SimpleDateFormat" %>
     <%@ page import="java.io.IOException" %>
     <%@ page import="java.util.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>

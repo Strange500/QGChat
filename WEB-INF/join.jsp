@@ -2,7 +2,6 @@
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
 <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
 <%@ page import="java.sql.SQLException" %>
-<%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
 <%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
 <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
 <%@ page import="io.jsonwebtoken.JwtException" %>
