@@ -21,7 +21,8 @@ services:
         dockerfile: Dockerfile
       ports:
           - "6998:8080"
-
+      volumes:
+        - ./config.yml:/usr/local/tomcat/webapps/sae/WEB-INF/classes/config.yml
       depends_on:
           - postgres
       networks:
