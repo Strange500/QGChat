@@ -27,7 +27,7 @@ public class MainController extends HttpServlet {
     }
 
 
-    public void service(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse res)
+    public void service(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
         HttpSession session = req.getSession();

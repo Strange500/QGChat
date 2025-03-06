@@ -5,6 +5,7 @@ import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.model.bdd.Util;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,8 +29,8 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
 
 
 
-    public void service(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse res)
-            throws jakarta.servlet.ServletException, java.io.IOException {
+    public void service(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
 
         HttpSession session = req.getSession();
         String action = req.getParameter("action");

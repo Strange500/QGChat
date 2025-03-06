@@ -3,9 +3,13 @@ package fr.univ.lille.s4a021.controller;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -22,8 +26,8 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
 
 
 
-    public void service(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse res)
-            throws jakarta.servlet.ServletException, java.io.IOException {
+    public void service(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
 
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
