@@ -10,7 +10,7 @@
 .settings/
 
 WEB-INF/classes/fr
-./lib
+/lib
 WEB-INF/classes/config.yml
 s4.a02.1_milantheron_benjaminroget.iml
 .vscode

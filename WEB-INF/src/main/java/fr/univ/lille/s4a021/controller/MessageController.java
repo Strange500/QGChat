@@ -126,11 +126,17 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
 
         int mid = Integer.parseInt(req.getParameter("mid"));
         int uid = (int) req.getSession().getAttribute("id");
+        String emoji  = req.getParameter("emoji");
 
-        if (messageDAO.isLikedByUser(mid, uid)) {
+        MessageDAO.Reaction reaction = MessageDAO.Reaction.getReactionFromEmoji(emoji);
+        MessageDAO.Reaction currentReaction = messageDAO.getUserReaction(mid, uid);
+
+        if (currentReaction == null) {
+            messageDAO.likeMessage(mid, uid, reaction);
+        } else if (currentReaction == reaction) {
             messageDAO.unlikeMessage(mid, uid);
         } else {
-            messageDAO.likeMessage(mid, uid);
+            messageDAO.updateReaction(mid, uid, reaction);
         }
 
         return messageDAO.getChannelByMessageId(mid);

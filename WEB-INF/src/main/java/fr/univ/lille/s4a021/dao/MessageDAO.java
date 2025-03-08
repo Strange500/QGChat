@@ -2,18 +2,49 @@ package fr.univ.lille.s4a021.dao;
 
 import fr.univ.lille.s4a021.dto.ImgMessage;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.model.bdd.Connect;
 import fr.univ.lille.s4a021.util.Pair;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class MessageDAO {
     private Connection connection;
 
     public MessageDAO() throws SQLException {
         this.connection = Connect.getConnection();
+    }
+
+
+    public enum Reaction {
+        EMPTY(""),
+        FIRE("🔥"),
+        HEART("❤️"),
+        LAUGH("😂"),
+        SAD("😢"),
+        ANGRY("😡");
+
+
+        private final String emoji;
+
+        Reaction(String emoji) {
+            this.emoji = emoji;
+        }
+
+        public String getEmoji() {
+            return emoji;
+        }
+
+        public static Reaction getReactionFromEmoji(String emoji) {
+            for (Reaction r : Reaction.values()) {
+                if (r.emoji.equals(emoji)) {
+                    return r;
+                }
+            }
+            return EMPTY;
+        }
+
     }
 
     public List<String> getWhoLiked(int mid) throws SQLException {
@@ -46,11 +77,57 @@ public class MessageDAO {
         return false;
     }
 
-    public void likeMessage(int mid, int uid) throws SQLException {
-        String query = "INSERT INTO likes (mid, uid) VALUES (?, ?)";
+    public Map<Reaction, Set<Integer>> getReactions(int mid) throws SQLException {
+        Map<Reaction, Set<Integer>> reactions = new HashMap<>();
+        String query = "SELECT u.uid, l.emoji FROM likes l JOIN utilisateur u ON l.uid = u.uid WHERE mid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int uid = rs.getInt("uid");
+                String reaction = rs.getString("emoji");
+                Reaction react = Reaction.getReactionFromEmoji(reaction);
+                reactions.put(react, reactions.getOrDefault(react, new HashSet<>()));
+                reactions.get(react).add(uid);
+            }
+        }
+        return reactions;
+    }
+
+    public Reaction getUserReaction(int mid, int uid) throws SQLException {
+        String query = "SELECT emoji FROM likes WHERE mid = ? AND uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, mid);
             stmt.setInt(2, uid);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String reaction = rs.getString("emoji");
+                return Reaction.getReactionFromEmoji(reaction);
+            }
+        }
+        return null;
+    }
+
+    public void updateReaction(int mid, int uid, Reaction emoji) throws SQLException {
+        String query = "UPDATE likes SET emoji = ? WHERE mid = ? AND uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, emoji.getEmoji());
+            stmt.setInt(2, mid);
+            stmt.setInt(3, uid);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void likeMessage(int mid, int uid) throws SQLException {
+        this.likeMessage(mid, uid, Reaction.HEART);
+    }
+
+    public void likeMessage(int mid, int uid, Reaction emoji) throws SQLException {
+        String query = "INSERT INTO likes (mid, uid, emoji) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, mid);
+            stmt.setInt(2, uid);
+            stmt.setString(3, emoji.getEmoji());
             stmt.executeUpdate();
         }
     }
@@ -185,12 +262,4 @@ public class MessageDAO {
         return new Pair<>(imgMessages, messages);
     }
 
-    public boolean isLiked(int mid) throws SQLException {
-        String query = "SELECT * FROM likes WHERE mid = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setInt(1, mid);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-        }
-    }
 }

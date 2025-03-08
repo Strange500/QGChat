@@ -93,34 +93,72 @@
         <%!
 
         private void appendLikeForm(StringBuilder sb, int mid, int uid) throws SQLException {
-            sb.append("<form action=\"message?action=like\" method=\"POST\" id=\"likeForm\">");
-            sb.append("<div style=\"display: none\" id=\"userDiv\">");
-            List<String> whoLiked = new MessageDAO().getWhoLiked(mid);
+
+            MessageDAO.Reaction userReaction = new MessageDAO().getUserReaction(mid, uid);
+
+           sb.append("<div class=\"d-flex align-items-center justify-content-around likeForm\" style=\"width: 100px;\">");
+
+            sb.append("<div style=\"display: none\" id=\"userDiv\" class=\"popover bs-popover-top shadow bg-white rounded p-2\">");
+            Map<MessageDAO.Reaction, Set<Integer>> whoLiked = new MessageDAO().getReactions(mid);
             if (whoLiked != null && !whoLiked.isEmpty()) {
-                if (whoLiked.size() > 3) {
-                    int size = whoLiked.size();
-                    whoLiked = whoLiked.subList(whoLiked.size() - 3, whoLiked.size());
-                    whoLiked.add("<br>and " + (size - 3) + " more");
+                sb.append("<span class=\"text-muted\">Liked by:</span>");
+                for (Map.Entry<MessageDAO.Reaction, Set<Integer>> entry : whoLiked.entrySet()) {
+                    for (int id : entry.getValue()) {
+                        User user = new UserDAO().getUserById(id);
+                        sb.append("<div class=\"d-flex align-items-center my-1\">");
+                        String imgBase64 = new UserDAO().getUserProfilePicture(user.getUid());
+                        sb.append("<img src=\"data:image/jpeg;base64,").append(imgBase64).append("\" alt=\"profile picture\" class=\"img-fluid rounded-circle\" style=\"width: 30px; height: 30px; object-fit: cover;\">");
+                        sb.append("<span class=\"ml-2\">").append(user.getUsername()).append("</span>");
+                        sb.append("</div>");
+                    }
                 }
-                sb.append("<span class=\"text-muted\">Liked by: ");
-                for (String u : whoLiked) {
-                    sb.append(u).append(", ");
-                }
-                sb.delete(sb.length() - 2, sb.length());
-                sb.append("</span>");
-            }
-            else {
+            } else {
                 sb.append("<span class=\"text-muted\">No likes yet</span>");
             }
             sb.append("</div>");
 
-            if (new MessageDAO().isLikedByUser(mid, uid)) {
-                sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star-fill\"></i></button>");
-            } else {
-                sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\"><button type=\"submit\" class=\"btn btn-link p-0\"><i class=\"bi bi-star\"></i></button>");
+
+
+                for (MessageDAO.Reaction reaction : MessageDAO.Reaction.values()) {
+                    if (whoLiked == null || whoLiked.getOrDefault(reaction, Collections.emptySet()).isEmpty()) {
+                        continue;
+                    }
+                    sb.append("<span class=\"badge badge-primary mx-1\">").append(whoLiked.get(reaction).size());
+
+                    sb.append("<form action=\"message\" method=\"POST\" class=\"d-inline-block mx-1\">");
+                    sb.append("<input type=\"hidden\" name=\"action\" value=\"like\">");
+                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">");
+                    sb.append("<input type=\"hidden\" name=\"emoji\" value=\"").append(reaction.getEmoji()).append("\">");
+
+                    if (userReaction == reaction) {
+                        sb.append("<div class=\"d-flex align-items-center bg-dark rounded\">");
+                        sb.append("<input type=\"submit\" class=\"btn btn-link p-0 font-weight-bold text-primary\" value=\"").append(reaction.getEmoji()).append("\">");
+                    } else {
+                        sb.append("<div class=\"d-flex align-items-center rounded\">");
+                        sb.append("<input type=\"submit\" class=\"btn btn-link p-0 text-muted\" value=\"").append(reaction.getEmoji()).append("\">");
+                    }
+                    sb.append("</div>");
+                    sb.append("</form>");
+                    sb.append("</span>");
+                }
+            sb.append("<div class=\"d-flex align-items-center otherReact\">");
+            sb.append("<a class=\"btn btn-link p-0 text-muted\">...</a>");
+            for (MessageDAO.Reaction reaction : MessageDAO.Reaction.values()) {
+                if (whoLiked != null && whoLiked.getOrDefault(reaction, Collections.emptySet()).isEmpty()) {
+                    sb.append("<form action=\"message\" method=\"POST\" class=\"d-inline-block otherReactForm mx-1\">");
+                    sb.append("<input type=\"hidden\" name=\"action\" value=\"like\">");
+                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">");
+                    sb.append("<input type=\"hidden\" name=\"emoji\" value=\"").append(reaction.getEmoji()).append("\">");
+
+                    sb.append("<div class=\"align-items-center rounded\" style=\"display: none\">");
+                    sb.append("<input type=\"submit\" class=\"btn btn-link p-0 text-muted\" value=\"").append(reaction.getEmoji()).append("\">");
+                    sb.append("</div>");
+                    sb.append("</form>");
+                }
             }
-            sb.append("</form>");
-        }
+            sb.append("</div>");
+            sb.append("</div>");
+                    }
 
         %>
 
@@ -313,10 +351,10 @@
         const messageList = document.getElementById('messageList');
         messageList.scrollTop = messageList.scrollHeight;
 
-        const likeForms = document.querySelectorAll('#likeForm');
+        const likeForms = document.querySelectorAll('.likeForm');
         likeForms.forEach(form => {
             form.addEventListener('mouseenter', (event) => {
-                document.getElementById('hover-div').style.display = 'block';
+                document.getElementById('hover-div').style.display = 'none';
                 document.getElementById('hover-div').style.position = 'absolute';
 
                 const rect = form.getBoundingClientRect();
@@ -345,7 +383,6 @@
                 previewImg.style.display = 'block';
             };
             reader.readAsDataURL(imgInput.files[0]);
-
         });
 
         const previewCardCancelBtn = document.querySelector('#preview a');
@@ -388,6 +425,26 @@
         profileLink.addEventListener('mouseleave', () => {
             profileLink.querySelector('i').style.display = 'none';
         });
+
+        const otherReacts = document.querySelectorAll('.otherReact');
+        otherReacts.forEach(otherReact => {
+            const aLink = otherReact.querySelector('a');
+            const otherReactFormsDivs = otherReact.querySelectorAll('.otherReactForm > div');
+            aLink.addEventListener('click', () => {
+                otherReactFormsDivs.forEach(div => {
+                    div.style.display = 'flex';
+                });
+            });
+
+            otherReact.addEventListener('mouseleave', () => {
+                otherReactFormsDivs.forEach(div => {
+                    div.style.display = 'none';
+                });
+            });
+        });
+
+
+
 
 
     </script>
