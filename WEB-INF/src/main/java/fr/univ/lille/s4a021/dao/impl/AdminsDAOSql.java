@@ -24,10 +24,10 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
     private final UserDAO userDAO;
     private final ChannelDAO channelDAO;
 
-    public AdminsDAOSql(Connection con) throws SQLException, ConfigErrorException {
+    public AdminsDAOSql(Connection con, UserDAO usrDAO,ChannelDAO chDAO) throws ConfigErrorException {
         super(con);
-        this.userDAO = Config.getConfig().getUserDAO();
-        this.channelDAO = Config.getConfig().getChannelDAO();
+        this.userDAO = usrDAO;
+        this.channelDAO = chDAO;
 
     }
 

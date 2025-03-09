@@ -26,10 +26,10 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
     private final MessageDAO messageDAO;
     private final UserDAO userDAO;
 
-    public ReactionDaoSql(Connection con) throws ConfigErrorException {
+    public ReactionDaoSql(Connection con, MessageDAO msdDAO, UserDAO usrDAO) throws ConfigErrorException {
         super(con);
-        this.messageDAO = Config.getConfig().getMessageDAO();
-        this.userDAO = Config.getConfig().getUserDAO();
+        this.messageDAO = msdDAO;
+        this.userDAO = usrDAO;
 
     }
 

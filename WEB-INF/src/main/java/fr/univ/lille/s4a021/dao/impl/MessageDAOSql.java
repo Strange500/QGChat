@@ -17,13 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDAOSql extends DaoSql implements MessageDAO {
-    private final ReactionDAO reactionDAO;
-    private final ChannelDAO channelDAO;
 
     public MessageDAOSql(Connection con) throws ConfigErrorException {
         super(con);
-        this.reactionDAO = Config.getConfig().getReactionDAO();
-        this.channelDAO = Config.getConfig().getChannelDAO();
     }
 
 
@@ -53,9 +49,6 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
 
     @Override
     public List<Message> getMessageByChannelId(int cid) throws ChannelNotFoundException, DataAccessException {
-        if (!channelDAO.channelExists(cid)) {
-            throw new ChannelNotFoundException("Channel not found");
-        }
         String query = "SELECT mid, uid, contenu, timestamp FROM Message WHERE cid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, cid);

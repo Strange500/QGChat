@@ -16,13 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChannelDAOSql extends DaoSql implements ChannelDAO {
-    private final UserDAO userDAO;
-    private final MessageDAO messageDAO;
 
     public ChannelDAOSql(Connection con) throws SQLException, ConfigErrorException {
         super(con);
-        this.userDAO = Config.getConfig().getUserDAO();
-        this.messageDAO = Config.getConfig().getMessageDAO();
 
     }
 

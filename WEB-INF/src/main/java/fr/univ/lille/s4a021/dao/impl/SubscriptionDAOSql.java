@@ -21,13 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
-    private ChannelDAO channelDAO;
-    private UserDAO userDAO;
+    private final ChannelDAO channelDAO;
+    private final UserDAO userDAO;
 
-    public SubscriptionDAOSql(Connection con) throws ConfigErrorException {
+    public SubscriptionDAOSql(Connection con, ChannelDAO chDAO, UserDAO usrDAO) throws ConfigErrorException {
         super(con);
-        this.channelDAO = Config.getConfig().getChannelDAO();
-        this.userDAO = Config.getConfig().getUserDAO();
+        this.channelDAO = chDAO;
+        this.userDAO = usrDAO;
     }
 
     @Override

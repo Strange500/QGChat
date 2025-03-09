@@ -26,7 +26,12 @@
     <%@ page import="java.util.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
     <%@ page import="java.util.stream.Collectors" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.ReactionDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
+    <%@ page import="fr.univ.lille.s4a021.Config" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.*" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.message.MessageNotFoundException" %>
 
     <div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
@@ -37,10 +42,9 @@
     <canvas style="display: none; position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1000;"></canvas>
 
     <%!
-        private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin, int editMid) throws IOException, SQLException {
+        private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin, int editMid, UserDAO userDAO, AdminsDAO adminDAO, ReactionDAO reactionDAO, MessageDAO messageDAO) throws IOException, SQLException, UserNotFoundException, DataAccessException, ChannelNotFoundException, MessageNotFoundException {
             StringBuilder sb = new StringBuilder();
             for (Message message : messages) {
-                UserDAOSql userDAO = new UserDAOSql();
                 User user = userDAO.getUserById(message.getSenderId());
                 sb.append("<div class=\"border p-3 mb-3 rounded\">");
                 sb.append("<div class=\"d-flex justify-content-between align-items-center\">");
@@ -54,7 +58,7 @@
                 } else {
                     sb.append(user.getUsername());
                 }
-                if (new ChannelDAOSql().userIsAdmin(user.getUid(), channelID)) {
+                if (adminDAO.userIsAdmin(user.getUid(), channelID)) {
                     sb.append("<span class=\"badge badge-warning ml-2\">Admin</span>");
                 }
                 sb.append("</span>");
@@ -85,7 +89,7 @@
                         sb.append("<p class=\"my-2 text-muted\">").append(message.getContenu()).append("</p>");
                     }
                 }
-                appendLikeForm(sb, message.getMid(), uid);
+                appendLikeForm(sb, message.getMid(), uid, reactionDAO, messageDAO, userDAO);
                 sb.append("</div>");
             }
             return sb.toString();
@@ -93,22 +97,22 @@
         %>
 
         <%!
-            private void appendLikeForm(StringBuilder sb, int mid, int uid) throws SQLException {
+            private void appendLikeForm(StringBuilder sb, int mid, int uid, ReactionDAO reactionDAO, MessageDAO messageDAO, UserDAO userDAO) throws MessageNotFoundException, DataAccessException, UserNotFoundException {
                 // Get user reaction once
-                ReactionDAO.Reaction userReaction = new MessageDAOSql().getUserReaction(mid, uid);
+                ReactionDAO.Reaction userReaction = reactionDAO.getUserReactionForMessage(mid, uid);
                 sb.append("<div style=\"width: 100px;\" class=\"d-flex align-items-center justify-content-around likeForm rounded \">");
                 sb.append("<div style=\"display: none\" id=\"userDiv\" class=\"popover bs-popover-top shadow bg-white rounded p-2\">");
 
                 // Fetch all reactions and their associated user IDs at once
-                Map<ReactionDAO.Reaction, Set<Integer>> whoLiked = new MessageDAOSql().getReactions(mid);
-                appendWhoLiked(sb, whoLiked);
+                Map<ReactionDAO.Reaction, Set<Integer>> whoLiked = reactionDAO.getReactionsForMessage(mid);
+                appendWhoLiked(sb, whoLiked, userDAO);
                 sb.append("</div>");
 
                 // Append reactions
                 if (whoLiked == null || whoLiked.isEmpty()) {
-                    appendReaction(sb, mid, ReactionDAO.Reaction.HEART, new HashSet<>());
+                    appendReaction(sb, mid, ReactionDAO.Reaction.HEART, new HashSet<>(), userDAO);
                 } else {
-                    appendReactions(sb, mid, userReaction, whoLiked);
+                    appendReactions(sb, mid, userReaction, whoLiked, userDAO);
                 }
 
                 sb.append("<div class=\"d-flex align-items-center otherReact\">");
@@ -120,7 +124,7 @@
             }
 
             // Modify to accept whoLiked as a parameter
-            private void appendWhoLiked(StringBuilder sb, Map<ReactionDAO.Reaction, Set<Integer>> whoLiked) throws SQLException {
+            private void appendWhoLiked(StringBuilder sb, Map<ReactionDAO.Reaction, Set<Integer>> whoLiked, UserDAO userDAO) throws UserNotFoundException, DataAccessException {
                 if (whoLiked != null && !whoLiked.isEmpty()) {
                     sb.append("<span class=\"text-muted\">Liked by:</span>");
                     // Store user IDs from whoLiked
@@ -128,14 +132,14 @@
                     for (Set<Integer> ids : whoLiked.values()) {
                         userIds.addAll(ids); // Collect all user IDs
                     }
-                    List<User> users = new UserDAOSql().getUserByIds(userIds); // Fetch all users at once
+                    List<User> users = userDAO.getUserByIds(userIds); // Fetch all users at once
 
                     // Create a map for quick look-up
                     Map<Integer, User> userMap = users.stream().collect(Collectors.toMap(User::getUid, user -> user));
                     for (Map.Entry<ReactionDAO.Reaction, Set<Integer>> entry : whoLiked.entrySet()) {
                         for (int id : entry.getValue()) {
                             User user = userMap.get(id);
-                            appendUserLike(sb, user);
+                            appendUserLike(sb, user, userDAO);
                         }
                     }
                 } else {
@@ -143,9 +147,9 @@
                 }
             }
 
-            private void appendUserLike(StringBuilder sb, User user) throws SQLException {
+            private void appendUserLike(StringBuilder sb, User user, UserDAO userDAO) throws UserNotFoundException, DataAccessException {
                 if (user != null) {
-                    String imgBase64 = new UserDAOSql().getUserProfilePicture(user.getUid());
+                    String imgBase64 = userDAO.getUserProfilePicture(user.getUid());
                     sb.append("<div class=\"d-flex align-items-center my-1\">")
                             .append("<img src=\"data:image/jpeg;base64,").append(imgBase64)
                             .append("\" alt=\"profile picture\" class=\"img-fluid rounded-circle\" style=\"width: 30px; height: 30px; object-fit: cover;\">")
@@ -156,13 +160,13 @@
 
             // Update appendReactions to accept whoLiked as a parameter
             private void appendReactions(StringBuilder sb, int mid, ReactionDAO.Reaction userReaction,
-                                         Map<ReactionDAO.Reaction, Set<Integer>> whoLiked) throws SQLException {
+                                         Map<ReactionDAO.Reaction, Set<Integer>> whoLiked, UserDAO userDAO) throws UserNotFoundException, DataAccessException {
                 // Iterate through each reaction type
                 for (ReactionDAO.Reaction reaction : ReactionDAO.Reaction.values()) {
                     if (shouldSkipReaction(whoLiked, reaction)) {
                         continue; // Skip if there are no likes
                     }
-                    appendReaction(sb, mid, reaction, whoLiked.get(reaction));
+                    appendReaction(sb, mid, reaction, whoLiked.get(reaction), userDAO);
                 }
             }
 
@@ -172,12 +176,12 @@
             }
 
             private void appendReaction(StringBuilder sb, int mid, ReactionDAO.Reaction reaction,
-                                        Set<Integer> userIds) throws SQLException {
+                                        Set<Integer> userIds, UserDAO userDAO) throws UserNotFoundException, DataAccessException {
                 int likeCount = userIds.size();
                 sb.append("<span class=\"badge badge-").append(likeCount > 0 ? "primary" : "secondary").append(" mx-1 reactSpan\">")
                         .append(likeCount > 0 ? likeCount : "");
                 appendLikeForm(sb, mid, reaction);
-                appendUserDetails(sb, userIds);
+                appendUserDetails(sb, userIds, userDAO);
                 sb.append("</span>"); // Close badge span
             }
 
@@ -193,17 +197,17 @@
                         .append("</form>");
             }
 
-            private void appendUserDetails(StringBuilder sb, Set<Integer> userIds) throws SQLException {
+            private void appendUserDetails(StringBuilder sb, Set<Integer> userIds, UserDAO userDAO) throws UserNotFoundException, DataAccessException {
                 sb.append("<section class=\"d-none reactDetails\">");
                 if (userIds.isEmpty()) {
                     sb.append("<span class=\"text-muted\">No likes yet</span>");
                     sb.append("</section>"); // Close user details section
                     return;
                 }
-                List<User> users = new UserDAOSql().getUserByIds(userIds);
+                List<User> users = userDAO.getUserByIds(userIds);
 
                 for (int i = 0; i < Math.min(4, users.size()); i++) {
-                    appendUserLike(sb, users.get(i));
+                    appendUserLike(sb, users.get(i), userDAO);
                 }
 
                 if (users.size() > 4) {
@@ -213,7 +217,7 @@
             }
 
             // Update appendOtherReactions to accept whoLiked as a parameter
-            private void appendOtherReactions(StringBuilder sb, int mid, Map<ReactionDAO.Reaction, Set<Integer>> whoLiked) throws SQLException {
+            private void appendOtherReactions(StringBuilder sb, int mid, Map<ReactionDAO.Reaction, Set<Integer>> whoLiked) {
                 for (ReactionDAO.Reaction reaction : ReactionDAO.Reaction.values()) {
                     if (whoLiked != null && whoLiked.getOrDefault(reaction, Collections.emptySet()).isEmpty()) {
 
@@ -245,7 +249,7 @@
 
     <section class="text-left">
     <%
-        UserDAOSql userDAO = new UserDAOSql();
+        UserDAO userDAO = Config.getConfig().getUserDAO();
         User user = userDAO.getUserById(Util.getUid(session));
         String profilepicBase64 = userDAO.getUserProfilePicture(user.getUid());
     %>

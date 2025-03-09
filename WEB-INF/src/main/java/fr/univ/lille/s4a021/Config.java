@@ -18,38 +18,39 @@ public class Config {
 
     private final DatabaseConfig databaseConfig;
 
-    private final AdminsDAO adminsDAO;
-    private final ChannelDAO channelDAO;
-    private final FriendDAO friendDAO;
-    private final MessageDAO messageDAO;
-    private final ReactionDAO reactionDAO;
-    private final SubscriptionDAO subscriptionDAO;
-    private final UserDAO userDAO;
+    private  AdminsDAO adminsDAO;
+    private  ChannelDAO channelDAO;
+    private  FriendDAO friendDAO;
+    private  MessageDAO messageDAO;
+    private  ReactionDAO reactionDAO;
+    private  SubscriptionDAO subscriptionDAO;
+    private  UserDAO userDAO;
 
 
     public static Config getConfig() throws ConfigErrorException {
         if (instance == null) {
             instance = new Config();
+            try {
+                Connection connection = Connect.getConnection(instance);
+                instance.userDAO = new UserDAOSql(connection);
+                instance.channelDAO = new ChannelDAOSql(connection);
+                instance.messageDAO = new MessageDAOSql(connection);
+                instance.reactionDAO = new ReactionDaoSql(connection,instance.messageDAO, instance.userDAO);
+                instance.subscriptionDAO = new SubscriptionDAOSql(connection,instance.channelDAO, instance.userDAO);
+                instance.friendDAO = new FriendDAOSql(connection);
+                instance.adminsDAO = new AdminsDAOSql(connection, instance.userDAO, instance.channelDAO);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new ConfigErrorException("Error while connecting to the database");
+            }
         }
         return instance;
     }
 
     private Config() throws ConfigErrorException {
         this.databaseConfig = loadDatabaseConfig();
-        try {
-            Connection connection = Connect.getConnection(this);
-            this.userDAO = new UserDAOSql(connection);
-            this.channelDAO = new ChannelDAOSql(connection);
-            this.messageDAO = new MessageDAOSql(connection);
-            this.reactionDAO = new ReactionDaoSql(connection);
-            this.subscriptionDAO = new SubscriptionDAOSql(connection);
-            this.friendDAO = new FriendDAOSql(connection);
-            this.adminsDAO = new AdminsDAOSql(connection);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ConfigErrorException("Error while connecting to the database");
-        }
     }
 
     private DatabaseConfig loadDatabaseConfig() throws ConfigErrorException {
