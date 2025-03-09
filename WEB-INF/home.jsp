@@ -25,6 +25,7 @@
     <%@ page import="java.io.IOException" %>
     <%@ page import="java.util.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+    <%@ page import="java.util.stream.Collectors" %>
 
     <div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
@@ -91,74 +92,142 @@
         %>
 
         <%!
+            private void appendLikeForm(StringBuilder sb, int mid, int uid) throws SQLException {
+                // Get user reaction once
+                MessageDAO.Reaction userReaction = new MessageDAO().getUserReaction(mid, uid);
+                sb.append("<div style=\"width: 100px;\" class=\"d-flex align-items-center justify-content-around likeForm rounded \">");
+                sb.append("<div style=\"display: none\" id=\"userDiv\" class=\"popover bs-popover-top shadow bg-white rounded p-2\">");
 
-        private void appendLikeForm(StringBuilder sb, int mid, int uid) throws SQLException {
+                // Fetch all reactions and their associated user IDs at once
+                Map<MessageDAO.Reaction, Set<Integer>> whoLiked = new MessageDAO().getReactions(mid);
+                appendWhoLiked(sb, whoLiked);
+                sb.append("</div>");
 
-            MessageDAO.Reaction userReaction = new MessageDAO().getUserReaction(mid, uid);
-
-           sb.append("<div class=\"d-flex align-items-center justify-content-around likeForm\" style=\"width: 100px;\">");
-
-            sb.append("<div style=\"display: none\" id=\"userDiv\" class=\"popover bs-popover-top shadow bg-white rounded p-2\">");
-            Map<MessageDAO.Reaction, Set<Integer>> whoLiked = new MessageDAO().getReactions(mid);
-            if (whoLiked != null && !whoLiked.isEmpty()) {
-                sb.append("<span class=\"text-muted\">Liked by:</span>");
-                for (Map.Entry<MessageDAO.Reaction, Set<Integer>> entry : whoLiked.entrySet()) {
-                    for (int id : entry.getValue()) {
-                        User user = new UserDAO().getUserById(id);
-                        sb.append("<div class=\"d-flex align-items-center my-1\">");
-                        String imgBase64 = new UserDAO().getUserProfilePicture(user.getUid());
-                        sb.append("<img src=\"data:image/jpeg;base64,").append(imgBase64).append("\" alt=\"profile picture\" class=\"img-fluid rounded-circle\" style=\"width: 30px; height: 30px; object-fit: cover;\">");
-                        sb.append("<span class=\"ml-2\">").append(user.getUsername()).append("</span>");
-                        sb.append("</div>");
-                    }
+                // Append reactions
+                if (whoLiked == null || whoLiked.isEmpty()) {
+                    appendReaction(sb, mid, MessageDAO.Reaction.HEART, new HashSet<>());
+                } else {
+                    appendReactions(sb, mid, userReaction, whoLiked);
                 }
-            } else {
-                sb.append("<span class=\"text-muted\">No likes yet</span>");
+
+                sb.append("<div class=\"d-flex align-items-center otherReact\">");
+                sb.append("<a class=\"btn btn-link p-0 text-muted\">...</a>");
+                appendOtherReactions(sb, mid, whoLiked);
+                sb.append("</div>");
+
+                sb.append("</div>");
             }
-            sb.append("</div>");
 
+            // Modify to accept whoLiked as a parameter
+            private void appendWhoLiked(StringBuilder sb, Map<MessageDAO.Reaction, Set<Integer>> whoLiked) throws SQLException {
+                if (whoLiked != null && !whoLiked.isEmpty()) {
+                    sb.append("<span class=\"text-muted\">Liked by:</span>");
+                    // Store user IDs from whoLiked
+                    Set<Integer> userIds = new HashSet<>();
+                    for (Set<Integer> ids : whoLiked.values()) {
+                        userIds.addAll(ids); // Collect all user IDs
+                    }
+                    List<User> users = new UserDAO().getUserByIds(userIds); // Fetch all users at once
 
+                    // Create a map for quick look-up
+                    Map<Integer, User> userMap = users.stream().collect(Collectors.toMap(User::getUid, user -> user));
+                    for (Map.Entry<MessageDAO.Reaction, Set<Integer>> entry : whoLiked.entrySet()) {
+                        for (int id : entry.getValue()) {
+                            User user = userMap.get(id);
+                            appendUserLike(sb, user);
+                        }
+                    }
+                } else {
+                    sb.append("<span class=\"text-muted\">No likes yet</span>");
+                }
+            }
 
+            private void appendUserLike(StringBuilder sb, User user) throws SQLException {
+                if (user != null) {
+                    String imgBase64 = new UserDAO().getUserProfilePicture(user.getUid());
+                    sb.append("<div class=\"d-flex align-items-center my-1\">")
+                            .append("<img src=\"data:image/jpeg;base64,").append(imgBase64)
+                            .append("\" alt=\"profile picture\" class=\"img-fluid rounded-circle\" style=\"width: 30px; height: 30px; object-fit: cover;\">")
+                            .append("<span class=\"ml-2\">").append(user.getUsername()).append("</span>")
+                            .append("</div>");
+                }
+            }
+
+            // Update appendReactions to accept whoLiked as a parameter
+            private void appendReactions(StringBuilder sb, int mid, MessageDAO.Reaction userReaction,
+                                         Map<MessageDAO.Reaction, Set<Integer>> whoLiked) throws SQLException {
+                // Iterate through each reaction type
                 for (MessageDAO.Reaction reaction : MessageDAO.Reaction.values()) {
-                    if (whoLiked == null || whoLiked.getOrDefault(reaction, Collections.emptySet()).isEmpty()) {
-                        continue;
+                    if (shouldSkipReaction(whoLiked, reaction)) {
+                        continue; // Skip if there are no likes
                     }
-                    sb.append("<span class=\"badge badge-primary mx-1\">").append(whoLiked.get(reaction).size());
-
-                    sb.append("<form action=\"message\" method=\"POST\" class=\"d-inline-block mx-1\">");
-                    sb.append("<input type=\"hidden\" name=\"action\" value=\"like\">");
-                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">");
-                    sb.append("<input type=\"hidden\" name=\"emoji\" value=\"").append(reaction.getEmoji()).append("\">");
-
-                    if (userReaction == reaction) {
-                        sb.append("<div class=\"d-flex align-items-center bg-dark rounded\">");
-                        sb.append("<input type=\"submit\" class=\"btn btn-link p-0 font-weight-bold text-primary\" value=\"").append(reaction.getEmoji()).append("\">");
-                    } else {
-                        sb.append("<div class=\"d-flex align-items-center rounded\">");
-                        sb.append("<input type=\"submit\" class=\"btn btn-link p-0 text-muted\" value=\"").append(reaction.getEmoji()).append("\">");
-                    }
-                    sb.append("</div>");
-                    sb.append("</form>");
-                    sb.append("</span>");
-                }
-            sb.append("<div class=\"d-flex align-items-center otherReact\">");
-            sb.append("<a class=\"btn btn-link p-0 text-muted\">...</a>");
-            for (MessageDAO.Reaction reaction : MessageDAO.Reaction.values()) {
-                if (whoLiked != null && whoLiked.getOrDefault(reaction, Collections.emptySet()).isEmpty()) {
-                    sb.append("<form action=\"message\" method=\"POST\" class=\"d-inline-block otherReactForm mx-1\">");
-                    sb.append("<input type=\"hidden\" name=\"action\" value=\"like\">");
-                    sb.append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">");
-                    sb.append("<input type=\"hidden\" name=\"emoji\" value=\"").append(reaction.getEmoji()).append("\">");
-
-                    sb.append("<div class=\"align-items-center rounded\" style=\"display: none\">");
-                    sb.append("<input type=\"submit\" class=\"btn btn-link p-0 text-muted\" value=\"").append(reaction.getEmoji()).append("\">");
-                    sb.append("</div>");
-                    sb.append("</form>");
+                    appendReaction(sb, mid, reaction, whoLiked.get(reaction));
                 }
             }
-            sb.append("</div>");
-            sb.append("</div>");
+
+            private boolean shouldSkipReaction(Map<MessageDAO.Reaction, Set<Integer>> whoLiked,
+                                               MessageDAO.Reaction reaction) {
+                return whoLiked == null || whoLiked.getOrDefault(reaction, Collections.emptySet()).isEmpty();
+            }
+
+            private void appendReaction(StringBuilder sb, int mid, MessageDAO.Reaction reaction,
+                                        Set<Integer> userIds) throws SQLException {
+                int likeCount = userIds.size();
+                sb.append("<span class=\"badge badge-").append(likeCount > 0 ? "primary" : "secondary").append(" mx-1 reactSpan\">")
+                        .append(likeCount > 0 ? likeCount : "");
+                appendLikeForm(sb, mid, reaction);
+                appendUserDetails(sb, userIds);
+                sb.append("</span>"); // Close badge span
+            }
+
+            private void appendLikeForm(StringBuilder sb, int mid, MessageDAO.Reaction reaction) {
+                sb.append("<form action=\"message\" method=\"POST\" class=\"d-inline-block mx-1\">")
+                        .append("<input type=\"hidden\" name=\"action\" value=\"like\">")
+                        .append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">")
+                        .append("<input type=\"hidden\" name=\"emoji\" value=\"").append(reaction.getEmoji()).append("\">")
+                        .append("<div class=\"d-flex align-items-center rounded\">")
+                        .append("<input type=\"submit\" class=\"btn btn-link p-0\" value=\"")
+                        .append(reaction.getEmoji()).append("\" style=\"font-size: 0.9em;\">")
+                        .append("</div>")
+                        .append("</form>");
+            }
+
+            private void appendUserDetails(StringBuilder sb, Set<Integer> userIds) throws SQLException {
+                sb.append("<section class=\"d-none reactDetails\">");
+                if (userIds.isEmpty()) {
+                    sb.append("<span class=\"text-muted\">No likes yet</span>");
+                    sb.append("</section>"); // Close user details section
+                    return;
+                }
+                List<User> users = new UserDAO().getUserByIds(userIds);
+
+                for (int i = 0; i < Math.min(4, users.size()); i++) {
+                    appendUserLike(sb, users.get(i));
+                }
+
+                if (users.size() > 4) {
+                    sb.append("<span class=\"text-muted\">and ").append(users.size() - 4).append(" others</span>");
+                }
+                sb.append("</section>"); // Close user details section
+            }
+
+            // Update appendOtherReactions to accept whoLiked as a parameter
+            private void appendOtherReactions(StringBuilder sb, int mid, Map<MessageDAO.Reaction, Set<Integer>> whoLiked) throws SQLException {
+                for (MessageDAO.Reaction reaction : MessageDAO.Reaction.values()) {
+                    if (whoLiked != null && whoLiked.getOrDefault(reaction, Collections.emptySet()).isEmpty()) {
+
+                        sb.append("<form action=\"message\" method=\"POST\" class=\"d-inline-block otherReactForm mx-1\">")
+                                .append("<input type=\"hidden\" name=\"action\" value=\"like\">")
+                                .append("<input type=\"hidden\" name=\"mid\" value=\"").append(mid).append("\">")
+                                .append("<input type=\"hidden\" name=\"emoji\" value=\"").append(reaction.getEmoji()).append("\">")
+                                .append("<div class=\"align-items-center rounded\" style=\"display: none\">")
+                                .append("<input type=\"submit\" class=\"btn btn-link p-0 text-muted\" value=\"")
+                                .append(reaction.getEmoji()).append("\" style=\"font-size: 0.8em;\">")
+                                .append("</div>")
+                                .append("</form>");
                     }
+                }
+            }
 
         %>
 
@@ -351,22 +420,22 @@
         const messageList = document.getElementById('messageList');
         messageList.scrollTop = messageList.scrollHeight;
 
-        const likeForms = document.querySelectorAll('.likeForm');
-        likeForms.forEach(form => {
-            form.addEventListener('mouseenter', (event) => {
-                document.getElementById('hover-div').style.display = 'none';
+        const reactSpan = document.querySelectorAll('.reactSpan');
+        reactSpan.forEach(span => {
+            span.addEventListener('mouseover', (event) => {
+                document.getElementById('hover-div').style.display = 'block';
                 document.getElementById('hover-div').style.position = 'absolute';
 
-                const rect = form.getBoundingClientRect();
-                document.getElementById('hover-div').style.top = rect.top + 'px';
-                document.getElementById('hover-div').style.left = rect.left + 20 + 'px';
+                const rect = span.getBoundingClientRect();
+                document.getElementById('hover-div').style.top = rect.bottom  + 'px';
+                document.getElementById('hover-div').style.left = rect.left + 'px';
 
                 const hoverDiv = document.getElementById('hover-div');
-                hoverDiv.innerHTML = form.querySelector('#userDiv').innerHTML;
+                hoverDiv.innerHTML = span.querySelector('.reactDetails').innerHTML;
 
             });
 
-            form.addEventListener('mouseleave', () => {
+            span.addEventListener('mouseleave', () => {
                 document.getElementById('hover-div').style.display = 'none';
             });
 

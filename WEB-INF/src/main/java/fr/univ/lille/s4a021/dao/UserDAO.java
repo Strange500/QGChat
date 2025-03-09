@@ -5,6 +5,7 @@ import fr.univ.lille.s4a021.model.bdd.Connect;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class UserDAO {
@@ -86,6 +87,38 @@ public class UserDAO {
         return null; // Retourne null si l'utilisateur n'est pas trouvé
     }
 
+    public List<User> getUserByIds(Collection<Integer> uids) throws SQLException {
+        List<User> users = new ArrayList<>();
+        StringBuilder query = new StringBuilder("SELECT uid, username, mail, password FROM Utilisateur WHERE uid IN (");
+        for (int i = 0; i < uids.size(); i++) {
+            query.append("?");
+            if (i < uids.size() - 1) {
+                query.append(",");
+            }
+        }
+        query.append(")");
+        try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
+            int i = 1;
+            for (int uid : uids) {
+                stmt.setInt(i++, uid);
+            }
+            ResultSet rs = stmt.executeQuery();
+            buildUsers(users, rs);
+            return users;
+        }
+
+    }
+
+    private void buildUsers(List<User> users, ResultSet rs) throws SQLException {
+        while (rs.next()) {
+            int uid = rs.getInt("uid");
+            String username = rs.getString("username");
+            String mail = rs.getString("mail");
+            String password = rs.getString("password");
+            users.add(new User(uid, username, mail, password));
+        }
+    }
+
     // Suppression d'un utilisateur par son ID
     public void deleteUser(int uid) throws SQLException {
         String query = "DELETE FROM Utilisateur WHERE uid = ?";
@@ -111,13 +144,7 @@ public class UserDAO {
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             List<User> users = new ArrayList<>();
-            while (rs.next()) {
-                int uid = rs.getInt("uid");
-                String username = rs.getString("username");
-                String mail = rs.getString("mail");
-                String password = rs.getString("password");
-                users.add(new User(uid, username, mail, password));
-            }
+            buildUsers(users, rs);
 
             return users;
         }
