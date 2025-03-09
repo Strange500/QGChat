@@ -49,23 +49,24 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
 
     @Override
     public List<Message> getMessageByChannelId(int cid) throws ChannelNotFoundException, DataAccessException {
-        String query = "SELECT mid, uid, contenu, timestamp FROM Message WHERE cid = ?";
+        String query = "SELECT mid, contenu, uid, cid, timestamp FROM Message WHERE cid = ? ORDER BY timestamp";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, cid);
             ResultSet rs = stmt.executeQuery();
-            return buildMessagesFromResultSet(rs, cid);
+            return buildMessagesFromResultSet(rs);
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting messages: " + e.getMessage());
+            throw new DataAccessException("Error while getting messages by channel id: " + e.getMessage());
         }
 
     }
 
-    private List<Message> buildMessagesFromResultSet(ResultSet rs, int cid) throws DataAccessException{
+    private List<Message> buildMessagesFromResultSet(ResultSet rs) throws DataAccessException{
         List<Message> messages = new ArrayList<>();
         try {
             while (rs.next()) {
                 int mid = rs.getInt("mid");
                 int uid = rs.getInt("uid");
+                int cid = rs.getInt("cid");
                 String contenu = rs.getString("contenu");
                 String timestamp = rs.getString("timestamp");
                 messages.add(new Message(mid, contenu, uid, cid, timestamp));
@@ -77,13 +78,11 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
     }
 
     public Message getMessageById(int mid) throws MessageNotFoundException, DataAccessException {
-        String query = "SELECT contenu, uid, cid, timestamp FROM Message WHERE mid = ? ";
+        String query = "SELECT mid, contenu, uid, cid, timestamp FROM Message WHERE mid = ? ";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, mid);
-            stmt.setInt(2, mid);
-            stmt.setInt(3, mid);
             ResultSet rs = stmt.executeQuery();
-            List<Message>r =  buildMessagesFromResultSet(rs, mid);
+            List<Message>r =  buildMessagesFromResultSet(rs);
             if (!r.isEmpty()) {
                 return r.getFirst();
             }

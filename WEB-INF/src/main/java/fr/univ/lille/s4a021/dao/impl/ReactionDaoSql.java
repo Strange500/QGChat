@@ -65,6 +65,7 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
         if (!userDAO.userExists(uid)) {
             throw new UserNotFoundException("User not found");
         }
+
         String query = "SELECT emoji FROM likes WHERE mid = ? AND uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, mid);
@@ -77,6 +78,7 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
         } catch (SQLException e) {
             throw new DataAccessException("Error while getting user reaction: " + e.getMessage());
         }
+
     }
 
     @Override

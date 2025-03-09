@@ -11,6 +11,7 @@ import fr.univ.lille.s4a021.exception.dao.message.MessageCreationException;
 import fr.univ.lille.s4a021.exception.dao.message.MessageNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.message.MessageUpdateException;
 import fr.univ.lille.s4a021.exception.dao.reaction.ReactionCreationException;
+import fr.univ.lille.s4a021.exception.dao.reaction.ReactionNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.reaction.ReactionUpdateException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.model.bdd.Util;
@@ -102,14 +103,15 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                     String emoji  = req.getParameter("emoji");
                     int channelId = 0;
                     try {
+                        channelId = messageDAO.getMessageById(mid).getChannelId();
                         if (!subscriptionDAO.isSubscribedTo(Util.getUid(session), channelId)) {
                             MainController.sendErrorPage(401, "Unauthorized", req, res);
                             return;
                         }
-                        channelId = messageDAO.getMessageById(mid).getChannelId();
                         likeMessage(mid, uid, emoji, reactionDAO);
 
-                    } catch (MessageNotFoundException | UserNotFoundException | ChannelNotFoundException e) {
+                    } catch (MessageNotFoundException | UserNotFoundException | ChannelNotFoundException |
+                             ReactionNotFoundException e) {
                         MainController.sendErrorPage(404, e.getMessage(), req, res);
                         return;
                     } catch (ReactionCreationException | ReactionUpdateException e) {
@@ -123,13 +125,14 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                     int cid = 0;
                     try {
                         Message message = messageDAO.getMessageById(mid2);
+                        cid = message.getChannelId();
                         if (!subscriptionDAO.isSubscribedTo(Util.getUid(session), message.getChannelId())) {
                             MainController.sendErrorPage(401, "Unauthorized", req, res);
                             return;
                         }
 
 
-                        if (message.getSenderId() != Util.getUid(session) && !adminDAO.userIsAdmin(Util.getUid(session), cid)) {
+                        if (message.getSenderId() != Util.getUid(session) && !adminDAO.userIsAdmin(Util.getUid(session), message.getChannelId())) {
                             MainController.sendErrorPage(401, "Unauthorized", req, res);
                             return;
                         }
@@ -186,10 +189,16 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
     }
 
 
-    private static void likeMessage(int mid, int uid, String emoji, ReactionDAO dao) throws MessageNotFoundException, UserNotFoundException, ReactionCreationException, DataAccessException, ReactionUpdateException {
+    private static void likeMessage(int mid, int uid, String emoji, ReactionDAO dao) throws MessageNotFoundException, UserNotFoundException, ReactionCreationException, DataAccessException, ReactionNotFoundException, ReactionUpdateException {
 
         ReactionDAO.Reaction reaction = ReactionDAO.Reaction.getReactionFromEmoji(emoji);
-        ReactionDAO.Reaction currentReaction = dao.getUserReactionForMessage(mid, uid);
+        ReactionDAO.Reaction currentReaction = null;
+        try {
+            currentReaction = dao.getUserReactionForMessage(mid, uid);
+        } catch (ReactionNotFoundException e) {
+            // do nothing
+        }
+
 
         if (currentReaction == null) {
             dao.createReactionForMessage(mid, uid, reaction);

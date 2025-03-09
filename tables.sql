@@ -36,8 +36,8 @@ CREATE TABLE Channel (
 -- Création de la table Message
 CREATE TABLE Message (
                          mid SERIAL PRIMARY KEY ,
-                         uid INT,
-                         cid INT,
+                         uid INT NOT NULL,
+                         cid INT NOT NULL,
                          contenu TEXT NOT NULL,
                          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             CONSTRAINT fk_user FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
@@ -91,10 +91,16 @@ INSERT INTO isAdmin (uid, cid) VALUES
 (2, 2),
 (3, 3);
 
-INSERT INTO Message (contenu) VALUES
-('Welcome to the General channel!'),
-('This is a random message.'),
-('Important announcement: Meeting at 3 PM.');
+INSERT INTO Message (contenu, uid, cid) VALUES
+('Hello World', 1, 1),
+('Bonjour le monde', 2, 1),
+('Hola Mundo', 3, 1),
+('Random message', 1, 2),
+('Another random message', 2, 2),
+('Un autre message random', 3, 2),
+('Announcement', 1, 3),
+('Another announcement', 2, 3),
+('Un autre annonce', 3, 3);
 
 INSERT INTO estAbonne (uid, cid) VALUES
 (1, 1),

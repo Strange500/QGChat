@@ -5,8 +5,6 @@ import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.SubscriptionDAO;
 import fr.univ.lille.s4a021.dao.UserDAO;
-import fr.univ.lille.s4a021.dao.impl.ChannelDAOSql;
-import fr.univ.lille.s4a021.dao.impl.UserDAOSql;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;

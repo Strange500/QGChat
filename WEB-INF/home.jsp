@@ -12,17 +12,12 @@
 
 </head>
 <body class="container">
-    <%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
     <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
-    <%@ page import="java.sql.SQLException" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Message" %>
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
     <%@ page import="fr.univ.lille.s4a021.dto.ImgMessage" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.impl.MessageDAOSql" %>
     <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
-    <%@ page import="java.io.IOException" %>
     <%@ page import="java.util.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
     <%@ page import="java.util.stream.Collectors" %>
@@ -32,6 +27,8 @@
     <%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
     <%@ page import="fr.univ.lille.s4a021.dao.*" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.message.MessageNotFoundException" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.reaction.ReactionNotFoundException" %>
 
     <div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
@@ -42,7 +39,7 @@
     <canvas style="display: none; position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1000;"></canvas>
 
     <%!
-        private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin, int editMid, UserDAO userDAO, AdminsDAO adminDAO, ReactionDAO reactionDAO, MessageDAO messageDAO) throws IOException, SQLException, UserNotFoundException, DataAccessException, ChannelNotFoundException, MessageNotFoundException {
+        private String processMessages(List<? extends Message> messages, int uid, int channelID, boolean isAdmin, int editMid, UserDAO userDAO, AdminsDAO adminDAO, ReactionDAO reactionDAO, MessageDAO messageDAO) throws UserNotFoundException, DataAccessException, ChannelNotFoundException, MessageNotFoundException {
             StringBuilder sb = new StringBuilder();
             for (Message message : messages) {
                 User user = userDAO.getUserById(message.getSenderId());
@@ -76,6 +73,8 @@
                 }
                 sb.append("</div>");
 
+
+
                 if (message.getImg() != null) {
                     sb.append("<img src=\"data:image/jpeg;base64,").append(message.getImg()).append("\" class=\"img-fluid my-2\">");
                 } else {
@@ -90,6 +89,7 @@
                     }
                 }
                 appendLikeForm(sb, message.getMid(), uid, reactionDAO, messageDAO, userDAO);
+
                 sb.append("</div>");
             }
             return sb.toString();
@@ -98,8 +98,13 @@
 
         <%!
             private void appendLikeForm(StringBuilder sb, int mid, int uid, ReactionDAO reactionDAO, MessageDAO messageDAO, UserDAO userDAO) throws MessageNotFoundException, DataAccessException, UserNotFoundException {
-                // Get user reaction once
-                ReactionDAO.Reaction userReaction = reactionDAO.getUserReactionForMessage(mid, uid);
+                ReactionDAO.Reaction userReaction;
+                try {
+                    userReaction = reactionDAO.getUserReactionForMessage(mid, uid);
+                } catch (ReactionNotFoundException e) {
+                    userReaction = null;
+                }
+
                 sb.append("<div style=\"width: 100px;\" class=\"d-flex align-items-center justify-content-around likeForm rounded \">");
                 sb.append("<div style=\"display: none\" id=\"userDiv\" class=\"popover bs-popover-top shadow bg-white rounded p-2\">");
 
@@ -108,12 +113,14 @@
                 appendWhoLiked(sb, whoLiked, userDAO);
                 sb.append("</div>");
 
+
                 // Append reactions
                 if (whoLiked == null || whoLiked.isEmpty()) {
                     appendReaction(sb, mid, ReactionDAO.Reaction.HEART, new HashSet<>(), userDAO);
                 } else {
                     appendReactions(sb, mid, userReaction, whoLiked, userDAO);
                 }
+
 
                 sb.append("<div class=\"d-flex align-items-center otherReact\">");
                 sb.append("<a class=\"btn btn-link p-0 text-muted\">...</a>");
@@ -233,7 +240,7 @@
                     }
                 }
             }
-
+//
         %>
 
     <%!
@@ -249,16 +256,44 @@
 
     <section class="text-left">
     <%
-        UserDAO userDAO = Config.getConfig().getUserDAO();
-        User user = userDAO.getUserById(Util.getUid(session));
-        String profilepicBase64 = userDAO.getUserProfilePicture(user.getUid());
+        try {
+            UserDAO userDAO = null;
+            SubscriptionDAO subscriptionDAO = null;
+            ChannelDAO channelDAO = null;
+            AdminsDAO adminsDAO = null;
+            MessageDAO messageDAO = null;
+            ReactionDAO reactionDAO = null;
+
+            try {
+                userDAO = Config.getConfig().getUserDAO();
+                subscriptionDAO = Config.getConfig().getSubscriptionDAO();
+                channelDAO = Config.getConfig().getChannelDAO();
+                adminsDAO = Config.getConfig().getAdminsDAO();
+                messageDAO = Config.getConfig().getMessageDAO();
+                reactionDAO = Config.getConfig().getReactionDAO();
+            } catch (ConfigErrorException e) {
+                MainController.sendErrorPage(500, e.getMessage(), request, response);
+                return;
+            }
+
+            User currentUser = null;
+            String profilepicBase64 = null;
+            try {
+                currentUser = userDAO.getUserById(Util.getUid(session));
+                profilepicBase64 = userDAO.getUserProfilePicture(currentUser.getUid());
+            } catch (UserNotFoundException e) {
+                MainController.sendErrorPage(404, e.getMessage(), request, response);
+                return;
+            }
+
+
     %>
     <div class="d-flex align-items-center">
         <a href="user?action=edit" class="d-inline-block position-relative" id="pofileLink">
             <img src="data:image/jpeg;base64,<%=profilepicBase64%>" alt="profile picture" class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
             <i class="bi bi-pencil" style="position: absolute; bottom: 50%; right: 50%; transform: translate(50%, 50%); font-size: 3em; background: rgba(127,127,127,0.5); border-radius: 50%; height: 100%; width: 100%; padding: 5% 0 0 15%; display: none;"></i>
         </a>
-    <p class="ml-3 mt-2 mb-0"><%=user.getUsername()%></p>
+    <p class="ml-3 mt-2 mb-0"><%=currentUser.getUsername()%></p>
 </div>
 </section>
 
@@ -270,15 +305,15 @@
 
                 <a href="channel?action=createchannel" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
                 <%
-                    ChannelDAOSql channelDAO = new ChannelDAOSql();
                     List<Channel> channels = channelDAO.getAllChannels();
                     if (channels != null) {
                     for (Channel channel : channels) {
                         boolean estAbonne = false;
                         try {
-                            estAbonne = userDAO.estAbonne((int) session.getAttribute("id"), channel.getCid());
-                        } catch (SQLException e) {
-                            MainController.sendErrorPage(500, "An error occurred while trying to get the channels", request, response);
+                            estAbonne = subscriptionDAO.isSubscribedTo((int) session.getAttribute("id"), channel.getCid());
+                        } catch (UserNotFoundException | ChannelNotFoundException e) {
+                            MainController.sendErrorPage(404, e.getMessage(), request, response);
+                            return;
                         }
                         if (!estAbonne) {
                             continue;
@@ -301,12 +336,14 @@
                     String editMid = request.getParameter("editMid");
 
 
+
+
                     if (channelIdParam != null) {
                         boolean estAbonne = false;
                         try {
-                            estAbonne = new UserDAOSql().estAbonne((int) session.getAttribute("id"), Integer.parseInt(channelIdParam));
-                        } catch (SQLException e) {
-                            MainController.sendErrorPage(500, "An error occurred while trying to get the channel", request, response);
+                            estAbonne = subscriptionDAO.isSubscribedTo((int) session.getAttribute("id"), Integer.parseInt(channelIdParam));
+                        } catch (UserNotFoundException | ChannelNotFoundException e) {
+                            MainController.sendErrorPage(404, e.getMessage(), request, response);
                             return;
                         }
                         if (!estAbonne) {
@@ -316,18 +353,25 @@
                         Channel channel = null;
                         try {
                             channel = channelDAO.getChannelById(channelID);
-                        }catch (SQLException e) {
-                            MainController.sendErrorPage(500, "An error occurred while trying to get the channel", request, response);
+                        }catch (ChannelNotFoundException e) {
+                            MainController.sendErrorPage(404, e.getMessage(), request, response);
                             return;
                         }
 
                         boolean isAdmin = false;
+
+
                         try {
-                            isAdmin = new ChannelDAOSql().userIsAdmin(Util.getUid(session), channelID);
-                        } catch (SQLException e) {
-                            MainController.sendErrorPage(500, "An error occurred while trying to get the channel", request, response);
+
+                            isAdmin = adminsDAO.userIsAdmin(Util.getUid(session), channelID);
+
+                        } catch (UserNotFoundException | ChannelNotFoundException e) {
+                            MainController.sendErrorPage(404, e.getMessage(), request, response);
                             return;
                         }
+
+
+
 
                         if (channel != null) {
                             %>
@@ -366,15 +410,31 @@
 
                             <div id="messageList" class="overflow-auto" style="max-height: 400px;">
                                 <%
-                                    List<Message> messages = channel.getMessages();
-                                    Pair<List<ImgMessage>, List<Message>> pair = new MessageDAOSql().separateImgFromMessage(messages);
-                                    List<Message> messagesList = new ArrayList<>(){{addAll(pair.getSecond()); addAll(pair.getFirst());}};
-                                    messages.sort(Comparator.comparing(Message::getDateSend));
-                                    if (messages != null && !messages.isEmpty()) {
-                                        int uid = (int) session.getAttribute("id");
-                                        int editMidInt = editMid == null ? -1 : Integer.parseInt(editMid);
-                                        out.print(processMessages(messagesList, uid, channelID, isAdmin, editMidInt));
+
+                                    List<Message> messages = null;
+                                    try {
+
+                                        messages = messageDAO.getMessageByChannelId(channelID);
+                                        System.out.println("LALALALALALLALA");
+
+
+                                        Pair<List<ImgMessage>, List<Message>> pair = messageDAO.separateImgFromMessage(messages);
+                                        List<Message> messagesList = new ArrayList<>(){{addAll(pair.getSecond()); addAll(pair.getFirst());}};
+                                        messages.sort(Comparator.comparing(Message::getDateSend));
+
+                                        if (!messages.isEmpty()) {
+                                            int uid = (int) session.getAttribute("id");
+                                            int editMidInt = editMid == null ? -1 : Integer.parseInt(editMid);
+                                            out.print(processMessages(messagesList, uid, channelID, isAdmin, editMidInt, userDAO, adminsDAO, reactionDAO, messageDAO));
+                                        }
+
+
+
+                                    } catch (ChannelNotFoundException | UserNotFoundException | MessageNotFoundException  e) {
+                                        MainController.sendErrorPage(404, e.getMessage(), request, response);
+                                        return;
                                     }
+
 
                         } else {
                             %>
@@ -524,5 +584,11 @@
     </script>
 </body>
 
+<%
+    } catch (DataAccessException e) {
+            MainController.sendErrorPage(500, e.getMessage(), request, response);
+            return;
+    }
+%>
 
 </html>

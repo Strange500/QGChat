@@ -34,7 +34,7 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
 
     @Override
     public void setAdmin(int cid, int uid) throws UserNotFoundException, ChannelNotFoundException, AdminCreationException, DataAccessException {
-        if (userDAO.userExists(uid)) {
+        if (!userDAO.userExists(uid)) {
             throw new UserNotFoundException("User not found");
         }
         if (!channelDAO.channelExists(cid)) {
@@ -107,7 +107,8 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
 
     @Override
     public boolean userIsAdmin(int uid, int cid) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
-        if (userDAO.userExists(uid)) {
+
+        if (!userDAO.userExists(uid)) {
             throw new UserNotFoundException("User not found");
         }
         if (!channelDAO.channelExists(cid)) {

@@ -35,7 +35,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
         if (!channelDAO.channelExists(cid)) {
             throw new ChannelNotFoundException("Channel not found");
         }
-        String query = "SELECT uid, username, mail, password FROM Utilisateur u JOIN estAbonne e ON u.uid = e.uid WHERE e.cid = ?";
+        String query = "SELECT u.uid, u.username, u.mail, u.password FROM Utilisateur u JOIN estAbonne e ON u.uid = e.uid WHERE e.cid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, cid);
             ResultSet rs = stmt.executeQuery();
@@ -116,19 +116,23 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
         if (!channelDAO.channelExists(ch.getCid())) {
             throw new ChannelNotFoundException("Channel not found");
         }
-        for (int uid : Uids) {
-            if (!userDAO.userExists(uid)) {
-                throw new UserNotFoundException("User not found");
+        if (!userDAO.userAllExists(Uids)) {
+            throw new UserNotFoundException("One or more users not found");
+        }
+        StringBuilder query = new StringBuilder("INSERT INTO estAbonne (uid, cid) VALUES ");
+        for (int i = 0; i < Uids.size(); i++) {
+            query.append("(?, ?)");
+            if (i < Uids.size() - 1) {
+                query.append(", ");
             }
         }
-        String query = "INSERT INTO estAbonne (uid, cid) VALUES (?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
+            int i = 1;
             for (int uid : Uids) {
-                stmt.setInt(1, uid);
-                stmt.setInt(2, ch.getCid());
-                stmt.addBatch();
+                stmt.setInt(i++, uid);
+                stmt.setInt(i++, ch.getCid());
             }
-            stmt.executeBatch();
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Error while subscribing users: " + e.getMessage());
         }

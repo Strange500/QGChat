@@ -2,7 +2,6 @@ package fr.univ.lille.s4a021.controller;
 
 import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.dao.UserDAO;
-import fr.univ.lille.s4a021.dao.impl.UserDAOSql;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
@@ -14,10 +13,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import org.eclipse.jdt.internal.compiler.batch.Main;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Base64;
 
 import static fr.univ.lille.s4a021.controller.MainController.getJSPPath;

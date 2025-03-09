@@ -4,6 +4,11 @@
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
 <%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
+<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+<%@ page import="fr.univ.lille.s4a021.Config" %>
+<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,6 +25,15 @@
 
 
 <%
+  ChannelDAO channelDAO = null;
+    try {
+        channelDAO = Config.getConfig().getChannelDAO();
+    } catch (ConfigErrorException e) {
+        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        return;
+    }
+
+
   Integer chanelID = Integer.parseInt(request.getParameter("channelID"));
   if (chanelID == null) {
     MainController.sendErrorPage(400, "Bad Request: The channel ID is missing", request, response);
@@ -27,13 +41,16 @@
   }
   Channel ch = null;
   try {
-    ch = new ChannelDAOSql().getChannelById(chanelID);
+    ch = channelDAO.getChannelById(chanelID);
     if (ch == null) {
       MainController.sendErrorPage(400, "Bad Request: The channel ID is invalid", request, response);
       return;
     }
-  } catch (SQLException e) {
-    MainController.sendErrorPage(400, "Bad Request: The channel ID is invalid", request, response);
+  } catch (ChannelNotFoundException e) {
+    MainController.sendErrorPage(404, e.getMessage(), request, response);
+    return;
+  } catch (DataAccessException e) {
+    MainController.sendErrorPage(500, e.getMessage(), request, response);
     return;
   }
 

@@ -212,7 +212,17 @@ public class UserDAOSql extends DaoSql implements UserDAO {
 
     @Override
     public boolean userExists(int uid) throws DataAccessException {
-        return userAllExists(List.of(uid));
+        String query = "SELECT COUNT(*) FROM Utilisateur WHERE uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while checking if user exists: " + e.getMessage());
+        }
+        return false;
     }
 
     @Override

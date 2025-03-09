@@ -4,7 +4,6 @@ import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.dao.AdminsDAO;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.SubscriptionDAO;
-import fr.univ.lille.s4a021.dao.impl.ChannelDAOSql;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
@@ -23,8 +22,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 import static fr.univ.lille.s4a021.controller.MainController.getJSPPath;
@@ -85,14 +82,17 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                     }
                     abonnees.add(Integer.parseInt(req.getSession().getAttribute("id").toString()));
                     try {
+                        System.out.println(abonnees);
                         Channel ch = channelDAO.createChannel(name);
                         subscriptionDAO.subscribeUsersTo(ch, abonnees);
                         adminsDAO.setAdmin(ch.getCid(), uid);
                         res.sendRedirect("home?action=view&channelID=" + ch.getCid());
                     } catch (ChannelCreationException | AdminCreationException e) {
                         MainController.sendErrorPage(500, e.getMessage(), req, res);
+                        return;
                     } catch (UserNotFoundException | ChannelNotFoundException e) {
                         MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        return;
                     }
                     break;
                 case "delete":
