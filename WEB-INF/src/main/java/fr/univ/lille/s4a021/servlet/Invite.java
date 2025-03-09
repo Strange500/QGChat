@@ -1,10 +1,16 @@
 package fr.univ.lille.s4a021.servlet;
 
+import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
+import fr.univ.lille.s4a021.dao.SubscriptionDAO;
 import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.User;
+import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.dao.DataAccessException;
+import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
+import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import fr.univ.lille.s4a021.util.JwtManager;
 import fr.univ.lille.s4a021.util.Pair;
@@ -24,14 +30,25 @@ import java.util.List;
 public class Invite extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
         try {
             if (!Util.userIsConnected(request.getSession())) {
                 MainController.sendErrorPage(401, "Unauthorized", request, response);
                 return;
             }
-        } catch (SQLException e) {
+        } catch (ConfigErrorException e) {
+            MainController.sendErrorPage(401, e.getMessage(), request, response);
+        }
+
+        UserDAO userDAO = null;
+        ChannelDAO channelDAO = null;
+        SubscriptionDAO subscriptionDAO = null;
+        try {
+            userDAO = Config.getConfig().getUserDAO();
+            channelDAO = Config.getConfig().getChannelDAO();
+            subscriptionDAO = Config.getConfig().getSubscriptionDAO();
+        } catch (ConfigErrorException e) {
             MainController.sendErrorPage(500, e.getMessage(), request, response);
+            return;
         }
 
         String token = request.getParameter("token");
@@ -51,51 +68,42 @@ public class Invite extends HttpServlet {
         User user = null;
         Channel channel = null;
         try {
-            user = new UserDAO().getUserById(Util.getUid(request.getSession()));
-        } catch (SQLException e) {
-            MainController.sendErrorPage(500, "Internal server error", request, response);
-            return;
-        }
-
-        if (user == null) {
-            MainController.sendErrorPage(500, "Internal server error", request, response);
-            return;
-        }
-
-        try {
-            channel = new ChannelDAO().getChannelById(uidAndCid.getSecond());
-        } catch (SQLException e) {
-            MainController.sendErrorPage(500, "Internal server error", request, response);
-            return;
-        }
-
-        if (channel == null) {
-            MainController.sendErrorPage(404, "Channel not found", request, response);
-            return;
-        }
-
-        try {
-            List<User> users = new ChannelDAO().getAbonnes(channel.getCid());
-            User finalUser = user;
-            if (users.stream().anyMatch(u -> u.getUid() == finalUser.getUid())) {
-                MainController.sendErrorPage(400, "You are already subscribed to this channel", request, response);
+            try {
+                user = userDAO.getUserById(Util.getUid(request.getSession()));
+            } catch (UserNotFoundException e) {
+                MainController.sendErrorPage(400, "User not found", request, response);
                 return;
             }
-            Pair<Integer, Integer> finalUidAndCid = uidAndCid;
-            if (users.stream().noneMatch(u -> u.getUid() == finalUidAndCid.getFirst())) {
-                MainController.sendErrorPage(400, "User who invited you is not subscribed to this channel", request, response);
+
+            try {
+                channel = channelDAO.getChannelById(uidAndCid.getSecond());
+            } catch (ChannelNotFoundException e) {
+                MainController.sendErrorPage(400, "Channel not found", request, response);
                 return;
             }
-            User finalUser1 = user;
-            new ChannelDAO().abonneUsers(channel, new ArrayList<>(){{add(finalUser1.getUid() + "");}});
-        } catch (SQLException e) {
-            MainController.sendErrorPage(500, "Internal server error", request, response);
+
+            try {
+                if (subscriptionDAO.isSubscribedTo(user.getUid(), channel.getCid())) {
+                    MainController.sendErrorPage(400, "You are already subscribed to this channel", request, response);
+                    return;
+                }
+                if (!subscriptionDAO.isSubscribedTo(uidAndCid.getFirst(), channel.getCid())) {
+                    MainController.sendErrorPage(400, "User who invited you is not subscribed to this channel", request, response);
+                    return;
+                }
+                subscriptionDAO.subscribeUsersTo(channel, List.of(user.getUid()));
+            } catch (ChannelNotFoundException e) {
+                MainController.sendErrorPage(400, "Channel not found", request, response);
+                return;
+            } catch (UserNotFoundException e) {
+                MainController.sendErrorPage(400, "User not found", request, response);
+                return;
+            }
+            response.sendRedirect("home?action=view&channelID=" + channel.getCid());
+        } catch (DataAccessException e) {
+            MainController.sendErrorPage(500, e.getMessage(), request, response);
             return;
         }
-
-        response.sendRedirect("home?action=view&channelID=" + channel.getCid());
-
-
 
     }
 

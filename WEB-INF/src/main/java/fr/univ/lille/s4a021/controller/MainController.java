@@ -1,6 +1,7 @@
 package fr.univ.lille.s4a021.controller;
 
 
+import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -71,7 +72,7 @@ public class MainController extends HttpServlet {
                 RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(LOGIN));
                 rd.forward(req, res);
             }
-        } catch (SQLException e) {
+        } catch (ConfigErrorException e) {
             MainController.sendErrorPage(500, e.getMessage(), req, res);
             return;
         }

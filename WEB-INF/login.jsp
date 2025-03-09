@@ -29,14 +29,15 @@
 
 
 
-<form action="Auth" method="post" class="mb-4">
+<form action="user" method="post" class="mb-4">
+    <input type="hidden" name="action" value="auth">
     <div class="form-group">
-        <label for="mail">Mail</label>
-        <input type="text" class="form-control" id="mail" name="mail" placeholder="Mail">
+        <label for="MailAuth">Mail</label>
+        <input type="text" class="form-control" id="MailAuth" name="mail" placeholder="Mail">
     </div>
     <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+        <label for="pwdAuth">Password</label>
+        <input type="password" class="form-control"  id="pwdAuth" name="password" placeholder="Password">
     </div>
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
