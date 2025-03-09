@@ -13,13 +13,13 @@
 </head>
 <body class="container">
 <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
 
 <%
   int uid = Util.getUid(session);
 
-  User user = new UserDAO().getUserById(uid);
+  User user = new UserDAOSql().getUserById(uid);
 
 %>
 

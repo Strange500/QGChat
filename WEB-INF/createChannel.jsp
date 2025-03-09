@@ -14,7 +14,7 @@
 
 <%@ page import="java.util.List" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
@@ -25,7 +25,7 @@
     List<User> users = new ArrayList<>();
 
     try {
-        users.addAll(new UserDAO().getAllUsers());
+        users.addAll(new UserDAOSql().getAllUsers());
     } catch (SQLException e) {
         MainController.sendErrorPage(500, "Internal Server Error: An error occurred while trying to get the users from the database", request, response);
     }

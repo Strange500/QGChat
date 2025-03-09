@@ -12,10 +12,10 @@
 
 </head>
 <body class="container">
-    <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
     <%@ page import="java.util.List" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
 
     <%
@@ -24,12 +24,12 @@
             response.sendRedirect("home");
         }
 
-        ChannelDAO channelDAO = new ChannelDAO();
+        ChannelDAOSql channelDAO = new ChannelDAOSql();
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
 
-        UserDAO userDAO = new UserDAO();
+        UserDAOSql userDAO = new UserDAOSql();
         List<User> users = userDAO.getAllUsers();
-        List<User> abonnes = channelDAO.getAbonnes(channel.getCid());
+        List<User> abonnes = channelDAO.getSubscribedUsers(channel.getCid());
     %>
 
     <a href="logout" class="btn btn-danger mb-3">Logout</a>

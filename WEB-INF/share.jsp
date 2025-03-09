@@ -1,6 +1,6 @@
 <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
 <%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
@@ -27,7 +27,7 @@
   }
   Channel ch = null;
   try {
-    ch = new ChannelDAO().getChannelById(chanelID);
+    ch = new ChannelDAOSql().getChannelById(chanelID);
     if (ch == null) {
       MainController.sendErrorPage(400, "Bad Request: The channel ID is invalid", request, response);
       return;

@@ -1,12 +1,12 @@
 <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
 <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
 <%@ page import="io.jsonwebtoken.JwtException" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -47,8 +47,8 @@
     User user = null;
     Channel channel = null;
     try {
-        user = new UserDAO().getUserById(userID);
-        channel = new ChannelDAO().getChannelById(channelID);
+        user = new UserDAOSql().getUserById(userID);
+        channel = new ChannelDAOSql().getChannelById(channelID);
     } catch (SQLException e) {
         MainController.sendErrorPage(500, "Internal Server Error: An error occurred while trying to get the user or the channel from the database", request, response);
         return;

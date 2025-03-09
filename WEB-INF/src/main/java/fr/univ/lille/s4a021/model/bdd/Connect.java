@@ -1,8 +1,11 @@
 package fr.univ.lille.s4a021.model.bdd;
 
 import fr.univ.lille.s4a021.Config;
+import fr.univ.lille.s4a021.controller.MainController;
+import fr.univ.lille.s4a021.exception.ConfigErrorException;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
@@ -15,21 +18,13 @@ public class Connect {
     private static final String DB_PASSWORD = "sae";
 
     private static Connection connection;
-    private static final Config config = new Config();
 
-    public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            try {
-                Class.forName("org.postgresql.Driver");
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                exit(1);
-            }
-            String url = "jdbc:postgresql://" + config.getHost() + ":" + config.getPort() + "/" + config.getDatabase();
-            System.out.println(url);
-            connection = DriverManager.getConnection(url, config.getUser(), config.getPassword());
-            createTableIfNotExist(connection);
-        }
+    public static Connection getConnection(Config conf) throws SQLException {
+        Class.forName()
+        String url = "jdbc:postgresql://" + conf.getHost() + ":" + conf.getPort() + "/" + conf.getDatabase();
+        System.out.println(url);
+        connection = DriverManager.getConnection(url, conf.getUser(), conf.getPassword());
+        createTableIfNotExist(connection);
         return connection;
     }
 
