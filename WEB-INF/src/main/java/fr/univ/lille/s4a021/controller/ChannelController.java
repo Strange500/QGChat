@@ -159,7 +159,6 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                     } catch (ChannelUpdateException | AdminCreationException e) {
                         MainController.sendErrorPage(500, e.getMessage(), req, res);
                     } catch (ChannelNotFoundException | UserNotFoundException e) {
-                        e.printStackTrace();
                         MainController.sendErrorPage(400, e.getMessage(), req, res);
                     }
                     break;
