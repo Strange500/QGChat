@@ -4,6 +4,7 @@ import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.dao.*;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.UnauthorizedException;
@@ -100,8 +101,11 @@ public class MessageController extends AbstractController {
         messageDAO.createMessage(msg, usr, channel.getCid());
     }
 
-    private String formatMessage(String msg, Part imgPart) throws IOException {
+    private String formatMessage(String msg, Part imgPart) throws IOException, BadParameterException {
         if (imgPart.getSize() > 0) {
+            if (!imgPart.getContentType().startsWith("image/")) {
+                throw new BadParameterException("Invalid image format");
+            }
             String imgBase64 = Base64.getEncoder().encodeToString(imgPart.getInputStream().readAllBytes());
             return "img:" + imgBase64;
         }

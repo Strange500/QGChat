@@ -520,6 +520,11 @@
                 const previewImg = previewCard.querySelector('img');
                 const reader = new FileReader();
                 reader.onload = (e) => {
+                    const contentTypes = ['image/jpeg', 'image/png'];
+                    if (!contentTypes.includes(imgInput.files[0].type)) {
+                        alert('Only jpeg and png files are allowed');
+                        return;
+                    }
                     previewImg.src = e.target.result;
                     previewImg.style.display = 'block';
                 };
