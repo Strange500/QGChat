@@ -1,13 +1,17 @@
 package fr.univ.lille.s4a021.model.bdd;
 
-import fr.univ.lille.s4a021.dao.UserDAO;
+import fr.univ.lille.s4a021.Config;
+import fr.univ.lille.s4a021.dao.impl.UserDAOSql;
+import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.dao.DataAccessException;
+import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import jakarta.servlet.http.HttpSession;
 
 import java.sql.SQLException;
 
 public class Util {
 
-    public static boolean userIsConnected(HttpSession session) throws SQLException {
+    public static boolean userIsConnected(HttpSession session) throws ConfigErrorException {
         Object uidObj = session.getAttribute("id");
         if (uidObj == null) {
             session.invalidate();
@@ -16,11 +20,11 @@ public class Util {
 
         try {
             int uid = (int) uidObj;
-            if (new UserDAO().getUserById(uid) == null) {
+            if (Config.getConfig().getUserDAO().getUserById(uid) == null) {
                 session.invalidate();
                 return false;
             }
-        } catch (ClassCastException e) {
+        } catch (ClassCastException | UserNotFoundException | DataAccessException e) {
             session.invalidate();
             return false;
         }

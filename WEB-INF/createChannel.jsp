@@ -14,21 +14,29 @@
 
 <%@ page import="java.util.List" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.Config" %>
+<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 
 <%
 
-
-    List<User> users = new ArrayList<>();
+    UserDAO userDAO = null;
 
     try {
-        users.addAll(new UserDAO().getAllUsers());
-    } catch (SQLException e) {
-        MainController.sendErrorPage(500, "Internal Server Error: An error occurred while trying to get the users from the database", request, response);
+        userDAO = Config.getConfig().getUserDAO();
+    } catch (ConfigErrorException e) {
+        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        return;
     }
+
+
+    try {
+        List<User> users = new ArrayList<>(userDAO.getAllUsers());
 %>
 
 <a href="home?action=logout" class="btn btn-danger mb-3">Logout</a>
@@ -65,5 +73,12 @@
 </form>
 
 </body>
+
+<%
+    } catch (DataAccessException e) {
+        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        return;
+    }
+%>
 
 </html>

@@ -1,7 +1,14 @@
 package fr.univ.lille.s4a021.servlet;
 
+import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.controller.MainController;
 import fr.univ.lille.s4a021.dao.UserDAO;
+import fr.univ.lille.s4a021.dao.impl.UserDAOSql;
+import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.dao.DataAccessException;
+import fr.univ.lille.s4a021.exception.dao.user.UserCreationException;
+import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
+import fr.univ.lille.s4a021.exception.dao.user.UserUpdateException;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -9,6 +16,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
+import org.eclipse.jdt.internal.compiler.batch.Main;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,18 +38,28 @@ public class Register extends HttpServlet {
             throws ServletException, IOException
     {
         try {
-            UserDAO userDAO = new UserDAO();
+            UserDAO userDAO = null;
+            try {
+                userDAO = Config.getConfig().getUserDAO();
+            } catch (ConfigErrorException e) {
+                MainController.sendErrorPage(500, e.getMessage(), req, res);
+                return;
+            }
             String username = StringEscapeUtils.escapeHtml4(req.getParameter("username"));
             String mail = StringEscapeUtils.escapeHtml4(req.getParameter("mail"));
             String password = req.getParameter("password");
             int uid = userDAO.createUser(username, mail, password);
             userDAO.setUserProfilePicture(getDefaultProfilePic(), uid);
             res.sendRedirect("home");
-        }
-        catch (SQLException e) {
-            RequestDispatcher rd = req.getRequestDispatcher(MainController.getJSPPath(MainController.LOGIN));
-            req.setAttribute("registererror", "Erreur lors de l'inscription");
-            rd.forward(req, res);
+        } catch (UserNotFoundException | UserUpdateException e) {
+            MainController.sendErrorPage(404, e.getMessage(), req, res);
+            return;
+        } catch (UserCreationException e) {
+            MainController.sendErrorPage(400, e.getMessage(), req, res);
+            return;
+        } catch (DataAccessException e) {
+            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            return;
         }
     }
 

@@ -1,12 +1,19 @@
 <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
 <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
 <%@ page import="io.jsonwebtoken.JwtException" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
+<%@ page import="fr.univ.lille.s4a021.Config" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -22,6 +29,17 @@
 
 
 <%
+    UserDAO userDAO = null;
+    ChannelDAO channelDAO = null;
+
+    try {
+        userDAO = Config.getConfig().getUserDAO();
+        channelDAO = Config.getConfig().getChannelDAO();
+    } catch (ConfigErrorException e) {
+        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        return;
+    }
+
   String token = request.getParameter("token");
   if (token == null) {
       MainController.sendErrorPage(400, "Bad Request: The token is missing", request, response);
@@ -47,13 +65,15 @@
     User user = null;
     Channel channel = null;
     try {
-        user = new UserDAO().getUserById(userID);
-        channel = new ChannelDAO().getChannelById(channelID);
-    } catch (SQLException e) {
-        MainController.sendErrorPage(500, "Internal Server Error: An error occurred while trying to get the user or the channel from the database", request, response);
+        user = userDAO.getUserById(userID);
+        channel = channelDAO.getChannelById(channelID);
+    } catch (UserNotFoundException | ChannelNotFoundException e) {
+        MainController.sendErrorPage(404, e.getMessage(), request, response);
+        return;
+    } catch (DataAccessException e) {
+        MainController.sendErrorPage(500, e.getMessage(), request, response);
         return;
     }
-
 
 %>
 
