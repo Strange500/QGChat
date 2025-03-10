@@ -483,41 +483,45 @@
 
     <script defer>
         const messageList = document.getElementById('messageList');
-        messageList.scrollTop = messageList.scrollHeight;
+        if (messageList) {
 
-        const reactSpan = document.querySelectorAll('.reactSpan');
-        reactSpan.forEach(span => {
-            span.addEventListener('mouseover', (event) => {
-                document.getElementById('hover-div').style.display = 'block';
-                document.getElementById('hover-div').style.position = 'absolute';
+            messageList.scrollTop = messageList.scrollHeight;
 
-                const rect = span.getBoundingClientRect();
-                document.getElementById('hover-div').style.top = rect.bottom  + 'px';
-                document.getElementById('hover-div').style.left = rect.left + 'px';
+            const reactSpan = document.querySelectorAll('.reactSpan');
+            reactSpan.forEach(span => {
+                span.addEventListener('mouseover', (event) => {
+                    document.getElementById('hover-div').style.display = 'block';
+                    document.getElementById('hover-div').style.position = 'absolute';
 
-                const hoverDiv = document.getElementById('hover-div');
-                hoverDiv.innerHTML = span.querySelector('.reactDetails').innerHTML;
+                    const rect = span.getBoundingClientRect();
+                    document.getElementById('hover-div').style.top = rect.bottom + 'px';
+                    document.getElementById('hover-div').style.left = rect.left + 'px';
+
+                    const hoverDiv = document.getElementById('hover-div');
+                    hoverDiv.innerHTML = span.querySelector('.reactDetails').innerHTML;
+
+                });
+
+                span.addEventListener('mouseleave', () => {
+                    document.getElementById('hover-div').style.display = 'none';
+                });
 
             });
 
-            span.addEventListener('mouseleave', () => {
-                document.getElementById('hover-div').style.display = 'none';
+
+            const imgInput = document.querySelector('input[type="file"]');
+            imgInput.addEventListener('change', () => {
+                const previewCard = document.getElementById('preview');
+                preview.style.display = 'block';
+                const previewImg = previewCard.querySelector('img');
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                };
+                reader.readAsDataURL(imgInput.files[0]);
             });
 
-        });
-
-        const imgInput = document.querySelector('input[type="file"]');
-        imgInput.addEventListener('change', () => {
-            const previewCard = document.getElementById('preview');
-            preview.style.display = 'block';
-            const previewImg = previewCard.querySelector('img');
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
-                previewImg.style.display = 'block';
-            };
-            reader.readAsDataURL(imgInput.files[0]);
-        });
 
         const previewCardCancelBtn = document.querySelector('#preview a');
         previewCardCancelBtn.addEventListener('click', () => {
@@ -545,12 +549,13 @@
         }
 
         // check if one message contains the word sheep
-        const messages = messageList.querySelectorAll('p');
-        messages.forEach(message => {
-            if (message.innerText.toLowerCase().includes('sheep')) {
-                displaySheep();
-            }
-        });
+            const messages = messageList.querySelectorAll('p');
+            messages.forEach(message => {
+                if (message.innerText.toLowerCase().includes('sheep')) {
+                    displaySheep();
+                }
+            });
+        }
 
         const profileLink = document.getElementById('pofileLink');
         profileLink.addEventListener('mouseenter', () => {
