@@ -1,13 +1,10 @@
 package fr.univ.lille.s4a021.dao.impl;
 
-import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
-import fr.univ.lille.s4a021.dao.ReactionDAO;
 import fr.univ.lille.s4a021.dao.SubscriptionDAO;
 import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.User;
-import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.subscription.SubscriptionNotFoundException;
@@ -24,7 +21,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
     private final ChannelDAO channelDAO;
     private final UserDAO userDAO;
 
-    public SubscriptionDAOSql(Connection con, ChannelDAO chDAO, UserDAO usrDAO) throws ConfigErrorException {
+    public SubscriptionDAOSql(Connection con, ChannelDAO chDAO, UserDAO usrDAO) {
         super(con);
         this.channelDAO = chDAO;
         this.userDAO = usrDAO;
@@ -135,6 +132,27 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Error while subscribing users: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<Channel> getSubscribedChannels(int uid) throws UserNotFoundException, DataAccessException {
+        if (!userDAO.userExists(uid)) {
+            throw new UserNotFoundException("User not found");
+        }
+        String query = "SELECT c.cid, c.name FROM Channel c JOIN estAbonne e ON c.cid = e.cid WHERE e.uid = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            ResultSet rs = stmt.executeQuery();
+            List<Channel> channels = new ArrayList<>();
+            while (rs.next()) {
+                int cid = rs.getInt("cid");
+                String name = rs.getString("name");
+                channels.add(new Channel(cid, name));
+            }
+            return channels;
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while getting subscribed channels: " + e.getMessage(), e);
         }
     }
 }

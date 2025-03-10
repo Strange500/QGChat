@@ -7,9 +7,6 @@ import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.subscription.SubscriptionNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 public interface SubscriptionDAO {
@@ -24,5 +21,6 @@ public interface SubscriptionDAO {
 
     void subscribeUsersTo(Channel ch, List<Integer> Uids) throws ChannelNotFoundException, UserNotFoundException, DataAccessException;
 
+    List<Channel> getSubscribedChannels(int uid) throws UserNotFoundException, DataAccessException;
 
 }

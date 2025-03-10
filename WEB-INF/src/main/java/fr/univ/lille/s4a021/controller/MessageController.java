@@ -7,7 +7,6 @@ import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
-import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.message.MessageCreationException;
@@ -32,11 +31,6 @@ import java.util.Base64;
 @MultipartConfig
 @WebServlet("/message")
 public class MessageController extends AbstractController {
-
-    private static final String MODIFY_CHANNEL = "ModifChannel.jsp";
-    private static final String CREATE_CHANNEL = "createChannel.jsp";
-    private static final String SHARE = "share.jsp";
-    private static final String INVITE = "join.jsp";
 
     private static final String ACTION_SEND = "send";
     private static final String ACTION_LIKE = "like";
@@ -84,16 +78,16 @@ public class MessageController extends AbstractController {
         }
     }
 
-    private void handleSendMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageCreationException, ChannelNotFoundException, DataAccessException {
+    private void handleSendMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageCreationException, ChannelNotFoundException, DataAccessException, BadParameterException {
         String channelID = req.getParameter("channelID");
-        if (!checkSubscription(uid, channelID, req, res)) return;
+        if (!checkSubscription(uid, channelID)) return;
 
         sendMessage(req, channelID);
         res.sendRedirect("home?action=view&channelID=" + channelID);
 
     }
 
-    private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException {
+    private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException, BadParameterException {
         Part imgPart = req.getPart("img");
         String msg = formatMessage(req.getParameter("message"), imgPart);
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
@@ -112,7 +106,7 @@ public class MessageController extends AbstractController {
         return StringEscapeUtils.escapeHtml4(msg);
     }
 
-    private void handleLikeMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, UserNotFoundException, MessageNotFoundException, ReactionUpdateException, ReactionCreationException, ReactionNotFoundException, DataAccessException {
+    private void handleLikeMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, UserNotFoundException, MessageNotFoundException, ReactionUpdateException, ReactionCreationException, ReactionNotFoundException, DataAccessException {
         int mid = Integer.parseInt(req.getParameter("mid"));
         String emoji = req.getParameter("emoji");
 
@@ -146,17 +140,17 @@ public class MessageController extends AbstractController {
 
     }
 
-    private void handleDeleteMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageNotFoundException, DataAccessException, UserNotFoundException, ChannelNotFoundException, UnauthorizedException {
+    private void handleDeleteMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, MessageNotFoundException, DataAccessException, UserNotFoundException, ChannelNotFoundException {
         int mid = Integer.parseInt(req.getParameter("mid"));
         Message message = messageDAO.getMessageById(mid);
-        if (!hasDeletePermission(uid, message, req, res)) return;
+        if (!hasDeletePermission(uid, message)) return;
         messageDAO.deleteMessage(mid);
         int channelId = message.getChannelId();
         res.sendRedirect("home?action=view&channelID=" + channelId);
 
     }
 
-    private boolean hasDeletePermission(int uid, Message message, HttpServletRequest req, HttpServletResponse res) throws UserNotFoundException, ChannelNotFoundException, DataAccessException, UnauthorizedException {
+    private boolean hasDeletePermission(int uid, Message message) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
         if (!subscriptionDAO.isSubscribedTo(uid, message.getChannelId())) {
             return false;
         }
@@ -164,11 +158,11 @@ public class MessageController extends AbstractController {
         return message.getSenderId() == uid || adminDAO.userIsAdmin(uid, message.getChannelId());
     }
 
-    private void handleEditMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageNotFoundException, DataAccessException, UserNotFoundException, ChannelNotFoundException, MessageUpdateException {
+    private void handleEditMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, MessageNotFoundException, DataAccessException, UserNotFoundException, ChannelNotFoundException, MessageUpdateException {
         int mid = Integer.parseInt(req.getParameter("mid"));
         String newMessageContent = req.getParameter("message");
         Message message = messageDAO.getMessageById(mid);
-        if (!hasEditPermission(uid, message, req, res)) return;
+        if (!hasEditPermission(uid, message)) return;
 
         message.setContenu(StringEscapeUtils.escapeHtml4(newMessageContent));
         messageDAO.updateMessage(mid, message.getContenu());
@@ -177,7 +171,7 @@ public class MessageController extends AbstractController {
 
     }
 
-    private boolean hasEditPermission(int uid, Message message, HttpServletRequest req, HttpServletResponse res) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
+    private boolean hasEditPermission(int uid, Message message) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
         if (!subscriptionDAO.isSubscribedTo(uid, message.getChannelId())) {
             return false;
         }
@@ -185,7 +179,7 @@ public class MessageController extends AbstractController {
         return message.getSenderId() == uid;
     }
 
-    private boolean checkSubscription(int uid, String channelID, HttpServletRequest req, HttpServletResponse res) {
+    private boolean checkSubscription(int uid, String channelID) {
         try {
             if (!subscriptionDAO.isSubscribedTo(uid, Integer.parseInt(channelID))) {
                 return false;
@@ -196,10 +190,10 @@ public class MessageController extends AbstractController {
         return true;
     }
 
-    private boolean isSubscribedToMessage(int uid, int mid, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    private boolean isSubscribedToMessage(int uid, int mid, HttpServletRequest req, HttpServletResponse res) {
         try {
             int channelId = messageDAO.getMessageById(mid).getChannelId();
-            return checkSubscription(uid, String.valueOf(channelId), req, res);
+            return checkSubscription(uid, String.valueOf(channelId));
         } catch (MessageNotFoundException | DataAccessException e) {
             handleError(e, req, res);
             return false;

@@ -6,9 +6,9 @@ import fr.univ.lille.s4a021.exception.dao.user.UserCreationException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserUpdateException;
 
-import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface UserDAO {
 
@@ -31,6 +31,8 @@ public interface UserDAO {
     void setUserProfilePicture(String base64Image, int uid) throws UserNotFoundException, UserUpdateException, DataAccessException;
 
     String getUserProfilePicture(int uid) throws UserNotFoundException, DataAccessException;
+
+    Map<Integer, String> getUserProfilePictures(Collection<Integer> uids) throws UserNotFoundException, DataAccessException;
 
     boolean userExists(int uid) throws DataAccessException;
 

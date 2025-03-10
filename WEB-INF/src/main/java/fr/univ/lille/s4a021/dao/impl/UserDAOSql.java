@@ -8,14 +8,11 @@ import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserUpdateException;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class UserDAOSql extends DaoSql implements UserDAO {
 
-    public UserDAOSql(Connection con) throws SQLException {
+    public UserDAOSql(Connection con) {
         super(con);
     }
 
@@ -77,8 +74,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
             stmt.setString(1, mail);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                User u = new User(rs.getInt("uid"), rs.getString("username"), rs.getString("mail"), rs.getString("password"));
-                return u;
+                return new User(rs.getInt("uid"), rs.getString("username"), rs.getString("mail"), rs.getString("password"));
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error while getting user by mail: " + e.getMessage(), e);
@@ -89,6 +85,9 @@ public class UserDAOSql extends DaoSql implements UserDAO {
 
 
     public List<User> getUserByIds(Collection<Integer> uids) throws DataAccessException, UserNotFoundException {
+        if (uids.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<User> users = new ArrayList<>();
         StringBuilder query = new StringBuilder("SELECT uid, username, mail, password FROM Utilisateur WHERE uid IN (");
         for (int i = 0; i < uids.size(); i++) {
@@ -208,6 +207,38 @@ public class UserDAOSql extends DaoSql implements UserDAO {
             throw new DataAccessException("Error while getting user profile picture: " + e.getMessage(), e);
         }
         throw new UserNotFoundException("User not found");
+    }
+
+    @Override
+    public Map<Integer, String> getUserProfilePictures(Collection<Integer> uids) throws UserNotFoundException, DataAccessException {
+        if (uids.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<Integer, String> profilePictures = new HashMap<>();
+        StringBuilder query = new StringBuilder("SELECT uid, profile_picture FROM Utilisateur WHERE uid IN (");
+        for (int i = 0; i < uids.size(); i++) {
+            query.append("?");
+            if (i < uids.size() - 1) {
+                query.append(", ");
+            }
+        }
+        query.append(")");
+        try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
+            int i = 1;
+            for (int uid : uids) {
+                stmt.setInt(i++, uid);
+            }
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                profilePictures.put(rs.getInt("uid"), rs.getString("profile_picture"));
+            }
+            if (profilePictures.size() != uids.size()) {
+                throw new UserNotFoundException("One or more users not found");
+            }
+            return profilePictures;
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while getting user profile pictures: " + e.getMessage(), e);
+        }
     }
 
     @Override

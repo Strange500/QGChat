@@ -10,6 +10,7 @@ import fr.univ.lille.s4a021.exception.dao.message.MessageUpdateException;
 import fr.univ.lille.s4a021.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public interface MessageDAO {
@@ -42,4 +43,15 @@ public interface MessageDAO {
     }
 
     boolean messageExists(int mid) throws DataAccessException;
+
+    default List<Message> getMessagesAndImgMessagesByChannelId(int cid) throws ChannelNotFoundException, DataAccessException {
+        List<Message> messages = getMessageByChannelId(cid);
+        Pair<List<ImgMessage>, List<Message>> pair = separateImgFromMessage(messages);
+        List<Message> messagesList = new ArrayList<>() {{
+            addAll(pair.getSecond());
+            addAll(pair.getFirst());
+        }};
+        messages.sort(Comparator.comparing(Message::getDateSend));
+        return messagesList;
+    }
 }
