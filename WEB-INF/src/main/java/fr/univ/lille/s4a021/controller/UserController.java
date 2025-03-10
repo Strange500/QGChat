@@ -55,7 +55,7 @@ public class UserController extends HttpServlet {
                 if (auth(req.getParameter("mail"), req.getParameter("password"), userDAO, session)) {
                     res.sendRedirect("home");
                 } else {
-                       RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(MainController.LOGIN));
+                    RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(MainController.LOGIN_JSP));
                        req.setAttribute("error", "Invalid credentials");
                        rd.forward(req, res);
                 }
