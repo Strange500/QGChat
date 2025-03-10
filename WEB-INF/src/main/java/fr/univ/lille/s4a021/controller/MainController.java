@@ -8,7 +8,6 @@ import fr.univ.lille.s4a021.exception.dao.CreationException;
 import fr.univ.lille.s4a021.exception.dao.NotFoundException;
 import fr.univ.lille.s4a021.exception.dao.UpdateException;
 import fr.univ.lille.s4a021.model.bdd.Util;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,6 +18,8 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
+import static fr.univ.lille.s4a021.model.bdd.Util.forwardToJSP;
+
 @MultipartConfig
 @WebServlet("/home")
 public class MainController extends HttpServlet {
@@ -28,10 +29,6 @@ public class MainController extends HttpServlet {
     public static final String ERROR_JSP = "error.jsp";
     public static final String FRIEND_JSP = "friend.jsp";
 
-    private static void forwardToJSP(HttpServletRequest req, HttpServletResponse res, String jsp) throws ServletException, IOException {
-        RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(jsp));
-        rd.forward(req, res);
-    }
 
     public static String getJSPPath(String jsp) {
         return "/WEB-INF/" + jsp;

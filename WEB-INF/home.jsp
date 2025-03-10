@@ -383,7 +383,8 @@
                                     <%
                                         if (isAdmin) {
                                     %>
-                                            <a href="channel?action=deletechannel&channelID=<%=channelID%>" class="btn btn-danger mb-3">
+                                    <a href="channel?action=delete&channelID=<%=channelID%>"
+                                       class="btn btn-danger mb-3">
                                                 <i class="bi bi-trash"></i>
                                             </a>
 

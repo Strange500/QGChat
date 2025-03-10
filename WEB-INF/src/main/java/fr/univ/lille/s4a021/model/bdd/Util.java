@@ -1,13 +1,18 @@
 package fr.univ.lille.s4a021.model.bdd;
 
 import fr.univ.lille.s4a021.Config;
-import fr.univ.lille.s4a021.dao.impl.UserDAOSql;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.sql.SQLException;
+import java.io.IOException;
+
+import static fr.univ.lille.s4a021.controller.MainController.getJSPPath;
 
 public class Util {
 
@@ -34,5 +39,11 @@ public class Util {
 
     public static int getUid(HttpSession session) {
         return (int) session.getAttribute("id");
+    }
+
+
+    public static void forwardToJSP(HttpServletRequest req, HttpServletResponse res, String jsp) throws ServletException, IOException {
+        RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(jsp));
+        rd.forward(req, res);
     }
 }
