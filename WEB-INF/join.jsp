@@ -1,4 +1,4 @@
-<%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
 <%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
@@ -36,26 +36,26 @@
         userDAO = Config.getConfig().getUserDAO();
         channelDAO = Config.getConfig().getChannelDAO();
     } catch (ConfigErrorException e) {
-        MainController.handleError(e, request, response);
+        AbstractController.handleError(e, request, response);
         return;
     }
 
   String token = request.getParameter("token");
   if (token == null) {
-      MainController.handleError(new IllegalArgumentException("The token is missing"), request, response);
+      AbstractController.handleError(new IllegalArgumentException("The token is missing"), request, response);
       return;
   }
     Pair<Integer, Integer> pair = null;
     try {
         pair = new JwtManager().getUidAndCidFromChannelInviteToken(token)   ;
     } catch (JwtException e) {
-        MainController.handleError(e, request, response);
+        AbstractController.handleError(e, request, response);
         return;
     }
 
 
   if (pair == null) {
-      MainController.handleError(new IllegalArgumentException("The token is invalid"), request, response);
+      AbstractController.handleError(new IllegalArgumentException("The token is invalid"), request, response);
       return;
   }
 
@@ -68,7 +68,7 @@
         user = userDAO.getUserById(userID);
         channel = channelDAO.getChannelById(channelID);
     } catch (UserNotFoundException | ChannelNotFoundException | DataAccessException e) {
-        MainController.handleError(e, request, response);
+        AbstractController.handleError(e, request, response);
         return;
     }
 
@@ -84,8 +84,8 @@
   </div>
   <div class="card-body">
     <p>You have been invited to join the channel "<%=channel.getName()%>" by <%=user.getUsername()%></p>
-    <form action="join" method="get">
-      <input type="hidden" name="action" value="join">
+      <form action="channel" method="get">
+          <input type="hidden" name="action" value="acceptInvite">
       <input type="hidden" name="token" value="<%=token%>">
       <button type="submit" class="btn btn-primary">Accept</button>
     </form>

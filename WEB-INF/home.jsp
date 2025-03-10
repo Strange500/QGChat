@@ -19,7 +19,7 @@
     <%@ page import="fr.univ.lille.s4a021.dto.ImgMessage" %>
     <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
     <%@ page import="java.util.*" %>
-    <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
     <%@ page import="java.util.stream.Collectors" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
@@ -31,6 +31,7 @@
     <%@ page import="fr.univ.lille.s4a021.exception.dao.reaction.ReactionNotFoundException" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.NotFoundException" %>
     <%@ page import="fr.univ.lille.s4a021.exception.MyDiscordException" %>
+    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 
     <div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
@@ -274,7 +275,7 @@
                 messageDAO = Config.getConfig().getMessageDAO();
                 reactionDAO = Config.getConfig().getReactionDAO();
             } catch (ConfigErrorException e) {
-                MainController.handleError(e, request, response);
+                AbstractController.handleError(e, request, response);
                 return;
             }
 
@@ -284,7 +285,7 @@
                 currentUser = userDAO.getUserById(Util.getUid(session));
                 profilepicBase64 = userDAO.getUserProfilePicture(currentUser.getUid());
             } catch (UserNotFoundException e) {
-                MainController.handleError(e, request, response);
+                AbstractController.handleError(e, request, response);
                 return;
             }
 
@@ -314,7 +315,7 @@
                         try {
                             estAbonne = subscriptionDAO.isSubscribedTo((int) session.getAttribute("id"), channel.getCid());
                         } catch (UserNotFoundException | ChannelNotFoundException e) {
-                            MainController.handleError(e, request, response);
+                            AbstractController.handleError(e, request, response);
                             return;
                         }
                         if (!estAbonne) {
@@ -345,7 +346,7 @@
                         try {
                             estAbonne = subscriptionDAO.isSubscribedTo((int) session.getAttribute("id"), Integer.parseInt(channelIdParam));
                         } catch (UserNotFoundException | ChannelNotFoundException e) {
-                            MainController.handleError(e, request, response);
+                            AbstractController.handleError(e, request, response);
                             return;
                         }
                         if (!estAbonne) {
@@ -356,7 +357,7 @@
                         try {
                             channel = channelDAO.getChannelById(channelID);
                         }catch (ChannelNotFoundException e) {
-                            MainController.handleError(e, request, response);
+                            AbstractController.handleError(e, request, response);
                             return;
                         }
 
@@ -368,7 +369,7 @@
                             isAdmin = adminsDAO.userIsAdmin(Util.getUid(session), channelID);
 
                         } catch (UserNotFoundException | ChannelNotFoundException e) {
-                            MainController.handleError(e, request, response);
+                            AbstractController.handleError(e, request, response);
                             return;
                         }
 
@@ -434,7 +435,7 @@
 
 
                                     } catch (ChannelNotFoundException | UserNotFoundException | MessageNotFoundException  e) {
-                                        MainController.handleError(e, request, response);
+                                        AbstractController.handleError(e, request, response);
                                         return;
                                     }
 
@@ -594,7 +595,7 @@
 
 <%
     } catch (MyDiscordException e) {
-        MainController.handleError(e, request, response);
+        AbstractController.handleError(e, request, response);
             return;
     }
 %>

@@ -4,29 +4,35 @@ import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.dao.AdminsDAO;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.SubscriptionDAO;
+import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.Channel;
+import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.UnauthorizedException;
-import fr.univ.lille.s4a021.exception.dao.DaoException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
+import fr.univ.lille.s4a021.exception.dao.admin.AdminCreationException;
+import fr.univ.lille.s4a021.exception.dao.channel.ChannelCreationException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
+import fr.univ.lille.s4a021.exception.dao.channel.ChannelUpdateException;
+import fr.univ.lille.s4a021.exception.dao.subscription.SubscriptionNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.model.bdd.Util;
+import fr.univ.lille.s4a021.util.JwtManager;
+import fr.univ.lille.s4a021.util.Pair;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.univ.lille.s4a021.model.bdd.Util.forwardToJSP;
-
 @WebServlet("/channel")
-public class ChannelController extends jakarta.servlet.http.HttpServlet {
+public class ChannelController extends AbstractController {
     private static final String MODIFY_CHANNEL_JSP = "ModifChannel.jsp";
     private static final String CREATE_CHANNEL_JSP = "createChannel.jsp";
     private static final String SHARE_JSP = "share.jsp";
@@ -35,6 +41,7 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
     private ChannelDAO channelDAO;
     private SubscriptionDAO subscriptionDAO;
     private AdminsDAO adminsDAO;
+    private UserDAO userDAO;
 
     @Override
     public void init() throws ServletException {
@@ -43,32 +50,135 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
             channelDAO = Config.getConfig().getChannelDAO();
             subscriptionDAO = Config.getConfig().getSubscriptionDAO();
             adminsDAO = Config.getConfig().getAdminsDAO();
+            userDAO = Config.getConfig().getUserDAO();
         } catch (ConfigErrorException e) {
             throw new ServletException("Failed to initialize DAOs", e);
         }
     }
 
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        HttpSession session = req.getSession();
-        String action = req.getParameter("action");
+    private void handleCreateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, ChannelCreationException, DataAccessException, UserNotFoundException, ChannelNotFoundException, AdminCreationException {
+        String name = req.getParameter("name");
+        List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
+        subscribers.add(Util.getUid(req.getSession()));
 
-        try {
-            if (!Util.userIsConnected(session)) {
-                res.sendRedirect("home");
-                return;
-            }
-        } catch (ConfigErrorException e) {
-            MainController.handleError(e, req, res);
+        Channel channel = channelDAO.createChannel(name);
+        subscriptionDAO.subscribeUsersTo(channel, subscribers);
+        adminsDAO.setAdmin(channel.getCid(), uid);
+        res.sendRedirect("home?action=view&channelID=" + channel.getCid());
+
+    }
+
+    private void handleDeleteChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, DataAccessException, ChannelNotFoundException, UnauthorizedException {
+        int cid = Integer.parseInt(req.getParameter("channelID"));
+        if (!isAuthorized(uid, cid)) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        channelDAO.deleteChannel(cid);
+        res.sendRedirect("home");
+
+    }
+
+    private void handleUpdateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, UnauthorizedException, DataAccessException, ChannelNotFoundException, UserNotFoundException, ChannelUpdateException, AdminCreationException {
+        int cid = Integer.parseInt(req.getParameter("channelID"));
+        if (!isAuthorized(uid, cid)) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        String newName = req.getParameter("name");
+        List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
+        subscribers.add(uid);
+
+        List<Integer> admins = extractUserIds(req.getParameterValues("admins"));
+        if (!areAllAdminsSubscribers(subscribers, admins)) {
             return;
         }
+        admins.add(uid);
 
+        Channel channel = channelDAO.getChannelById(cid);
+        channelDAO.updateChannel(cid, newName);
+        subscriptionDAO.clearSubscriptions(cid);
+        subscriptionDAO.subscribeUsersTo(channel, subscribers);
+        adminsDAO.clearAdmins(cid);
+        adminsDAO.setAdmins(channel.getCid(), admins);
+        res.sendRedirect("home?action=view&channelID=" + cid);
+
+    }
+
+    private boolean areAllAdminsSubscribers(List<Integer> subscribers, List<Integer> admins) throws BadParameterException {
+        for (int adminUid : admins) {
+            if (!subscribers.contains(adminUid)) {
+                throw new BadParameterException("An admin must be a subscriber");
+            }
+        }
+        return true;
+    }
+
+    private void handleShareChannel(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        String channelID = req.getParameter("channelID");
+        req.setAttribute("channelID", channelID);
+        forwardToJSP(req, res, SHARE_JSP);
+    }
+
+    private void handleUnsubscribeUser(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, UserNotFoundException, ChannelNotFoundException, SubscriptionNotFoundException, DataAccessException {
+        int cid = Integer.parseInt(req.getParameter("channelID"));
+        subscriptionDAO.unsubscribeUser(uid, cid);
+        res.sendRedirect("home");
+
+    }
+
+    private boolean isAuthorized(int uid, int channelId) throws DataAccessException {
+        try {
+            return adminsDAO.userIsAdmin(uid, channelId);
+        } catch (UserNotFoundException | ChannelNotFoundException e) {
+            return false;
+        }
+    }
+
+    private List<Integer> extractUserIds(String[] params) throws BadParameterException {
+        List<Integer> userIds = new ArrayList<>();
+        if (params != null) {
+            for (String param : params) {
+                try {
+                    userIds.add(Integer.parseInt(param));
+                } catch (NumberFormatException e) {
+                    throw new BadParameterException("Invalid user ID");
+                }
+            }
+        }
+        return userIds;
+    }
+
+    private void handleAcceptInvite(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, DataAccessException, ChannelNotFoundException, UserNotFoundException, SubscriptionNotFoundException, UnauthorizedException {
+        String token = req.getParameter("token");
+        Pair<Integer, Integer> uidAndCid = null;
+        try {
+            uidAndCid = new JwtManager().getUidAndCidFromChannelInviteToken(token);
+            if (uidAndCid == null) {
+                throw new UnauthorizedException("Invalid token");
+            }
+        } catch (JwtException e) {
+            throw new UnauthorizedException("Invalid token");
+        }
+        User user = userDAO.getUserById(uid);
+        Channel channel = channelDAO.getChannelById(uidAndCid.getSecond());
+        if (subscriptionDAO.isSubscribedTo(user.getUid(), channel.getCid())) {
+            throw new SubscriptionNotFoundException("You are already subscribed to this channel");
+        }
+        if (!subscriptionDAO.isSubscribedTo(uidAndCid.getFirst(), channel.getCid())) {
+            throw new SubscriptionNotFoundException("The user who invited you is not subscribed to this channel");
+        }
+        subscriptionDAO.subscribeUsersTo(channel, List.of(user.getUid()));
+
+        res.sendRedirect("home?action=view&channelID=" + channel.getCid());
+
+    }
+
+    @Override
+    protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         if (action == null) {
             res.sendRedirect("home");
             return;
         }
-
-        int uid = Util.getUid(session);
+        int uid = Util.getUid(req.getSession());
         switch (action) {
             case "create":
                 handleCreateChannel(req, res, uid);
@@ -88,6 +198,9 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
             case "share":
                 handleShareChannel(req, res);
                 break;
+            case "acceptInvite":
+                handleAcceptInvite(req, res, uid);
+                break;
             case "join":
                 forwardToJSP(req, res, INVITE_JSP);
                 break;
@@ -99,117 +212,4 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
         }
 
     }
-
-    private void handleCreateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, ServletException {
-        String name = req.getParameter("name");
-        List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
-        subscribers.add(Util.getUid(req.getSession()));
-
-        try {
-            Channel channel = channelDAO.createChannel(name);
-            subscriptionDAO.subscribeUsersTo(channel, subscribers);
-            adminsDAO.setAdmin(channel.getCid(), uid);
-            res.sendRedirect("home?action=view&channelID=" + channel.getCid());
-        } catch (DaoException e) {
-            MainController.handleError(e, req, res);
-        }
-    }
-
-    private void handleDeleteChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, ServletException {
-        int cid = Integer.parseInt(req.getParameter("channelID"));
-        try {
-            if (!isAuthorized(uid, cid)) {
-                MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
-                return;
-            }
-            channelDAO.deleteChannel(cid);
-            res.sendRedirect("home");
-        } catch (DaoException e) {
-            MainController.handleError(e, req, res);
-        }
-    }
-
-    private void handleUpdateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException {
-        int cid = Integer.parseInt(req.getParameter("channelID"));
-        try {
-            if (!isAuthorized(uid, cid)) {
-                MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
-                return;
-            }
-        } catch (DataAccessException e) {
-            MainController.handleError(e, req, res);
-            return;
-        }
-
-        String newName = req.getParameter("name");
-        List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
-        subscribers.add(uid);
-
-        List<Integer> admins = extractUserIds(req.getParameterValues("admins"));
-        if (!areAllAdminsSubscribers(subscribers, admins, req, res)) {
-            return;
-        }
-        admins.add(uid);
-
-        try {
-            Channel channel = channelDAO.getChannelById(cid);
-            channelDAO.updateChannel(cid, newName);
-            subscriptionDAO.clearSubscriptions(cid);
-            subscriptionDAO.subscribeUsersTo(channel, subscribers);
-            adminsDAO.clearAdmins(cid);
-            adminsDAO.setAdmins(channel.getCid(), admins);
-            res.sendRedirect("home?action=view&channelID=" + cid);
-        } catch (DaoException e) {
-            MainController.handleError(e, req, res);
-        }
-    }
-
-    private boolean areAllAdminsSubscribers(List<Integer> subscribers, List<Integer> admins, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        for (int adminUid : admins) {
-            if (!subscribers.contains(adminUid)) {
-                MainController.handleError(new BadParameterException("An admin must be a subscriber"), req, res);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void handleShareChannel(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        String channelID = req.getParameter("channelID");
-        req.setAttribute("channelID", channelID);
-        forwardToJSP(req, res, SHARE_JSP);
-    }
-
-    private void handleUnsubscribeUser(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, ServletException {
-        int cid = Integer.parseInt(req.getParameter("channelID"));
-        try {
-            subscriptionDAO.unsubscribeUser(uid, cid);
-            res.sendRedirect("home");
-        } catch (DaoException e) {
-            MainController.handleError(e, req, res);
-        }
-    }
-
-    private boolean isAuthorized(int uid, int channelId) throws DataAccessException {
-        try {
-            return adminsDAO.userIsAdmin(uid, channelId);
-        } catch (UserNotFoundException | ChannelNotFoundException e) {
-            return false;
-        }
-    }
-
-    private List<Integer> extractUserIds(String[] params) {
-        List<Integer> userIds = new ArrayList<>();
-        if (params != null) {
-            for (String param : params) {
-                try {
-                    userIds.add(Integer.parseInt(param));
-                } catch (NumberFormatException e) {
-                    // Log or handle the error here as needed
-                }
-            }
-        }
-        return userIds;
-    }
-
 }

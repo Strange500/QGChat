@@ -17,7 +17,7 @@
 <%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
 <%@ page import="fr.univ.lille.s4a021.Config" %>
 <%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
@@ -30,7 +30,7 @@
     try {
         userDAO = Config.getConfig().getUserDAO();
     } catch (ConfigErrorException e) {
-        MainController.handleError(e, request, response);
+        AbstractController.handleError(e, request, response);
         return;
     }
 
@@ -76,7 +76,7 @@
 
 <%
     } catch (DataAccessException e) {
-        MainController.handleError(e, request, response);
+        AbstractController.handleError(e, request, response);
         return;
     }
 %>

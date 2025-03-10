@@ -13,12 +13,11 @@
 </head>
 <body class="container">
 <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
-<%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
 <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
 <%@ page import="fr.univ.lille.s4a021.Config" %>
 <%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
-<%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <%@ page import="fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException" %>
 <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 
@@ -29,7 +28,7 @@
     try {
         userDAO = Config.getConfig().getUserDAO();
     } catch (ConfigErrorException e) {
-      MainController.handleError(e, request, response);
+      AbstractController.handleError(e, request, response);
         return;
     }
 
@@ -37,7 +36,7 @@
     try {
         user = userDAO.getUserById(uid);
     } catch (UserNotFoundException | DataAccessException e) {
-      MainController.handleError(e, request, response);
+      AbstractController.handleError(e, request, response);
         return;
     }
 

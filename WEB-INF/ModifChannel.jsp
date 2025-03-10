@@ -21,7 +21,7 @@
     <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
     <%@ page import="fr.univ.lille.s4a021.Config" %>
     <%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
-    <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
     <%@ page import="fr.univ.lille.s4a021.dao.SubscriptionDAO" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
@@ -39,7 +39,7 @@
             subscriptionDAO = Config.getConfig().getSubscriptionDAO();
             adminsDAO = Config.getConfig().getAdminsDAO();
         } catch (ConfigErrorException e) {
-            MainController.handleError(e, request, response);
+            AbstractController.handleError(e, request, response);
             return;
         }
 
@@ -60,7 +60,7 @@
             abonnes = subscriptionDAO.getSubscribedUsers(channel.getCid());
             admins = adminsDAO.getAdmins(channel.getCid());
         } catch (ChannelNotFoundException | DataAccessException e) {
-            MainController.handleError(e, request, response);
+            AbstractController.handleError(e, request, response);
             return;
         }
     %>

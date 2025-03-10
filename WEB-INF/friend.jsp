@@ -1,4 +1,4 @@
-<%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
 <%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
 <%@ page import="java.sql.SQLException" %>
@@ -29,25 +29,25 @@
     try {
         channelDAO = Config.getConfig().getChannelDAO();
     } catch (ConfigErrorException e) {
-        MainController.handleError(e, request, response);
+        AbstractController.handleError(e, request, response);
         return;
     }
 
 
   Integer chanelID = Integer.parseInt(request.getParameter("channelID"));
   if (chanelID == null) {
-    MainController.handleError(new IllegalArgumentException("The channel ID is missing"), request, response);
+    AbstractController.handleError(new IllegalArgumentException("The channel ID is missing"), request, response);
     return;
   }
   Channel ch = null;
   try {
     ch = channelDAO.getChannelById(chanelID);
     if (ch == null) {
-      MainController.handleError(new ChannelNotFoundException("The channel with ID " + chanelID + " was not found"), request, response);
+      AbstractController.handleError(new ChannelNotFoundException("The channel with ID " + chanelID + " was not found"), request, response);
       return;
     }
   } catch (ChannelNotFoundException | DataAccessException e) {
-    MainController.handleError(e, request, response);
+    AbstractController.handleError(e, request, response);
     return;
   }
 
