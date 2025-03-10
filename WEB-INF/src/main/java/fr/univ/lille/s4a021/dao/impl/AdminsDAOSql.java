@@ -79,7 +79,7 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
         }
         if (users == null || users.isEmpty()) {
             return;
-        } else if (userDAO.userAllExists(users)) {
+        } else if (!userDAO.userAllExists(users)) {
             throw new UserNotFoundException("One or more users does not exist");
         }
 
