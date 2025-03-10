@@ -40,9 +40,9 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
                 return getMessageById(mid);
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while creating message: " + e.getMessage());
+            throw new DataAccessException("Error while creating message: " + e.getMessage(), e);
         } catch (MessageNotFoundException e) {
-            throw new MessageCreationException("Error while creating message: " + e.getMessage());
+            throw new MessageCreationException("Error while creating message: " + e.getMessage(), e);
         }
         throw new MessageCreationException("Error while creating message");
     }
@@ -55,7 +55,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
             ResultSet rs = stmt.executeQuery();
             return buildMessagesFromResultSet(rs);
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting messages by channel id: " + e.getMessage());
+            throw new DataAccessException("Error while getting messages by channel id: " + e.getMessage(), e);
         }
 
     }
@@ -72,7 +72,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
                 messages.add(new Message(mid, contenu, uid, cid, timestamp));
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while building messages from result set: " + e.getMessage());
+            throw new DataAccessException("Error while building messages from result set: " + e.getMessage(), e);
         }
         return messages;
     }
@@ -87,7 +87,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
                 return r.getFirst();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting message by id: " + e.getMessage());
+            throw new DataAccessException("Error while getting message by id: " + e.getMessage(), e);
         }
         throw new MessageNotFoundException("Message not found");
     }
@@ -101,7 +101,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
                 throw new MessageNotFoundException("Message not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while deleting message: " + e.getMessage());
+            throw new DataAccessException("Error while deleting message: " + e.getMessage(), e);
         }
     }
 
@@ -118,7 +118,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
                 throw new MessageNotFoundException("Message not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while updating message: " + e.getMessage());
+            throw new DataAccessException("Error while updating message: " + e.getMessage(), e);
         }
     }
 
@@ -129,7 +129,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
             stmt.setInt(1, mid);
             return stmt.executeQuery().next();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while checking if message exists: " + e.getMessage());
+            throw new DataAccessException("Error while checking if message exists: " + e.getMessage(), e);
         }
     }
 }

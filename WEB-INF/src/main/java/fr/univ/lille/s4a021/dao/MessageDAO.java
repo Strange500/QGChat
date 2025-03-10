@@ -15,17 +15,17 @@ import java.util.List;
 public interface MessageDAO {
 
 
-    public Message createMessage(String contenu, int senderId, int channelId) throws MessageCreationException, DataAccessException;
+    Message createMessage(String contenu, int senderId, int channelId) throws MessageCreationException, DataAccessException;
 
-    public List<Message> getMessageByChannelId(int cid) throws ChannelNotFoundException, DataAccessException;
+    List<Message> getMessageByChannelId(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    public Message getMessageById(int mid) throws MessageNotFoundException, DataAccessException;
+    Message getMessageById(int mid) throws MessageNotFoundException, DataAccessException;
 
-    public void deleteMessage(int mid) throws MessageNotFoundException, DataAccessException;
+    void deleteMessage(int mid) throws MessageNotFoundException, DataAccessException;
 
-    public void updateMessage(int mid, String newContent) throws MessageNotFoundException, MessageUpdateException, DataAccessException;
+    void updateMessage(int mid, String newContent) throws MessageNotFoundException, MessageUpdateException, DataAccessException;
 
-    public default Pair<List<ImgMessage>,List<Message>> separateImgFromMessage(List<Message> listMessage) {
+    default Pair<List<ImgMessage>, List<Message>> separateImgFromMessage(List<Message> listMessage) {
         List<Message> messages = new ArrayList<>(listMessage);
         List<Message> lsToRemove = new ArrayList<>();
         List<ImgMessage> imgMessages = new ArrayList<>();
@@ -41,5 +41,5 @@ public interface MessageDAO {
         return new Pair<>(imgMessages, messages);
     }
 
-    public boolean messageExists(int mid) throws DataAccessException;
+    boolean messageExists(int mid) throws DataAccessException;
 }

@@ -39,7 +39,7 @@
             subscriptionDAO = Config.getConfig().getSubscriptionDAO();
             adminsDAO = Config.getConfig().getAdminsDAO();
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(500, e.getMessage(), request, response);
+            MainController.handleError(e, request, response);
             return;
         }
 
@@ -59,11 +59,8 @@
             users = userDAO.getAllUsers();
             abonnes = subscriptionDAO.getSubscribedUsers(channel.getCid());
             admins = adminsDAO.getAdmins(channel.getCid());
-        } catch (ChannelNotFoundException e) {
-            MainController.sendErrorPage(404, e.getMessage(), request, response);
-            return;
-        } catch (DataAccessException e) {
-            MainController.sendErrorPage(500, e.getMessage(), request, response);
+        } catch (ChannelNotFoundException | DataAccessException e) {
+            MainController.handleError(e, request, response);
             return;
         }
     %>

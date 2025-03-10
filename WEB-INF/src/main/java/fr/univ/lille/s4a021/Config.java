@@ -15,8 +15,10 @@ import java.util.Objects;
 public class Config {
 
     private static Config instance = null;
+    public static boolean DEBUG;
 
     private final DatabaseConfig databaseConfig;
+    private final Map<String, Object> config;
 
     private  AdminsDAO adminsDAO;
     private  ChannelDAO channelDAO;
@@ -39,7 +41,6 @@ public class Config {
                 instance.subscriptionDAO = new SubscriptionDAOSql(connection,instance.channelDAO, instance.userDAO);
                 instance.friendDAO = new FriendDAOSql(connection);
                 instance.adminsDAO = new AdminsDAOSql(connection, instance.userDAO, instance.channelDAO);
-
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new ConfigErrorException("Error while connecting to the database");
@@ -49,25 +50,37 @@ public class Config {
     }
 
     private Config() throws ConfigErrorException {
+        this.config = loadConfig();
         this.databaseConfig = loadDatabaseConfig();
-
+        DEBUG = loadDebugMode();
     }
 
-    private DatabaseConfig loadDatabaseConfig() throws ConfigErrorException {
+    private DatabaseConfig loadDatabaseConfig() {
+        Map<String, String> databaseConfig = (Map<String, String>) config.get("database");
+        return new DatabaseConfig(
+                Objects.requireNonNull(databaseConfig.get("host"), "Host not found"),
+                Objects.requireNonNull(databaseConfig.get("port"), "Port not found"),
+                Objects.requireNonNull(databaseConfig.get("database"), "Database not found"),
+                Objects.requireNonNull(databaseConfig.get("user"), "User not found"),
+                Objects.requireNonNull(databaseConfig.get("password"), "Password not found")
+        );
+    }
+
+    private boolean loadDebugMode() throws ConfigErrorException {
+        try {
+            return (boolean) config.get("debug");
+        } catch (Exception e) {
+            throw new ConfigErrorException("Error while reading the debug mode");
+        }
+    }
+
+    private Map<String, Object> loadConfig() throws ConfigErrorException {
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("config.yml")) {
             if (input == null) {
                 throw new ConfigErrorException("Config file not found");
             }
             Yaml yaml = new Yaml();
-            Map<String, Object> config = yaml.load(input);
-            Map<String, String> databaseConfig = (Map<String, String>) config.get("database");
-            return new DatabaseConfig(
-                    Objects.requireNonNull(databaseConfig.get("host"), "Host not found"),
-                    Objects.requireNonNull(databaseConfig.get("port"), "Port not found"),
-                    Objects.requireNonNull(databaseConfig.get("database"), "Database not found"),
-                    Objects.requireNonNull(databaseConfig.get("user"), "User not found"),
-                    Objects.requireNonNull(databaseConfig.get("password"), "Password not found")
-            );
+            return yaml.load(input);
         } catch (IOException e) {
             throw new ConfigErrorException("Error while reading the config file");
         }
@@ -120,6 +133,7 @@ public class Config {
     public AdminsDAO getAdminsDAO() {
         return adminsDAO;
     }
+
 
 }
 

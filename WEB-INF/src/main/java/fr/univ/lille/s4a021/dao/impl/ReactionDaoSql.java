@@ -53,7 +53,7 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
             }
             return reactions;
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting reactions: " + e.getMessage());
+            throw new DataAccessException("Error while getting reactions: " + e.getMessage(), e);
         }
     }
 
@@ -76,7 +76,7 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
             }
             throw new ReactionNotFoundException("Reaction not found");
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting user reaction: " + e.getMessage());
+            throw new DataAccessException("Error while getting user reaction: " + e.getMessage(), e);
         }
 
     }
@@ -102,7 +102,7 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
                 throw new ReactionNotFoundException("Reaction not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while updating user reaction: " + e.getMessage());
+            throw new DataAccessException("Error while updating user reaction: " + e.getMessage(), e);
         }
     }
 
@@ -124,7 +124,7 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
             stmt.setString(3, emoji.getEmoji());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while creating reaction: " + e.getMessage());
+            throw new DataAccessException("Error while creating reaction: " + e.getMessage(), e);
         }
     }
 
@@ -145,7 +145,7 @@ public class ReactionDaoSql extends DaoSql implements ReactionDAO {
                 throw new ReactionNotFoundException("Reaction not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while deleting reaction: " + e.getMessage());
+            throw new DataAccessException("Error while deleting reaction: " + e.getMessage(), e);
         }
     }
 

@@ -45,7 +45,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
             }
             throw new UserCreationException("Error while creating user");
         } catch (SQLException e) {
-            throw new DataAccessException("Error while creating user: " + e.getMessage());
+            throw new DataAccessException("Error while creating user: " + e.getMessage(), e);
         }
     }
 
@@ -63,7 +63,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while authenticating user: " + e.getMessage());
+            throw new DataAccessException("Error while authenticating user: " + e.getMessage(), e);
         }
         return false;
     }
@@ -81,7 +81,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 return u;
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting user by mail: " + e.getMessage());
+            throw new DataAccessException("Error while getting user by mail: " + e.getMessage(), e);
         }
         throw new UserNotFoundException("User not found");
         }
@@ -110,7 +110,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
             }
             return users;
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting users by ids: " + e.getMessage());
+            throw new DataAccessException("Error while getting users by ids: " + e.getMessage(), e);
         }
     }
 
@@ -142,7 +142,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 throw new UserNotFoundException("User not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while deleting user: " + e.getMessage());
+            throw new DataAccessException("Error while deleting user: " + e.getMessage(), e);
         }
 
     }
@@ -161,7 +161,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 throw new UserNotFoundException("User not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while updating user: " + e.getMessage());
+            throw new DataAccessException("Error while updating user: " + e.getMessage(), e);
         }
     }
 
@@ -173,7 +173,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
             buildUsers(users, rs);
             return users;
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting all users: " + e.getMessage());
+            throw new DataAccessException("Error while getting all users: " + e.getMessage(), e);
         }
     }
 
@@ -191,7 +191,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 throw new UserNotFoundException("User not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while updating user profile picture: " + e.getMessage());
+            throw new DataAccessException("Error while updating user profile picture: " + e.getMessage(), e);
         }
 
     }
@@ -205,7 +205,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 return rs.getString("profile_picture");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting user profile picture: " + e.getMessage());
+            throw new DataAccessException("Error while getting user profile picture: " + e.getMessage(), e);
         }
         throw new UserNotFoundException("User not found");
     }
@@ -220,7 +220,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while checking if user exists: " + e.getMessage());
+            throw new DataAccessException("Error while checking if user exists: " + e.getMessage(), e);
         }
         return false;
     }
@@ -246,7 +246,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
                 return rs.getInt(1) == uniqueUids.size();
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while checking if users exist: " + e.getMessage());
+            throw new DataAccessException("Error while checking if users exist: " + e.getMessage(), e);
         }
         return false;
     }

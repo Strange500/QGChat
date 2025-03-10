@@ -3,7 +3,9 @@ package fr.univ.lille.s4a021.controller;
 import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.User;
+import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserUpdateException;
@@ -39,8 +41,7 @@ public class UserController extends HttpServlet {
         try {
             userDAO = Config.getConfig().getUserDAO();
         } catch (ConfigErrorException e) {
-            e.printStackTrace();
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            MainController.handleError(e, req, res);
             return;
         }
 
@@ -58,12 +59,8 @@ public class UserController extends HttpServlet {
                        req.setAttribute("error", "Invalid credentials");
                        rd.forward(req, res);
                 }
-            } catch (DataAccessException e) {
-                e.printStackTrace();
-                MainController.sendErrorPage(500, e.getMessage(), req, res);
-                return;
-            } catch (UserNotFoundException e) {
-                MainController.sendErrorPage(404, e.getMessage(), req, res);
+            } catch (DataAccessException | UserNotFoundException e) {
+                MainController.handleError(e, req, res);
                 return;
             }
             return;
@@ -75,7 +72,7 @@ public class UserController extends HttpServlet {
                 return;
             }
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            MainController.handleError(e, req, res);
         }
 
         int currentUid = Util.getUid(session);
@@ -96,14 +93,14 @@ public class UserController extends HttpServlet {
                 case "delete":
                     int uid = Integer.parseInt(req.getParameter("uid"));
                     if (uid != currentUid) {
-                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
                         return;
                     }
 
                     try {
                         userDAO.deleteUser(uid);
                     }  catch (UserNotFoundException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
 
@@ -112,7 +109,7 @@ public class UserController extends HttpServlet {
                 case "update":
                     int uidToUpdate = Integer.parseInt(req.getParameter("uid"));
                     if (uidToUpdate != currentUid) {
-                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
                         return;
                     }
 
@@ -121,11 +118,8 @@ public class UserController extends HttpServlet {
 
                     try {
                         userDAO.updateUser(uidToUpdate, username, email);
-                    } catch (UserNotFoundException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
-                        return;
-                    } catch (UserUpdateException e) {
-                        MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    } catch (UserNotFoundException | UserUpdateException e) {
+                        MainController.handleError(e, req, res);
                         return;
                     }
 
@@ -135,18 +129,18 @@ public class UserController extends HttpServlet {
                 case "setprofilepic":
                     int uidToSetProfilePic = Integer.parseInt(req.getParameter("uid"));
                     if (uidToSetProfilePic != currentUid) {
-                        MainController.sendErrorPage(401, "Unauthorized", req, res);
+                        MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
                         return;
                     }
 
                     Part imgPart = req.getPart("profilepic");
                     if (imgPart.getSize() == 0) {
-                        MainController.sendErrorPage(400, "Bad request: no image", req, res);
+                        MainController.handleError(new BadParameterException("No image provided"), req, res);
                         return;
                     }
 
                     if (imgPart.getSize() > MAX_FILE_SIZE) {
-                        MainController.sendErrorPage(400, "Bad request: image too big", req, res);
+                        MainController.handleError(new BadParameterException("Image too big"), req, res);
                         return;
                     }
 
@@ -155,7 +149,7 @@ public class UserController extends HttpServlet {
                     try {
                         userDAO.setUserProfilePicture(base64Img, uidToSetProfilePic);
                     } catch (UserNotFoundException | UserUpdateException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
 
@@ -168,8 +162,7 @@ public class UserController extends HttpServlet {
 
             }
         } catch (DataAccessException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
-            return;
+            MainController.handleError(e, req, res);
         }
 
 

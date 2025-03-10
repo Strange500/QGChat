@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SentDAO {
 
-    public List<Message> getChannelMessages(int cid) throws ChannelNotFoundException, DataAccessException;
+    List<Message> getChannelMessages(int cid) throws ChannelNotFoundException, DataAccessException;
 
 
 

@@ -4,3 +4,4 @@ database:
   user: "sae"
   database: "sae"
   password: "sae"
+debug: true

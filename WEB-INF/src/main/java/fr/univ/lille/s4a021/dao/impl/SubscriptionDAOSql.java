@@ -41,7 +41,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
             ResultSet rs = stmt.executeQuery();
             return buildUsersFromResultSet(rs);
         } catch (Exception e) {
-            throw new DataAccessException("Error while getting subscribed users: " + e.getMessage());
+            throw new DataAccessException("Error while getting subscribed users: " + e.getMessage(), e);
         }
     }
 
@@ -67,7 +67,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
             stmt.setInt(1, cid);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while clearing subscriptions: " + e.getMessage());
+            throw new DataAccessException("Error while clearing subscriptions: " + e.getMessage(), e);
         }
     }
 
@@ -88,7 +88,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
                 throw new SubscriptionNotFoundException("user not subscribed to channel");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while unsubscribing user: " + e.getMessage());
+            throw new DataAccessException("Error while unsubscribing user: " + e.getMessage(), e);
         }
     }
 
@@ -107,7 +107,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
             ResultSet rs = stmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while checking subscription: " + e.getMessage());
+            throw new DataAccessException("Error while checking subscription: " + e.getMessage(), e);
         }
     }
 
@@ -134,7 +134,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
             }
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while subscribing users: " + e.getMessage());
+            throw new DataAccessException("Error while subscribing users: " + e.getMessage(), e);
         }
     }
 }

@@ -5,6 +5,7 @@ import fr.univ.lille.s4a021.dao.*;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.message.MessageCreationException;
@@ -57,7 +58,7 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
             reactionDAO = Config.getConfig().getReactionDAO();
             adminDAO = Config.getConfig().getAdminsDAO();
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            MainController.handleError(e, req, res);
             return;
         }
 
@@ -67,7 +68,7 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                 return;
             }
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            MainController.handleError(e, req, res);
         }
         try {
 
@@ -77,22 +78,19 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                     String channelID = req.getParameter("channelID");
                     try {
                         if (!subscriptionDAO.isSubscribedTo(Util.getUid(session), Integer.parseInt(channelID))) {
-                            MainController.sendErrorPage(401, "Unauthorized", req, res);
+                            MainController.handleError(new UnauthorizedException("You must be subscribed to the channel to send a message"), req, res);
                             return;
                         }
                     } catch (UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                     }
 
                     String msg = req.getParameter("message");
                     Part imgPart = req.getPart("img");
                     try {
                         sendMessage(req, channelID, imgPart, msg, channelDAO, messageDAO);
-                    } catch (ChannelNotFoundException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
-                        return;
-                    } catch (MessageCreationException e) {
-                        MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    } catch (ChannelNotFoundException | MessageCreationException e) {
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     res.sendRedirect("home?action=view&channelID=" + channelID);
@@ -105,17 +103,14 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                     try {
                         channelId = messageDAO.getMessageById(mid).getChannelId();
                         if (!subscriptionDAO.isSubscribedTo(Util.getUid(session), channelId)) {
-                            MainController.sendErrorPage(401, "Unauthorized", req, res);
+                            MainController.handleError(new UnauthorizedException("You must be subscribed to the channel to like a message"), req, res);
                             return;
                         }
                         likeMessage(mid, uid, emoji, reactionDAO);
 
                     } catch (MessageNotFoundException | UserNotFoundException | ChannelNotFoundException |
-                             ReactionNotFoundException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
-                        return;
-                    } catch (ReactionCreationException | ReactionUpdateException e) {
-                        MainController.sendErrorPage(500, e.getMessage(), req, res);
+                             ReactionNotFoundException | ReactionCreationException | ReactionUpdateException e) {
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     res.sendRedirect("home?action=view&channelID=" + channelId);
@@ -127,20 +122,20 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                         Message message = messageDAO.getMessageById(mid2);
                         cid = message.getChannelId();
                         if (!subscriptionDAO.isSubscribedTo(Util.getUid(session), message.getChannelId())) {
-                            MainController.sendErrorPage(401, "Unauthorized", req, res);
+                            MainController.handleError(new UnauthorizedException("You must be subscribed to the channel to delete a message"), req, res);
                             return;
                         }
 
 
                         if (message.getSenderId() != Util.getUid(session) && !adminDAO.userIsAdmin(Util.getUid(session), message.getChannelId())) {
-                            MainController.sendErrorPage(401, "Unauthorized", req, res);
+                            MainController.handleError(new UnauthorizedException("You must be the sender of the message or an admin of the channel to delete a message"), req, res);
                             return;
                         }
 
                         messageDAO.deleteMessage(mid2);
 
                     }catch (MessageNotFoundException | UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
 
@@ -155,22 +150,20 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
                         cidEdit = msgEdit.getChannelId();
 
                         if (!subscriptionDAO.isSubscribedTo(Util.getUid(session), cidEdit)) {
-                            MainController.sendErrorPage(401, "Unauthorized", req, res);
+                            MainController.handleError(new UnauthorizedException("You must be subscribed to the channel to edit a message"), req, res);
                             return;
                         }
 
                         if (msgEdit.getSenderId() != Util.getUid(session)) {
-                            MainController.sendErrorPage(401, "Unauthorized", req, res);
+                            MainController.handleError(new UnauthorizedException("You must be the sender of the message to edit it"), req, res);
                             return;
                         }
 
                         msgEdit.setContenu(StringEscapeUtils.escapeHtml4(newMessage));
                         messageDAO.updateMessage(msgEdit.getMid(), msgEdit.getContenu());
-                    } catch (MessageNotFoundException | UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(404, e.getMessage(), req, res);
-                        return;
-                    } catch (MessageUpdateException e) {
-                        MainController.sendErrorPage(500, e.getMessage(), req, res);
+                    } catch (MessageNotFoundException | UserNotFoundException | ChannelNotFoundException |
+                             MessageUpdateException e) {
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     res.sendRedirect("home?action=view&channelID=" + cidEdit);
@@ -181,8 +174,7 @@ public class MessageController extends jakarta.servlet.http.HttpServlet {
 
             }
         } catch (DataAccessException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
-            return;
+            MainController.handleError(e, req, res);
         }
 
 

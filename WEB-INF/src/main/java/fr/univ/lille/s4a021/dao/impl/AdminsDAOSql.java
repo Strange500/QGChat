@@ -50,9 +50,9 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
                 throw new DataAccessException("Error while setting admin");
             }
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new AdminCreationException("Error while setting admin: " + e.getMessage());
+            throw new AdminCreationException("Error while setting admin: " + e.getMessage(), e);
         } catch (SQLException e) {
-            throw new DataAccessException("Error while setting admin: " + e.getMessage());
+            throw new DataAccessException("Error while setting admin: " + e.getMessage(), e);
         }
 
     }
@@ -67,7 +67,7 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
             stmt.setInt(1, cid);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while clearing admins: " + e.getMessage());
+            throw new DataAccessException("Error while clearing admins: " + e.getMessage(), e);
         }
 
     }
@@ -99,9 +99,9 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
             }
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new AdminCreationException("Error while setting admins: " + e.getMessage());
+            throw new AdminCreationException("Error while setting admins: " + e.getMessage(), e);
         } catch (SQLException e) {
-            throw new DataAccessException("Error while setting admins: " + e.getMessage());
+            throw new DataAccessException("Error while setting admins: " + e.getMessage(), e);
         }
     }
 
@@ -121,7 +121,7 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
             stmt.setInt(2, uid);
             return stmt.executeQuery().next();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while checking if user is admin: " + e.getMessage());
+            throw new DataAccessException("Error while checking if user is admin: " + e.getMessage(), e);
         }
     }
 
@@ -138,7 +138,7 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
             ((UserDAOSql) userDAO).buildUsers(admins, stmt.executeQuery());
             return admins;
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting admins: " + e.getMessage());
+            throw new DataAccessException("Error while getting admins: " + e.getMessage(), e);
         }
     }
 
@@ -160,7 +160,7 @@ public class AdminsDAOSql extends DaoSql implements AdminsDAO {
                 throw new AdminNotFoundException("Admin not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while removing admin: " + e.getMessage());
+            throw new DataAccessException("Error while removing admin: " + e.getMessage(), e);
         }
     }
 

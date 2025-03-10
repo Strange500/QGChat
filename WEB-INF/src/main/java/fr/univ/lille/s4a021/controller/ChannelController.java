@@ -5,7 +5,9 @@ import fr.univ.lille.s4a021.dao.AdminsDAO;
 import fr.univ.lille.s4a021.dao.ChannelDAO;
 import fr.univ.lille.s4a021.dao.SubscriptionDAO;
 import fr.univ.lille.s4a021.dto.Channel;
+import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.admin.AdminCreationException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelCreationException;
@@ -49,7 +51,7 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
             subscriptionDAO = Config.getConfig().getSubscriptionDAO();
             adminsDAO = Config.getConfig().getAdminsDAO();
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            MainController.handleError(e, req, res);
             return;
         }
 
@@ -64,7 +66,7 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                 return;
             }
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
+            MainController.handleError(e, req, res);
             return;
         }
 
@@ -87,11 +89,9 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                         subscriptionDAO.subscribeUsersTo(ch, abonnees);
                         adminsDAO.setAdmin(ch.getCid(), uid);
                         res.sendRedirect("home?action=view&channelID=" + ch.getCid());
-                    } catch (ChannelCreationException | AdminCreationException e) {
-                        MainController.sendErrorPage(500, e.getMessage(), req, res);
-                        return;
-                    } catch (UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                    } catch (ChannelCreationException | AdminCreationException | UserNotFoundException |
+                             ChannelNotFoundException e) {
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     break;
@@ -99,29 +99,29 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                     int cid = Integer.parseInt(req.getParameter("channelID"));
                     try {
                         if (!adminsDAO.userIsAdmin(uid, cid)) {
-                            MainController.sendErrorPage(403, "Forbidden", req, res);
+                            MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
                             return;
                         }
                     } catch (UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     try {
                         channelDAO.deleteChannel(cid);
                         res.sendRedirect("home");
                     }catch (ChannelNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                     }
                     break;
                 case "update":
                     int cid2 = Integer.parseInt(req.getParameter("channelID"));
                     try {
                         if (!adminsDAO.userIsAdmin(uid, cid2)) {
-                            MainController.sendErrorPage(403, "Forbidden", req, res);
+                            MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
                             return;
                         }
                     }catch (UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     String newName = req.getParameter("name");
@@ -140,7 +140,7 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                         for (String admin : adminsArray) {
                             int adminUid = Integer.parseInt(admin);
                             if (!abonnees2.contains(adminUid)) {
-                                MainController.sendErrorPage(400, "Admin must be subscribed to the channel", req, res);
+                                MainController.handleError(new BadParameterException("An admin must be a subscriber"), req, res);
                                 return;
                             }
                             admins.add(adminUid);
@@ -156,21 +156,20 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                         adminsDAO.clearAdmins(cid2);
                         adminsDAO.setAdmins(ch.getCid(), admins);
                         res.sendRedirect("home?action=view&channelID=" + cid2);
-                    } catch (ChannelUpdateException | AdminCreationException e) {
-                        MainController.sendErrorPage(500, e.getMessage(), req, res);
-                    } catch (ChannelNotFoundException | UserNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                    } catch (ChannelUpdateException | AdminCreationException | ChannelNotFoundException |
+                             UserNotFoundException e) {
+                        MainController.handleError(e, req, res);
                     }
                     break;
                 case "modifchannel":
                     int cid3 = Integer.parseInt(req.getParameter("channelID"));
                     try {
                         if (!adminsDAO.userIsAdmin(uid, cid3)) {
-                            MainController.sendErrorPage(403, "Forbidden", req, res);
+                            MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
                             return;
                         }
                     } catch (UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     RequestDispatcher rd3 = req.getRequestDispatcher(getJSPPath(MODIFY_CHANNEL));
@@ -196,7 +195,7 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                         subscriptionDAO.unsubscribeUser(Util.getUid(session), cid5);
                         res.sendRedirect("home");
                     }catch (UserNotFoundException | ChannelNotFoundException | SubscriptionNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     break;
@@ -204,18 +203,18 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
                     int cid4 = Integer.parseInt(req.getParameter("channelID"));
                     try {
                         if (!adminsDAO.userIsAdmin(uid, cid4)) {
-                            MainController.sendErrorPage(403, "Forbidden", req, res);
+                            MainController.handleError(new UnauthorizedException("Unauthorized"), req, res);
                             return;
                         }
                     }  catch (UserNotFoundException | ChannelNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     try {
                         channelDAO.deleteChannel(cid4);
                         res.sendRedirect("home");
                     } catch (ChannelNotFoundException e) {
-                        MainController.sendErrorPage(400, e.getMessage(), req, res);
+                        MainController.handleError(e, req, res);
                         return;
                     }
                     break;
@@ -224,8 +223,7 @@ public class ChannelController extends jakarta.servlet.http.HttpServlet {
 
             }
         } catch (DataAccessException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
-            return;
+            MainController.handleError(e, req, res);
         }
 
     }

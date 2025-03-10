@@ -38,10 +38,10 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
             try {
                 return getChannelById(rs.getInt(1));
             } catch (ChannelNotFoundException e) {
-                throw new ChannelCreationException("Error while creating channel: " + e.getMessage());
+                throw new ChannelCreationException("Error while creating channel: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while creating channel: " + e.getMessage());
+            throw new DataAccessException("Error while creating channel: " + e.getMessage(), e);
         }
 
     }
@@ -56,7 +56,7 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
                 return new Channel(cid, name);
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting channel by name: " + e.getMessage());
+            throw new DataAccessException("Error while getting channel by name: " + e.getMessage(), e);
         }
         throw new ChannelNotFoundException("Channel not found");
     }
@@ -71,7 +71,7 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
                 return new Channel(cid, name);
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting channel by id: " + e.getMessage());
+            throw new DataAccessException("Error while getting channel by id: " + e.getMessage(), e);
         }
         throw new ChannelNotFoundException("Channel not found");
     }
@@ -86,7 +86,7 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
                 throw new ChannelNotFoundException("Channel not found");
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while deleting channel: " + e.getMessage());
+            throw new DataAccessException("Error while deleting channel: " + e.getMessage(), e);
         }
 
     }
@@ -106,7 +106,7 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
             }
 
         } catch (SQLException e) {
-            throw new DataAccessException("Error while updating channel: " + e.getMessage());
+            throw new DataAccessException("Error while updating channel: " + e.getMessage(), e);
         }
     }
 
@@ -122,7 +122,7 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
                 channels.add(new Channel(cid, name));
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Error while getting all channels: " + e.getMessage());
+            throw new DataAccessException("Error while getting all channels: " + e.getMessage(), e);
         }
         return channels;
     }
@@ -135,25 +135,7 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
             ResultSet rs = stmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {
-            throw new DataAccessException("Error while checking if channel exists: " + e.getMessage());
-        }
-    }
-
-    public void abonneUsers(Channel ch, List<String> users) {
-        try {
-            String query = "INSERT INTO estAbonne (uid, cid) VALUES (?, ?)";
-
-            for (String user : users) {
-                int uid = Integer.parseInt(user);
-                try (PreparedStatement stmt = connection.prepareStatement(query)) {
-                    stmt.setInt(1, uid);
-                    stmt.setInt(2, ch.getCid());
-                    stmt.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-
+            throw new DataAccessException("Error while checking if channel exists: " + e.getMessage(), e);
         }
     }
 

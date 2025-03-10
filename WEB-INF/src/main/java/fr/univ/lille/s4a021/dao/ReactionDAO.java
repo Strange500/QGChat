@@ -17,15 +17,15 @@ import java.util.Set;
 
 public interface ReactionDAO {
 
-    public Map<Reaction, Set<Integer>> getReactionsForMessage(int mid) throws MessageNotFoundException, DataAccessException;
+    Map<Reaction, Set<Integer>> getReactionsForMessage(int mid) throws MessageNotFoundException, DataAccessException;
 
-    public Reaction getUserReactionForMessage(int mid, int uid) throws MessageNotFoundException, UserNotFoundException, ReactionNotFoundException, DataAccessException;
+    Reaction getUserReactionForMessage(int mid, int uid) throws MessageNotFoundException, UserNotFoundException, ReactionNotFoundException, DataAccessException;
 
-    public void updateUserReactionForMessage(int mid, int uid, ReactionDAO.Reaction emoji) throws MessageNotFoundException, UserNotFoundException, ReactionUpdateException, ReactionNotFoundException, DataAccessException;
+    void updateUserReactionForMessage(int mid, int uid, ReactionDAO.Reaction emoji) throws MessageNotFoundException, UserNotFoundException, ReactionUpdateException, ReactionNotFoundException, DataAccessException;
 
-    public void createReactionForMessage(int mid, int uid, ReactionDAO.Reaction emoji) throws MessageNotFoundException, UserNotFoundException, ReactionCreationException, DataAccessException;
+    void createReactionForMessage(int mid, int uid, ReactionDAO.Reaction emoji) throws MessageNotFoundException, UserNotFoundException, ReactionCreationException, DataAccessException;
 
-    public void deleteReactionForMessage(int mid, int uid) throws MessageNotFoundException, UserNotFoundException, ReactionNotFoundException, DataAccessException;
+    void deleteReactionForMessage(int mid, int uid) throws MessageNotFoundException, UserNotFoundException, ReactionNotFoundException, DataAccessException;
 
     enum Reaction {
         EMPTY(""),

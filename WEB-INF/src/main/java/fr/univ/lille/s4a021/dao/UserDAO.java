@@ -12,27 +12,27 @@ import java.util.List;
 
 public interface UserDAO {
 
-    public int createUser(String username, String mail, String password) throws UserCreationException, DataAccessException;
+    int createUser(String username, String mail, String password) throws UserCreationException, DataAccessException;
 
-    public boolean authenticateUser(String mail, String password) throws DataAccessException;
+    boolean authenticateUser(String mail, String password) throws DataAccessException;
 
-    public User getUserByMail(String mail) throws UserNotFoundException, DataAccessException;
+    User getUserByMail(String mail) throws UserNotFoundException, DataAccessException;
 
-    public User getUserById(int uid) throws UserNotFoundException, DataAccessException;
+    User getUserById(int uid) throws UserNotFoundException, DataAccessException;
 
-    public List<User> getUserByIds(Collection<Integer> uids) throws UserNotFoundException, DataAccessException;
+    List<User> getUserByIds(Collection<Integer> uids) throws UserNotFoundException, DataAccessException;
 
-    public void deleteUser(int uid) throws UserNotFoundException, DataAccessException;
+    void deleteUser(int uid) throws UserNotFoundException, DataAccessException;
 
-    public void updateUser(int uid, String newUsername, String newMail) throws UserNotFoundException, UserUpdateException, DataAccessException;
+    void updateUser(int uid, String newUsername, String newMail) throws UserNotFoundException, UserUpdateException, DataAccessException;
 
-    public List<User> getAllUsers() throws DataAccessException;
+    List<User> getAllUsers() throws DataAccessException;
 
-    public void setUserProfilePicture(String base64Image, int uid) throws UserNotFoundException, UserUpdateException, DataAccessException;
+    void setUserProfilePicture(String base64Image, int uid) throws UserNotFoundException, UserUpdateException, DataAccessException;
 
-    public String getUserProfilePicture(int uid) throws UserNotFoundException, DataAccessException;
+    String getUserProfilePicture(int uid) throws UserNotFoundException, DataAccessException;
 
-    public boolean userExists(int uid) throws DataAccessException;
+    boolean userExists(int uid) throws DataAccessException;
 
-    public boolean userAllExists(Collection<Integer> uids) throws DataAccessException;
+    boolean userAllExists(Collection<Integer> uids) throws DataAccessException;
 }

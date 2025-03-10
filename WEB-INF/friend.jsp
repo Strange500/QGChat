@@ -29,28 +29,25 @@
     try {
         channelDAO = Config.getConfig().getChannelDAO();
     } catch (ConfigErrorException e) {
-        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        MainController.handleError(e, request, response);
         return;
     }
 
 
   Integer chanelID = Integer.parseInt(request.getParameter("channelID"));
   if (chanelID == null) {
-    MainController.sendErrorPage(400, "Bad Request: The channel ID is missing", request, response);
+    MainController.handleError(new IllegalArgumentException("The channel ID is missing"), request, response);
     return;
   }
   Channel ch = null;
   try {
     ch = channelDAO.getChannelById(chanelID);
     if (ch == null) {
-      MainController.sendErrorPage(400, "Bad Request: The channel ID is invalid", request, response);
+      MainController.handleError(new ChannelNotFoundException("The channel with ID " + chanelID + " was not found"), request, response);
       return;
     }
-  } catch (ChannelNotFoundException e) {
-    MainController.sendErrorPage(404, e.getMessage(), request, response);
-    return;
-  } catch (DataAccessException e) {
-    MainController.sendErrorPage(500, e.getMessage(), request, response);
+  } catch (ChannelNotFoundException | DataAccessException e) {
+    MainController.handleError(e, request, response);
     return;
   }
 

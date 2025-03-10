@@ -76,7 +76,7 @@
 
 <%
     } catch (DataAccessException e) {
-        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        MainController.handleError(e, request, response);
         return;
     }
 %>

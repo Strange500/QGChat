@@ -11,16 +11,16 @@ import java.util.List;
 
 public interface AdminsDAO {
 
-    public void setAdmin(int cid, int uid) throws UserNotFoundException, ChannelNotFoundException, AdminCreationException, DataAccessException;
+    void setAdmin(int cid, int uid) throws UserNotFoundException, ChannelNotFoundException, AdminCreationException, DataAccessException;
 
-    public void clearAdmins(int cid) throws ChannelNotFoundException, DataAccessException;
+    void clearAdmins(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    public void setAdmins(int cid, List<Integer> users) throws UserNotFoundException, ChannelNotFoundException, AdminCreationException, DataAccessException;
+    void setAdmins(int cid, List<Integer> users) throws UserNotFoundException, ChannelNotFoundException, AdminCreationException, DataAccessException;
 
-    public boolean userIsAdmin(int uid, int cid) throws UserNotFoundException, ChannelNotFoundException, DataAccessException;
+    boolean userIsAdmin(int uid, int cid) throws UserNotFoundException, ChannelNotFoundException, DataAccessException;
 
-    public List<User> getAdmins(int cid) throws ChannelNotFoundException, DataAccessException;
+    List<User> getAdmins(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    public void removeAdmin(int uid, int cid) throws AdminNotFoundException, ChannelNotFoundException, DataAccessException;
+    void removeAdmin(int uid, int cid) throws AdminNotFoundException, ChannelNotFoundException, DataAccessException;
 
 }

@@ -42,7 +42,7 @@ public class Register extends HttpServlet {
             try {
                 userDAO = Config.getConfig().getUserDAO();
             } catch (ConfigErrorException e) {
-                MainController.sendErrorPage(500, e.getMessage(), req, res);
+                MainController.handleError(e, req, res);
                 return;
             }
             String username = StringEscapeUtils.escapeHtml4(req.getParameter("username"));
@@ -51,15 +51,8 @@ public class Register extends HttpServlet {
             int uid = userDAO.createUser(username, mail, password);
             userDAO.setUserProfilePicture(getDefaultProfilePic(), uid);
             res.sendRedirect("home");
-        } catch (UserNotFoundException | UserUpdateException e) {
-            MainController.sendErrorPage(404, e.getMessage(), req, res);
-            return;
-        } catch (UserCreationException e) {
-            MainController.sendErrorPage(400, e.getMessage(), req, res);
-            return;
-        } catch (DataAccessException e) {
-            MainController.sendErrorPage(500, e.getMessage(), req, res);
-            return;
+        } catch (UserNotFoundException | UserUpdateException | DataAccessException | UserCreationException e) {
+            MainController.handleError(e, req, res);
         }
     }
 

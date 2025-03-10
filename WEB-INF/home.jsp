@@ -29,6 +29,8 @@
     <%@ page import="fr.univ.lille.s4a021.exception.dao.message.MessageNotFoundException" %>
     <%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.reaction.ReactionNotFoundException" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.NotFoundException" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.MyDiscordException" %>
 
     <div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
@@ -272,7 +274,7 @@
                 messageDAO = Config.getConfig().getMessageDAO();
                 reactionDAO = Config.getConfig().getReactionDAO();
             } catch (ConfigErrorException e) {
-                MainController.sendErrorPage(500, e.getMessage(), request, response);
+                MainController.handleError(e, request, response);
                 return;
             }
 
@@ -282,7 +284,7 @@
                 currentUser = userDAO.getUserById(Util.getUid(session));
                 profilepicBase64 = userDAO.getUserProfilePicture(currentUser.getUid());
             } catch (UserNotFoundException e) {
-                MainController.sendErrorPage(404, e.getMessage(), request, response);
+                MainController.handleError(e, request, response);
                 return;
             }
 
@@ -312,7 +314,7 @@
                         try {
                             estAbonne = subscriptionDAO.isSubscribedTo((int) session.getAttribute("id"), channel.getCid());
                         } catch (UserNotFoundException | ChannelNotFoundException e) {
-                            MainController.sendErrorPage(404, e.getMessage(), request, response);
+                            MainController.handleError(e, request, response);
                             return;
                         }
                         if (!estAbonne) {
@@ -343,7 +345,7 @@
                         try {
                             estAbonne = subscriptionDAO.isSubscribedTo((int) session.getAttribute("id"), Integer.parseInt(channelIdParam));
                         } catch (UserNotFoundException | ChannelNotFoundException e) {
-                            MainController.sendErrorPage(404, e.getMessage(), request, response);
+                            MainController.handleError(e, request, response);
                             return;
                         }
                         if (!estAbonne) {
@@ -354,7 +356,7 @@
                         try {
                             channel = channelDAO.getChannelById(channelID);
                         }catch (ChannelNotFoundException e) {
-                            MainController.sendErrorPage(404, e.getMessage(), request, response);
+                            MainController.handleError(e, request, response);
                             return;
                         }
 
@@ -366,7 +368,7 @@
                             isAdmin = adminsDAO.userIsAdmin(Util.getUid(session), channelID);
 
                         } catch (UserNotFoundException | ChannelNotFoundException e) {
-                            MainController.sendErrorPage(404, e.getMessage(), request, response);
+                            MainController.handleError(e, request, response);
                             return;
                         }
 
@@ -431,7 +433,7 @@
 
 
                                     } catch (ChannelNotFoundException | UserNotFoundException | MessageNotFoundException  e) {
-                                        MainController.sendErrorPage(404, e.getMessage(), request, response);
+                                        MainController.handleError(e, request, response);
                                         return;
                                     }
 
@@ -590,8 +592,8 @@
 </body>
 
 <%
-    } catch (DataAccessException e) {
-            MainController.sendErrorPage(500, e.getMessage(), request, response);
+    } catch (MyDiscordException e) {
+        MainController.handleError(e, request, response);
             return;
     }
 %>

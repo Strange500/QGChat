@@ -29,18 +29,15 @@
     try {
         userDAO = Config.getConfig().getUserDAO();
     } catch (ConfigErrorException e) {
-        MainController.sendErrorPage(500, e.getMessage(), request, response);
+      MainController.handleError(e, request, response);
         return;
     }
 
     User user = null;
     try {
         user = userDAO.getUserById(uid);
-    } catch (UserNotFoundException e) {
-        MainController.sendErrorPage(404, e.getMessage(), request, response);
-        return;
-    } catch (DataAccessException e) {
-        MainController.sendErrorPage(500, e.getMessage(), request, response);
+    } catch (UserNotFoundException | DataAccessException e) {
+      MainController.handleError(e, request, response);
         return;
     }
 

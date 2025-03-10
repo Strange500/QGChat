@@ -1,6 +1,11 @@
 package fr.univ.lille.s4a021.exception.dao.channel;
 
-public class ChannelNotFoundException extends Exception {
+import fr.univ.lille.s4a021.exception.dao.NotFoundException;
+
+public class ChannelNotFoundException extends NotFoundException {
+    public ChannelNotFoundException(String message, Exception e) {
+        super(message, e);
+    }
     public ChannelNotFoundException(String message) {
         super(message);
     }

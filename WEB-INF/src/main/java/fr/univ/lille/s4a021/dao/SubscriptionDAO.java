@@ -14,15 +14,15 @@ import java.util.List;
 
 public interface SubscriptionDAO {
 
-    public List<User> getSubscribedUsers(int cid) throws ChannelNotFoundException, DataAccessException;
+    List<User> getSubscribedUsers(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    public void clearSubscriptions(int cid) throws ChannelNotFoundException, DataAccessException;
+    void clearSubscriptions(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    public void unsubscribeUser(int uid, int cid) throws UserNotFoundException, ChannelNotFoundException, SubscriptionNotFoundException,DataAccessException;
+    void unsubscribeUser(int uid, int cid) throws UserNotFoundException, ChannelNotFoundException, SubscriptionNotFoundException, DataAccessException;
 
-    public boolean isSubscribedTo(int uid, int cid) throws UserNotFoundException, ChannelNotFoundException, DataAccessException;
+    boolean isSubscribedTo(int uid, int cid) throws UserNotFoundException, ChannelNotFoundException, DataAccessException;
 
-    public void subscribeUsersTo(Channel ch, List<Integer> Uids) throws ChannelNotFoundException, UserNotFoundException, DataAccessException;
+    void subscribeUsersTo(Channel ch, List<Integer> Uids) throws ChannelNotFoundException, UserNotFoundException, DataAccessException;
 
 
 }

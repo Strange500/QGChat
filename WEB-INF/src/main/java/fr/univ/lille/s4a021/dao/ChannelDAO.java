@@ -12,18 +12,18 @@ import java.util.List;
 public interface ChannelDAO {
 
 
-    public Channel createChannel(String name) throws ChannelCreationException, DataAccessException;
+    Channel createChannel(String name) throws ChannelCreationException, DataAccessException;
 
-    public Channel getChannelByName(String name) throws ChannelNotFoundException, DataAccessException;
+    Channel getChannelByName(String name) throws ChannelNotFoundException, DataAccessException;
 
-    public Channel getChannelById(int cid) throws ChannelNotFoundException, DataAccessException;
+    Channel getChannelById(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    public void deleteChannel(int cid) throws ChannelNotFoundException, DataAccessException;
+    void deleteChannel(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    public void updateChannel(int cid, String newName) throws ChannelNotFoundException, ChannelUpdateException, DataAccessException;
+    void updateChannel(int cid, String newName) throws ChannelNotFoundException, ChannelUpdateException, DataAccessException;
 
-    public List<Channel> getAllChannels() throws DataAccessException;
+    List<Channel> getAllChannels() throws DataAccessException;
 
-    public boolean channelExists(int cid) throws DataAccessException;
+    boolean channelExists(int cid) throws DataAccessException;
 
 }

@@ -8,7 +8,7 @@ public class Message {
     private String contenu;
     private int senderId;
     private int channelId;
-    private String timestamp;
+    private final String timestamp;
 
     private Date dateSend;
 

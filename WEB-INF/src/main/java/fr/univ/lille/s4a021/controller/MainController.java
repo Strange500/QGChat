@@ -1,7 +1,12 @@
 package fr.univ.lille.s4a021.controller;
 
 
+import fr.univ.lille.s4a021.Config;
+import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.MyDiscordException;
+import fr.univ.lille.s4a021.exception.UnauthorizedException;
+import fr.univ.lille.s4a021.exception.dao.*;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -13,6 +18,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.SQLException;
 
 @MultipartConfig
@@ -74,7 +81,6 @@ public class MainController extends HttpServlet {
             }
         } catch (ConfigErrorException e) {
             MainController.sendErrorPage(500, e.getMessage(), req, res);
-            return;
         }
 
     }
@@ -85,10 +91,29 @@ public class MainController extends HttpServlet {
         System.out.println("Hello, World!");
     }
 
-    public static void sendErrorPage(int errorCode, String msg, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    private static void sendErrorPage(int errorCode, String msg, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         req.setAttribute("errorCode", errorCode);
         req.setAttribute("message", msg);
         RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(ERROR));
         rd.forward(req, res);
+    }
+
+    public static void handleError(Exception exception, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        int errorCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+        if (exception instanceof MyDiscordException) {
+            errorCode = switch (exception) {
+                case NotFoundException notFoundException -> HttpServletResponse.SC_NOT_FOUND;
+                case CreationException creationException -> HttpServletResponse.SC_BAD_REQUEST;
+                case UpdateException updateException -> HttpServletResponse.SC_BAD_REQUEST;
+                case UnauthorizedException unauthorizedException -> HttpServletResponse.SC_UNAUTHORIZED;
+                case BadParameterException badParameterException -> HttpServletResponse.SC_BAD_REQUEST;
+                default -> HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+            };
+        }
+        String message = exception.getMessage();
+        if (Config.DEBUG) {
+            req.setAttribute("exception", exception);
+        }
+        sendErrorPage(errorCode, message, req, res);
     }
 }

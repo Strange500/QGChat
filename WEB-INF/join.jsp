@@ -36,26 +36,26 @@
         userDAO = Config.getConfig().getUserDAO();
         channelDAO = Config.getConfig().getChannelDAO();
     } catch (ConfigErrorException e) {
-        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        MainController.handleError(e, request, response);
         return;
     }
 
   String token = request.getParameter("token");
   if (token == null) {
-      MainController.sendErrorPage(400, "Bad Request: The token is missing", request, response);
+      MainController.handleError(new IllegalArgumentException("The token is missing"), request, response);
       return;
   }
     Pair<Integer, Integer> pair = null;
     try {
         pair = new JwtManager().getUidAndCidFromChannelInviteToken(token)   ;
     } catch (JwtException e) {
-        MainController.sendErrorPage(400, "Bad Request: " + e.getMessage(), request, response);
+        MainController.handleError(e, request, response);
         return;
     }
 
 
   if (pair == null) {
-      MainController.sendErrorPage(400, "Bad Request: The token is invalid", request, response);
+      MainController.handleError(new IllegalArgumentException("The token is invalid"), request, response);
       return;
   }
 
@@ -67,11 +67,8 @@
     try {
         user = userDAO.getUserById(userID);
         channel = channelDAO.getChannelById(channelID);
-    } catch (UserNotFoundException | ChannelNotFoundException e) {
-        MainController.sendErrorPage(404, e.getMessage(), request, response);
-        return;
-    } catch (DataAccessException e) {
-        MainController.sendErrorPage(500, e.getMessage(), request, response);
+    } catch (UserNotFoundException | ChannelNotFoundException | DataAccessException e) {
+        MainController.handleError(e, request, response);
         return;
     }
 

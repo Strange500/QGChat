@@ -8,8 +8,10 @@ import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
+import fr.univ.lille.s4a021.exception.dao.subscription.SubscriptionNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.model.bdd.Util;
 import fr.univ.lille.s4a021.util.JwtManager;
@@ -32,11 +34,11 @@ public class Invite extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             if (!Util.userIsConnected(request.getSession())) {
-                MainController.sendErrorPage(401, "Unauthorized", request, response);
+                MainController.handleError(new UnauthorizedException("You must be connected to access this page"), request, response);
                 return;
             }
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(401, e.getMessage(), request, response);
+            MainController.handleError(e, request, response);
         }
 
         UserDAO userDAO = null;
@@ -47,7 +49,7 @@ public class Invite extends HttpServlet {
             channelDAO = Config.getConfig().getChannelDAO();
             subscriptionDAO = Config.getConfig().getSubscriptionDAO();
         } catch (ConfigErrorException e) {
-            MainController.sendErrorPage(500, e.getMessage(), request, response);
+            MainController.handleError(e, request, response);
             return;
         }
 
@@ -57,11 +59,11 @@ public class Invite extends HttpServlet {
         try {
             uidAndCid = new JwtManager().getUidAndCidFromChannelInviteToken(token);
             if (uidAndCid == null) {
-                MainController.sendErrorPage(400, "Invalid token", request, response);
+                MainController.handleError(new UnauthorizedException("Invalid token"), request, response);
                 return;
             }
         } catch (JwtException e) {
-            MainController.sendErrorPage(400, "Invalid token", request, response);
+            MainController.handleError(new UnauthorizedException("Invalid token"), request, response);
             return;
         }
 
@@ -71,38 +73,34 @@ public class Invite extends HttpServlet {
             try {
                 user = userDAO.getUserById(Util.getUid(request.getSession()));
             } catch (UserNotFoundException e) {
-                MainController.sendErrorPage(400, "User not found", request, response);
+                MainController.handleError(e, request, response);
                 return;
             }
 
             try {
                 channel = channelDAO.getChannelById(uidAndCid.getSecond());
             } catch (ChannelNotFoundException e) {
-                MainController.sendErrorPage(400, "Channel not found", request, response);
+                MainController.handleError(e, request, response);
                 return;
             }
 
             try {
                 if (subscriptionDAO.isSubscribedTo(user.getUid(), channel.getCid())) {
-                    MainController.sendErrorPage(400, "You are already subscribed to this channel", request, response);
+                    MainController.handleError(new SubscriptionNotFoundException("You are already subscribed to this channel"), request, response);
                     return;
                 }
                 if (!subscriptionDAO.isSubscribedTo(uidAndCid.getFirst(), channel.getCid())) {
-                    MainController.sendErrorPage(400, "User who invited you is not subscribed to this channel", request, response);
+                    MainController.handleError(new SubscriptionNotFoundException("The user who invited you is not subscribed to this channel"), request, response);
                     return;
                 }
                 subscriptionDAO.subscribeUsersTo(channel, List.of(user.getUid()));
-            } catch (ChannelNotFoundException e) {
-                MainController.sendErrorPage(400, "Channel not found", request, response);
-                return;
-            } catch (UserNotFoundException e) {
-                MainController.sendErrorPage(400, "User not found", request, response);
+            } catch (ChannelNotFoundException | UserNotFoundException e) {
+                MainController.handleError(e, request, response);
                 return;
             }
             response.sendRedirect("home?action=view&channelID=" + channel.getCid());
         } catch (DataAccessException e) {
-            MainController.sendErrorPage(500, e.getMessage(), request, response);
-            return;
+            MainController.handleError(e, request, response);
         }
 
     }
