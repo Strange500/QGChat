@@ -12,24 +12,60 @@
 
 </head>
 <body class="container">
-    <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.impl.ChannelDAOSql" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
     <%@ page import="java.util.List" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.Config" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
+    <%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.SubscriptionDAO" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
+    <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
+    <%@ page import="fr.univ.lille.s4a021.dao.AdminsDAO" %>
 
     <%
+        ChannelDAO channelDAO = null;
+        UserDAO userDAO = null;
+        SubscriptionDAO subscriptionDAO = null;
+        AdminsDAO adminsDAO = null;
+
+        try {
+            channelDAO = Config.getConfig().getChannelDAO();
+            userDAO = Config.getConfig().getUserDAO();
+            subscriptionDAO = Config.getConfig().getSubscriptionDAO();
+            adminsDAO = Config.getConfig().getAdminsDAO();
+        } catch (ConfigErrorException e) {
+            MainController.sendErrorPage(500, e.getMessage(), request, response);
+            return;
+        }
+
         String channelID = request.getParameter("channelID");
         if (channelID == null) {
             response.sendRedirect("home");
+            return;
         }
 
-        ChannelDAO channelDAO = new ChannelDAO();
-        Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
+        Channel channel = null;
 
-        UserDAO userDAO = new UserDAO();
-        List<User> users = userDAO.getAllUsers();
-        List<User> abonnes = channelDAO.getAbonnes(channel.getCid());
+        List<User> users = null;
+        List<User> abonnes = null;
+        List<User> admins = null;
+        try {
+            channel = channelDAO.getChannelById(Integer.parseInt(channelID));
+            users = userDAO.getAllUsers();
+            abonnes = subscriptionDAO.getSubscribedUsers(channel.getCid());
+            admins = adminsDAO.getAdmins(channel.getCid());
+        } catch (ChannelNotFoundException e) {
+            MainController.sendErrorPage(404, e.getMessage(), request, response);
+            return;
+        } catch (DataAccessException e) {
+            MainController.sendErrorPage(500, e.getMessage(), request, response);
+            return;
+        }
     %>
 
     <a href="logout" class="btn btn-danger mb-3">Logout</a>
@@ -71,9 +107,7 @@
             </div>
 
             <div id="adminList">
-                <%
-                List<User> admins = channelDAO.getAdmins(channel.getCid());
-                %>
+
 
                 <h2>Admins</h2>
                 <ul>

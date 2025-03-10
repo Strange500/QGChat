@@ -13,13 +13,36 @@
 </head>
 <body class="container">
 <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.dao.impl.UserDAOSql" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
+<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
+<%@ page import="fr.univ.lille.s4a021.Config" %>
+<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
+<%@ page import="fr.univ.lille.s4a021.controller.MainController" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException" %>
+<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 
 <%
+  UserDAO userDAO = null;
   int uid = Util.getUid(session);
 
-  User user = new UserDAO().getUserById(uid);
+    try {
+        userDAO = Config.getConfig().getUserDAO();
+    } catch (ConfigErrorException e) {
+        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        return;
+    }
+
+    User user = null;
+    try {
+        user = userDAO.getUserById(uid);
+    } catch (UserNotFoundException e) {
+        MainController.sendErrorPage(404, e.getMessage(), request, response);
+        return;
+    } catch (DataAccessException e) {
+        MainController.sendErrorPage(500, e.getMessage(), request, response);
+        return;
+    }
 
 %>
 
