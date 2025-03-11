@@ -44,6 +44,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
 
     @Override
     public List<Message> getMessageByChannelId(int cid) throws DataAccessException {
+        deleteExpiredMessages();
         String query = "SELECT mid, contenu, uid, cid, timestamp FROM Message WHERE cid = ? ORDER BY timestamp";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, cid);
@@ -73,6 +74,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
     }
 
     public Message getMessageById(int mid) throws MessageNotFoundException, DataAccessException {
+        deleteExpiredMessages();
         String query = "SELECT mid, contenu, uid, cid, timestamp FROM Message WHERE mid = ? ";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, mid);
@@ -125,6 +127,29 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
             return stmt.executeQuery().next();
         } catch (SQLException e) {
             throw new DataAccessException("Error while checking if message exists: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteExpiredMessages() throws DataAccessException {
+        String deleteQuery = """
+                    DELETE FROM Message
+                    WHERE mid IN (
+                        SELECT mid
+                        FROM Message m
+                        JOIN Channel ON m.cid = Channel.cid
+                        WHERE Channel.minuteBeforeExpiration > 0 AND  EXTRACT(EPOCH FROM (current_timestamp - m.timestamp)) / 60 > Channel.minuteBeforeExpiration
+                    )
+                """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(deleteQuery)) {
+            int deletedCount = stmt.executeUpdate();
+            // Optional: Log the number of deleted messages
+            if (deletedCount > 0) {
+                System.out.println(deletedCount + " expired messages deleted.");
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while deleting expired messages: " + e.getMessage(), e);
         }
     }
 }

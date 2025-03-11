@@ -30,6 +30,7 @@ CREATE TABLE isFriend (
 -- Création de la table Channel
 CREATE TABLE Channel (
                          cid SERIAL PRIMARY KEY,
+                         minuteBeforeExpiration INT DEFAULT -1,
                          name VARCHAR(1024) NOT NULL
 );
 

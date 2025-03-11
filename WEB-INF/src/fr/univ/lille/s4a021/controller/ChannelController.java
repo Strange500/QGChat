@@ -56,6 +56,7 @@ public class ChannelController extends AbstractController {
             throw new UnauthorizedException("Unauthorized");
         }
         String newName = req.getParameter("name");
+        int expiration = Integer.parseInt(req.getParameter("expiration"));
         List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
         subscribers.add(uid);
 
@@ -66,7 +67,7 @@ public class ChannelController extends AbstractController {
         admins.add(uid);
 
         Channel channel = channelDAO.getChannelById(cid);
-        channelDAO.updateChannel(cid, newName);
+        channelDAO.updateChannel(cid, newName, expiration);
         subscriptionDAO.clearSubscriptions(cid);
         subscriptionDAO.subscribeUsersTo(channel, subscribers);
         adminDAO.clearAdmins(cid);

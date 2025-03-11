@@ -24,6 +24,7 @@
     <%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
     <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
     <%@ page import="fr.univ.lille.s4a021.dao.AdminsDAO" %>
+    <%@ page import="java.util.Map" %>
 
     <%
         ChannelDAO channelDAO ;
@@ -76,6 +77,39 @@
                 <label for="name">Name</label>
                 <input type="text" class="form-control" id="name" name="name" value="<%=channel.getName()%>">
             </div>
+            <div class="form-group">
+                <label for="expiration">Minute before expiration Expiration</label>
+                <%
+                    Map<Integer, String> listChoices = Map.of(
+                            0, "No expiration",
+                            1, "1 minute",
+                            5, "5 minutes",
+                            10, "10 minutes",
+                            30, "30 minutes",
+                            60, "1 hour",
+                            120, "2 hours",
+                            1440, "1 day",
+                            10080, "1 week",
+                            43200, "1 month"
+                    );
+                    boolean vlueIsInList = listChoices.containsKey(channel.getMinuteBeforeExpiration());
+                %>
+                <select class="form-control" id="expiration" name="expiration">
+                    <% for (Integer key : listChoices.keySet().stream().sorted().toList()) { %>
+                    <option value="<%=key%>" <% if (key == channel.getMinuteBeforeExpiration()) {
+                        out.print("selected");
+                    } %>>
+                        <%=listChoices.get(key)%>
+                    </option>
+                    <% } %>
+                    <% if (!vlueIsInList) { %>
+                    <option value="<%=channel.getMinuteBeforeExpiration()%>" selected>
+                        <%=channel.getMinuteBeforeExpiration()%> minutes
+                    </option>
+                    <% } %>
+
+                </select>
+            </div>
 
             <div id="abonneList">
                 <h2>Abonnes</h2>
@@ -103,8 +137,6 @@
             </div>
 
             <div id="adminList">
-
-
                 <h2>Admins</h2>
                 <ul>
                     <% for (User user : subscribers) {

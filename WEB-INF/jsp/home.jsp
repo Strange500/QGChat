@@ -77,6 +77,8 @@
                 String sendError = (String) request.getAttribute("sendError");
                 Channel channel = (Channel) request.getAttribute("channel");
                 List<Message> messages = (List<Message>) request.getAttribute("messages");
+
+                int minuteBeforeExpiration = channel.getMinuteBeforeExpiration();
         %>
 
         <div class="col-md-8">
@@ -160,7 +162,9 @@
                                         <img src="" alt="preview" class="img-fluid" >
                                     </div>
                                 </div>
-
+                                <% if (minuteBeforeExpiration > 0) { %>
+                                <label>Message (will expire in <%=minuteBeforeExpiration%> minutes)</label>
+                                <% } %>
                                 <input type="text" class="form-control" name="message" placeholder="Enter your message">
                             </div>
                             <input type="file" accept="image/jpeg" class="form-control-file" name="img" id="imgInput" style="display: none;">

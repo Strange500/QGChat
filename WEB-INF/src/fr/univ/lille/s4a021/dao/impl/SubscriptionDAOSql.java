@@ -140,7 +140,7 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
         if (!userDAO.userExists(uid)) {
             throw new UserNotFoundException("User not found");
         }
-        String query = "SELECT c.cid, c.name FROM Channel c JOIN estAbonne e ON c.cid = e.cid WHERE e.uid = ?";
+        String query = "SELECT c.cid, c.name, c.minuteBeforeExpiration FROM Channel c JOIN estAbonne e ON c.cid = e.cid WHERE e.uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, uid);
             ResultSet rs = stmt.executeQuery();
@@ -148,7 +148,8 @@ public class SubscriptionDAOSql extends DaoSql implements SubscriptionDAO {
             while (rs.next()) {
                 int cid = rs.getInt("cid");
                 String name = rs.getString("name");
-                channels.add(new Channel(cid, name));
+                int minuteBeforeExpiration = rs.getInt("minuteBeforeExpiration");
+                channels.add(new Channel(cid, name, minuteBeforeExpiration));
             }
             return channels;
         } catch (SQLException e) {

@@ -3,10 +3,12 @@ package fr.univ.lille.s4a021.dto;
 public class Channel {
     private int cid;
     private String name;
+    int minuteBeforeExpiration;
 
-    public Channel(int cid, String name) {
+    public Channel(int cid, String name, int minuteBeforeExpiration) {
         this.cid = cid;
         this.name = name;
+        this.minuteBeforeExpiration = minuteBeforeExpiration;
     }
 
     // Getters and Setters
@@ -24,6 +26,14 @@ public class Channel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getMinuteBeforeExpiration() {
+        return minuteBeforeExpiration;
+    }
+
+    public void setMinuteBeforeExpiration(int minuteBeforeExpiration) {
+        this.minuteBeforeExpiration = minuteBeforeExpiration;
     }
 
     @Override

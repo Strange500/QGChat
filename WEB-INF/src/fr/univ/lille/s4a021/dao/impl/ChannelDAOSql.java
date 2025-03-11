@@ -45,13 +45,14 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
     }
 
     public Channel getChannelByName(String name) throws ChannelNotFoundException, DataAccessException {
-        String query = "SELECT cid FROM Channel WHERE name = ?";
+        String query = "SELECT cid, minuteBeforeExpiration FROM Channel WHERE name = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, name);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 int cid = rs.getInt("cid");
-                return new Channel(cid, name);
+                int minuteBeforeExpiration = rs.getInt("minuteBeforeExpiration");
+                return new Channel(cid, name, minuteBeforeExpiration);
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error while getting channel by name: " + e.getMessage(), e);
@@ -60,13 +61,14 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
     }
 
     public Channel getChannelById(int cid) throws ChannelNotFoundException, DataAccessException {
-        String query = "SELECT name FROM Channel WHERE cid = ?";
+        String query = "SELECT name, minuteBeforeExpiration FROM Channel WHERE cid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, cid);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String name = rs.getString("name");
-                return new Channel(cid, name);
+                int minuteBeforeExpiration = rs.getInt("minuteBeforeExpiration");
+                return new Channel(cid, name, minuteBeforeExpiration);
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error while getting channel by id: " + e.getMessage(), e);
@@ -90,14 +92,15 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
     }
 
     // Mise à jour des informations d'un canal
-    public void updateChannel(int cid, String newName) throws ChannelNotFoundException, ChannelUpdateException, DataAccessException {
+    public void updateChannel(int cid, String newName, int expiration) throws ChannelNotFoundException, ChannelUpdateException, DataAccessException {
         if (newName == null || newName.isEmpty()) {
             throw new ChannelUpdateException("Channel name cannot be empty");
         }
-        String query = "UPDATE Channel SET name = ? WHERE cid = ?";
+        String query = "UPDATE Channel SET name = ?, minuteBeforeExpiration = ? WHERE cid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, newName);
-            stmt.setInt(2, cid);
+            stmt.setInt(2, expiration);
+            stmt.setInt(3, cid);
             int r = stmt.executeUpdate();
             if (r == 0) {
                 throw new ChannelNotFoundException("Channel not found");
@@ -117,7 +120,8 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
             while (rs.next()) {
                 int cid = rs.getInt("cid");
                 String name = rs.getString("name");
-                channels.add(new Channel(cid, name));
+                int minuteBeforeExpiration = rs.getInt("minuteBeforeExpiration");
+                channels.add(new Channel(cid, name, minuteBeforeExpiration));
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error while getting all channels: " + e.getMessage(), e);

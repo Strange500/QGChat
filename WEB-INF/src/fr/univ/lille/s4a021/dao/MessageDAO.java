@@ -44,6 +44,8 @@ public interface MessageDAO {
 
     boolean messageExists(int mid) throws DataAccessException;
 
+    void deleteExpiredMessages() throws DataAccessException;
+
     default List<Message> getMessagesAndImgMessagesByChannelId(int cid) throws ChannelNotFoundException, DataAccessException {
         List<Message> messages = getMessageByChannelId(cid);
         Pair<List<ImgMessage>, List<Message>> pair = separateImgFromMessage(messages);

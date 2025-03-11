@@ -19,7 +19,7 @@ public interface ChannelDAO {
 
     void deleteChannel(int cid) throws ChannelNotFoundException, DataAccessException;
 
-    void updateChannel(int cid, String newName) throws ChannelNotFoundException, ChannelUpdateException, DataAccessException;
+    void updateChannel(int cid, String newName, int expiration) throws ChannelNotFoundException, ChannelUpdateException, DataAccessException;
 
     List<Channel> getAllChannels() throws DataAccessException;
 
