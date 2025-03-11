@@ -1,5 +1,6 @@
 package fr.univ.lille.s4a021.controller;
 
+import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.dao.NotFoundException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -13,19 +14,13 @@ import java.io.IOException;
 @WebServlet("/home")
 public class MainController extends AbstractController {
 
-    public static final String HOME_JSP = "home.jsp";
-    public static final String FRIEND_JSP = "friend.jsp";
-
-
-
-
     public static void main(String[] args) {
-        System.out.println(getJSPPath("login.jsp"));
+        System.out.println("Hello World");
     }
 
-    protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         if (action == null) {
-            forwardToJSP(req, res, HOME_JSP);
+            forwardToJSP(req, res, JSP.HOME);
             return;
         }
 
@@ -34,7 +29,7 @@ public class MainController extends AbstractController {
                 handleLogout(req, res);
                 break;
             case "view":
-                forwardToJSP(req, res, HOME_JSP);
+                forwardToJSP(req, res, JSP.HOME);
                 break;
             default:
                 handleError(new NotFoundException("Action not found"), req, res);
@@ -42,9 +37,9 @@ public class MainController extends AbstractController {
         }
     }
 
-    private void handleLogout(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    private void handleLogout(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         req.getSession().invalidate();
-        forwardToJSP(req, res, LOGIN_JSP);
+        forwardToJSP(req, res, JSP.LOGIN);
     }
 
 }

@@ -21,6 +21,8 @@
 </head>
 <body class="container mt-5">
 
+<%@ include file="components/TopBar.jsp" %>
+
 
 <%
   ChannelDAO channelDAO;

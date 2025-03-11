@@ -1,10 +1,8 @@
 package fr.univ.lille.s4a021.controller;
 
-import fr.univ.lille.s4a021.Config;
-import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.BadParameterException;
-import fr.univ.lille.s4a021.exception.ConfigErrorException;
+import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.user.UserCreationException;
@@ -31,10 +29,7 @@ import java.util.List;
 public class UserController extends AbstractController {
 
     private static final int MAX_FILE_SIZE = 1024 * 1024 * 2; // 2MB
-    private static final String EDIT_JSP = "editUser.jsp";
-    private static final String FRIEND_JSP = "friend.jsp";
     List<String> defaultProfilePics = Arrays.asList("default1.png", "default2.png", "default3.png", "default4.png");
-    private UserDAO userDAO;
 
     private String getDefaultProfilePic() throws IOException {
         try (InputStream st = getClass().getClassLoader().getResourceAsStream(defaultProfilePics.get((int) (Math.random() * defaultProfilePics.size())))) {
@@ -48,18 +43,8 @@ public class UserController extends AbstractController {
     }
 
     @Override
-    public void init() throws ServletException {
-        super.init();
-        try {
-            userDAO = Config.getConfig().getUserDAO();
-        } catch (ConfigErrorException e) {
-            throw new ServletException("Failed to initialize DAOs", e);
-        }
-    }
-
-    @Override
     protected void processNoAuthAction(String action, HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException, UserNotFoundException, DataAccessException, UserCreationException, UserUpdateException {
+            throws IOException, UserNotFoundException, DataAccessException, UserCreationException, UserUpdateException {
 
         if ("auth".equalsIgnoreCase(action)) {
             if (authenticateUser(req)) {
@@ -85,16 +70,16 @@ public class UserController extends AbstractController {
     }
 
     @Override
-    protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, BadParameterException, UserNotFoundException, UserUpdateException, DataAccessException, UnauthorizedException {
+    protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         int uid = Util.getUid(req.getSession());
 
         switch (action) {
             case "edit":
-                forwardToJSP(req, res, EDIT_JSP);
+                forwardToJSP(req, res, JSP.EDIT_USER);
                 break;
 
             case "friend":
-                forwardToJSP(req, res, FRIEND_JSP);
+                forwardToJSP(req, res, JSP.FRIEND);
                 break;
 
             case "delete":
