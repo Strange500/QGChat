@@ -4,7 +4,7 @@
     User currentUser = (User) request.getAttribute("currentUser");
 %>
 
-<a href="?action=logout" class="btn btn-danger mb-3">Logout</a>
+<a href="home?action=logout" class="btn btn-danger mb-3">Logout</a>
 <section class="text-left">
     <div class="d-flex align-items-center">
         <a href="user?action=edit" class="d-inline-block position-relative" id="pofileLink">
