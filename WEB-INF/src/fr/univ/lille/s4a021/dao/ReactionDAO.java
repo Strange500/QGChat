@@ -23,6 +23,8 @@ public interface ReactionDAO {
     void deleteReactionForMessage(int mid, int uid) throws MessageNotFoundException, UserNotFoundException, ReactionNotFoundException, DataAccessException;
 
     enum Reaction {
+        UNLIKE("👎"),
+        LIKE("👍"),
         EMPTY(""),
         FIRE("🔥"),
         HEART("❤️"),
