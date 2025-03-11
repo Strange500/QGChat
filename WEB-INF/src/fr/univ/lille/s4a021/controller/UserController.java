@@ -1,10 +1,7 @@
 package fr.univ.lille.s4a021.controller;
 
-import fr.univ.lille.s4a021.Config;
-import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.BadParameterException;
-import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.user.UserCreationException;
@@ -34,7 +31,6 @@ public class UserController extends AbstractController {
     private static final String EDIT_JSP = "editUser.jsp";
     private static final String FRIEND_JSP = "friend.jsp";
     List<String> defaultProfilePics = Arrays.asList("default1.png", "default2.png", "default3.png", "default4.png");
-    private UserDAO userDAO;
 
     private String getDefaultProfilePic() throws IOException {
         try (InputStream st = getClass().getClassLoader().getResourceAsStream(defaultProfilePics.get((int) (Math.random() * defaultProfilePics.size())))) {
@@ -44,16 +40,6 @@ public class UserController extends AbstractController {
             return Base64.getEncoder().encodeToString(st.readAllBytes());
         } catch (IOException e) {
             throw new IOException("Failed to load default profile picture", e);
-        }
-    }
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        try {
-            userDAO = Config.getConfig().getUserDAO();
-        } catch (ConfigErrorException e) {
-            throw new ServletException("Failed to initialize DAOs", e);
         }
     }
 

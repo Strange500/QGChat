@@ -1,11 +1,9 @@
 package fr.univ.lille.s4a021.controller;
 
-import fr.univ.lille.s4a021.Config;
-import fr.univ.lille.s4a021.dao.*;
+import fr.univ.lille.s4a021.dao.ReactionDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.exception.BadParameterException;
-import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
@@ -36,26 +34,6 @@ public class MessageController extends AbstractController {
     private static final String ACTION_LIKE = "like";
     private static final String ACTION_DELETE = "delete";
     private static final String ACTION_EDIT = "edit";
-
-    private ChannelDAO channelDAO;
-    private MessageDAO messageDAO;
-    private SubscriptionDAO subscriptionDAO;
-    private ReactionDAO reactionDAO;
-    private AdminsDAO adminDAO;
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        try {
-            this.channelDAO = Config.getConfig().getChannelDAO();
-            this.messageDAO = Config.getConfig().getMessageDAO();
-            this.subscriptionDAO = Config.getConfig().getSubscriptionDAO();
-            this.reactionDAO = Config.getConfig().getReactionDAO();
-            this.adminDAO = Config.getConfig().getAdminsDAO();
-        } catch (ConfigErrorException e) {
-            throw new ServletException("Failed to initialize DAOs", e);
-        }
-    }
 
     @Override
     protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {

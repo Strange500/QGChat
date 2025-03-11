@@ -1,7 +1,9 @@
 package fr.univ.lille.s4a021.controller;
 
 import fr.univ.lille.s4a021.Config;
+import fr.univ.lille.s4a021.dao.*;
 import fr.univ.lille.s4a021.exception.BadParameterException;
+import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.CreationException;
@@ -23,6 +25,28 @@ public abstract class AbstractController extends HttpServlet {
 
     public static final String LOGIN_JSP = "login.jsp";
     public static final String ERROR_JSP = "error.jsp";
+
+    protected ChannelDAO channelDAO;
+    protected MessageDAO messageDAO;
+    protected SubscriptionDAO subscriptionDAO;
+    protected ReactionDAO reactionDAO;
+    protected AdminsDAO adminDAO;
+    protected UserDAO userDAO;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        try {
+            this.channelDAO = Config.getConfig().getChannelDAO();
+            this.messageDAO = Config.getConfig().getMessageDAO();
+            this.subscriptionDAO = Config.getConfig().getSubscriptionDAO();
+            this.reactionDAO = Config.getConfig().getReactionDAO();
+            this.adminDAO = Config.getConfig().getAdminsDAO();
+            this.userDAO = Config.getConfig().getUserDAO();
+        } catch (ConfigErrorException e) {
+            throw new ServletException("Failed to initialize DAOs", e);
+        }
+    }
 
     public static void handleError(Exception exception, HttpServletRequest req, HttpServletResponse res) {
         int errorCode = getErrorCode(exception);
@@ -71,6 +95,7 @@ public abstract class AbstractController extends HttpServlet {
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
 
+
         try {
 
             processNoAuthAction(action, req, res);
@@ -83,6 +108,8 @@ public abstract class AbstractController extends HttpServlet {
                 forwardToJSP(req, res, LOGIN_JSP);
                 return;
             }
+
+            req.setAttribute("id", Util.getUid(session));
 
             processAction(action, req, res);
 

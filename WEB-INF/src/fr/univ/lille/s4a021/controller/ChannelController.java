@@ -1,14 +1,8 @@
 package fr.univ.lille.s4a021.controller;
 
-import fr.univ.lille.s4a021.Config;
-import fr.univ.lille.s4a021.dao.AdminsDAO;
-import fr.univ.lille.s4a021.dao.ChannelDAO;
-import fr.univ.lille.s4a021.dao.SubscriptionDAO;
-import fr.univ.lille.s4a021.dao.UserDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.BadParameterException;
-import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
@@ -38,23 +32,6 @@ public class ChannelController extends AbstractController {
     private static final String SHARE_JSP = "share.jsp";
     private static final String INVITE_JSP = "join.jsp";
 
-    private ChannelDAO channelDAO;
-    private SubscriptionDAO subscriptionDAO;
-    private AdminsDAO adminsDAO;
-    private UserDAO userDAO;
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        try {
-            channelDAO = Config.getConfig().getChannelDAO();
-            subscriptionDAO = Config.getConfig().getSubscriptionDAO();
-            adminsDAO = Config.getConfig().getAdminsDAO();
-            userDAO = Config.getConfig().getUserDAO();
-        } catch (ConfigErrorException e) {
-            throw new ServletException("Failed to initialize DAOs", e);
-        }
-    }
 
     private void handleCreateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, ChannelCreationException, DataAccessException, UserNotFoundException, ChannelNotFoundException, AdminCreationException {
         String name = req.getParameter("name");
@@ -63,7 +40,7 @@ public class ChannelController extends AbstractController {
 
         Channel channel = channelDAO.createChannel(name);
         subscriptionDAO.subscribeUsersTo(channel, subscribers);
-        adminsDAO.setAdmin(channel.getCid(), uid);
+        adminDAO.setAdmin(channel.getCid(), uid);
         res.sendRedirect("home?action=view&channelID=" + channel.getCid());
 
     }
@@ -97,8 +74,8 @@ public class ChannelController extends AbstractController {
         channelDAO.updateChannel(cid, newName);
         subscriptionDAO.clearSubscriptions(cid);
         subscriptionDAO.subscribeUsersTo(channel, subscribers);
-        adminsDAO.clearAdmins(cid);
-        adminsDAO.setAdmins(channel.getCid(), admins);
+        adminDAO.clearAdmins(cid);
+        adminDAO.setAdmins(channel.getCid(), admins);
         res.sendRedirect("home?action=view&channelID=" + cid);
 
     }
@@ -127,7 +104,7 @@ public class ChannelController extends AbstractController {
 
     private boolean isAuthorized(int uid, int channelId) throws DataAccessException {
         try {
-            return adminsDAO.userIsAdmin(uid, channelId);
+            return adminDAO.userIsAdmin(uid, channelId);
         } catch (UserNotFoundException | ChannelNotFoundException e) {
             return false;
         }
