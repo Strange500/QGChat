@@ -63,7 +63,8 @@
         }
     %>
 
-    <a href="user?action" class="btn btn-danger mb-3">Logout</a>
+    <%@ include file="components/TopBar.jsp" %>
+
 
     <section id="channel">
         <a href="home?action=view&channelID=<%=channel.getCid()%>" class="btn btn-primary mb-3">Back</a>

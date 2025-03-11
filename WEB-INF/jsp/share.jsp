@@ -24,7 +24,7 @@
 
 <%
 
-  ChannelDAO channelDAO = null;
+  ChannelDAO channelDAO ;
     try {
         channelDAO = Config.getConfig().getChannelDAO();
     } catch (ConfigErrorException e) {
@@ -33,7 +33,7 @@
     }
 
   int chanelID = Integer.parseInt(request.getParameter("channelID"));
-  Channel ch = null;
+  Channel ch ;
   try {
     ch = channelDAO.getChannelById(chanelID);
     if (ch == null) {
@@ -54,9 +54,10 @@
 
 %>
 
-<a href="home?action=logout" class="btn btn-danger mb-3">Logout</a>
 
 <a href="home" class="btn btn-primary mb-3">Back</a>
+<%@ include file="components/TopBar.jsp" %>
+
 
 <h1 class="mb-4">Share Channel <%=ch.getName()%></h1>
 

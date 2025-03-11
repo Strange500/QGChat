@@ -35,43 +35,17 @@
 
     <%
         try {
-            int uid = (int) session.getAttribute("id");
+            int uid = (Integer) request.getAttribute("id");
+            List<Channel> subscribedChannels = (List<Channel>) request.getAttribute("subscribedChannels");
 
-            UserDAO userDAO = Config.getConfig().getUserDAO();
-            SubscriptionDAO subscriptionDAO = Config.getConfig().getSubscriptionDAO();
-            ChannelDAO channelDAO = Config.getConfig().getChannelDAO();
-            AdminsDAO adminsDAO = Config.getConfig().getAdminsDAO();
-            MessageDAO messageDAO = Config.getConfig().getMessageDAO();
-            ReactionDAO reactionDAO = Config.getConfig().getReactionDAO();
-
-            User currentUser = userDAO.getUserById(Util.getUid(session));
-            String profilepicBase64 = userDAO.getUserProfilePicture(currentUser.getUid());
     %>
 
 
-    <!-- PROFILE -->
+    <!-- TOP BAR -->
 
-    <a href="?action=logout" class="btn btn-danger mb-3">Logout</a>
-
-    <section class="text-left">
-        <div class="d-flex align-items-center">
-            <a href="user?action=edit" class="d-inline-block position-relative" id="pofileLink">
-                <img src="data:image/jpeg;base64,<%=profilepicBase64%>" alt="profile picture"
-                     class="img-fluid rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
-                <i class="bi bi-pencil"
-                   style="position: absolute; bottom: 50%; right: 50%; transform: translate(50%, 50%); font-size: 3em; background: rgba(127,127,127,0.5); border-radius: 50%; height: 100%; width: 100%; padding: 5% 0 0 15%; display: none;"></i>
-            </a>
-            <p class="ml-3 mt-2 mb-0"><%=currentUser.getUsername()%>
-            </p>
-        </div>
-    </section>
+    <%@ include file="components/TopBar.jsp" %>
 
     <!-- CHANNELS -->
-
-    <%
-        List<Channel> subscribedChannels = subscriptionDAO.getSubscribedChannels(uid);
-    %>
-
 
     <div class="row">
         <div class="col-md-4">
@@ -94,15 +68,15 @@
         <!-- CONVERSATION -->
 
         <%
-            int channelToViewId = request.getParameter("channelID") == null ? -1 : Integer.parseInt(request.getParameter("channelID"));
-            if (channelToViewId != -1 && subscribedChannels.stream().anyMatch(channel -> channel.getCid() == channelToViewId)) {
-                List<User> listAdmins = adminsDAO.getAdmins(channelToViewId);
-                boolean isAdmin = listAdmins.stream().anyMatch(user -> user.getUid() == uid);
-                int editMid = request.getParameter("editMid") == null ? -1 : Integer.parseInt(request.getParameter("editMid"));
-                String sendError = request.getAttribute("senderror") == null ? "" : request.getAttribute("senderror").toString();
-                request.removeAttribute("senderror");
-                Channel channel = channelDAO.getChannelById(channelToViewId);
-                List<Message> messages = messageDAO.getMessagesAndImgMessagesByChannelId(channelToViewId);
+            Boolean showChannel = (Boolean) request.getAttribute("showChannel");
+            if (showChannel) {
+                Integer channelToViewId = (Integer) request.getAttribute("channelToViewId");
+                List<User> listAdmins = (List<User>) request.getAttribute("listAdmins");
+                Boolean isAdmin = (Boolean) request.getAttribute("isAdmin");
+                Integer editMid = (Integer) request.getAttribute("editMid");
+                String sendError = (String) request.getAttribute("sendError");
+                Channel channel = (Channel) request.getAttribute("channel");
+                List<Message> messages = (List<Message>) request.getAttribute("messages");
         %>
 
         <div class="col-md-8">
@@ -147,6 +121,8 @@
                             <div id="messageList" class="overflow-auto" style="max-height: 400px;">
                                 <%
                                     if (!messages.isEmpty()) {
+                                        UserDAO userDAO = (UserDAO) request.getAttribute("userDAO");
+                                        ReactionDAO reactionDAO = (ReactionDAO) request.getAttribute("reactionDAO");
                                         for (Message message : messages) {
                                             User sender = userDAO.getUserById(message.getSenderId());
                                             boolean userCanEdit = message.getSenderId() == uid || isAdmin;
@@ -160,135 +136,8 @@
                                             Map<Integer, String> usersProfilePictures = userDAO.getUserProfilePictures(users.stream().map(User::getUid).collect(Collectors.toList()));
                                 %>
 
-                                <div class="border p-3 mb-3 rounded">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <img src="data:image/jpeg;base64,<%=imgBase64%>" alt="profile picture"
-                                                 class="img-fluid rounded-circle"
-                                                 style="width: 50px; height: 50px; object-fit: cover;">
-                                            <div class="ml-3">
-                                                            <span class="font-weight-bold text-dark">
-                                                                <%=displayName%>
-                                                                <% if (senderIsAdmin) { %>
-                                                                    <span class="badge badge-warning ml-2">Admin</span>
-                                                                <% } %>
-                                                            </span>
-                                                <small class="text-muted d-block"><%=message.getTimeAgo()%>
-                                                </small>
-                                            </div>
-                                        </div>
-                                        <% if (userCanEdit) {
-                                        %>
-                                        <div class="d-flex">
-                                            <% if (!isImgMessage) { %>
-                                            <a href="?channelID=<%=message.getChannelId()%>&editMid=<%=message.getMid()%>"
-                                               class="btn btn-link p-0"><i class="bi bi-pencil"></i></a>
-                                            <% } %>
-                                            <form action="message?action=delete" method="POST">
-                                                <input type="hidden" name="mid" value="<%=message.getMid()%>">
-                                                <button type="submit" class="btn btn-link p-0"><i
-                                                        class="bi bi-trash"></i></button>
-                                            </form>
-                                        </div>
-                                        <% } %>
-                                    </div>
+                                <%@include file="components/message.jsp" %>
 
-
-                                    <% if (isImgMessage) { %>
-                                    <img src="data:image/jpeg;base64,<%=message.getImg()%>" class="img-fluid my-2"
-                                         alt="img">
-                                    <% } else {
-                                        if (messageRequireEdit && userCanEdit) { %>
-                                    <form action="message" method="POST" class="mt-4">
-                                        <input type="hidden" name="action" value="edit">
-                                        <input type="hidden" name="mid" value="<%=message.getMid()%>">
-                                        <input type="text" class="form-control" name="message"
-                                               value="<%=message.getContenu()%>">
-                                    </form>
-                                    <% } else { %>
-                                    <p class="my-2 text-muted"><%=message.getContenu()%>
-                                    </p>
-                                    <% }
-                                    }%>
-                                    <div style="width: 100px;"
-                                         class="d-flex align-items-center justify-content-around likeForm rounded ">
-                                        <%
-                                            boolean forceHeart = false;
-                                            if (usersForReactionMap.isEmpty()) {
-                                                usersForReactionMap.put(ReactionDAO.Reaction.HEART, Collections.emptySet());
-                                                forceHeart = true;
-                                            }
-                                            for (ReactionDAO.Reaction reaction : ReactionDAO.Reaction.values()) {
-                                                if (usersForReactionMap.getOrDefault(reaction, Collections.emptySet()).isEmpty() && (reaction != ReactionDAO.Reaction.HEART || !forceHeart)) {
-                                                    continue;
-                                                }
-                                                int likeCount = usersForReactionMap.get(reaction).size();
-                                        %>
-
-                                        <span class="badge badge-<%=likeCount == 0 ? "secondary" : "primary"%> mx-1 reactSpan">
-                                                        <%=likeCount %>
-                                                        <form action="message" method="POST"
-                                                              class="d-inline-block mx-1">
-                                                            <input type="hidden" name="action" value="like">
-                                                            <input type="hidden" name="mid"
-                                                                   value="<%=message.getMid()%>">
-                                                            <input type="hidden" name="emoji"
-                                                                   value="<%=reaction.getEmoji()%>">
-                                                            <div class="d-flex align-items-center rounded">
-                                                            <input type="submit" class="btn btn-link p-0"
-                                                                   value="<%=reaction.getEmoji()%>"
-                                                                   style="font-size: 0.9em;">
-                                                            </div>
-                                                        </form>
-                                                        <section class="d-none reactDetails">
-
-                                                        <% if (usersForReactionMap.isEmpty() || likeCount == 0) { %>
-                                                            <span class="text-muted">No likes yet</span>
-                                                        <% } else {
-                                                            for (int i = 0; i < Math.min(4, likeCount); i++) {
-                                                                User reactionUser = users.get(i);
-                                                        %>
-                                                                <div class="d-flex align-items-center my-1">
-                                                                    <img src="data:image/jpeg;base64,<%=usersProfilePictures.get(reactionUser.getUid())%>"
-                                                                         alt="profile picture"
-                                                                         class="img-fluid rounded-circle"
-                                                                         style="width: 30px; height: 30px; object-fit: cover;">
-                                                                    <span class="ml-2"><%=reactionUser.getUsername()%></span>
-                                                                </div>
-                                                           <% }
-                                                               if (likeCount > 4) { %>
-                                                                <span class="text-muted">and <%=likeCount - 4%> others</span>
-                                                           <% }
-                                                           } %>
-                                                        </section>
-                                                    </span>
-                                        <% } %>
-
-
-                                        <div class="d-flex align-items-center otherReact">
-                                            <a class="btn btn-link p-0 text-muted">...</a>
-                                            <% for (ReactionDAO.Reaction reaction : ReactionDAO.Reaction.values()) {
-                                                if (usersForReactionMap.getOrDefault(reaction, Collections.emptySet()).isEmpty()) { %>
-
-                                            <form action="message" method="POST"
-                                                  class="d-inline-block otherReactForm mx-1">
-                                                <input type="hidden" name="action" value="like">
-                                                <input type="hidden" name="mid" value="<%=message.getMid()%>">
-                                                <input type="hidden" name="emoji" value="<%=reaction.getEmoji()%>">
-                                                <div class="align-items-center rounded" style="display: none">
-                                                    <input type="submit" class="btn btn-link p-0 text-muted"
-                                                           value="<%=reaction.getEmoji()%>" style="font-size: 0.8em;">
-                                                </div>
-                                            </form>
-                                            <%
-                                                    }
-                                                }
-                                            %>
-                                        </div>
-
-                                    </div>
-
-                                </div>
                                 <%
                                     }
                                 } else {
