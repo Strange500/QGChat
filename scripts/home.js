@@ -103,3 +103,41 @@ otherReacts.forEach(otherReact => {
         });
     });
 });
+
+const timeAgos = document.querySelectorAll('.timeAgo');
+
+setInterval(() => {
+    const now = Math.floor(Date.now() / 1000); // Get current time in seconds
+
+    timeAgos.forEach(timeAgo => {
+        const spanElement = timeAgo.querySelector("span");
+        const pElement = timeAgo.querySelector("p");
+
+        if (!spanElement || !pElement) {
+            return; // Exit early if necessary elements are not present
+        }
+
+        const secondSent = parseInt(spanElement.innerHTML, 10); // Parse the timestamp safely
+
+        // Calculate the difference
+        const diffSeconds = now - secondSent;
+        let timeString = "";
+
+        if (diffSeconds < 60) {
+            timeString = diffSeconds + " second" + (diffSeconds !== 1 ? "s" : "") + " ago";
+        } else if (diffSeconds < 3600) { // Less than an hour
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            timeString = diffMinutes + " minute" + (diffMinutes !== 1 ? "s" : "") + " ago";
+        } else if (diffSeconds < 86400) { // Less than a day
+            const diffHours = Math.floor(diffSeconds / 3600);
+            timeString = diffHours + " hour" + (diffHours !== 1 ? "s" : "") + " ago";
+        } else { // More than a day
+            const diffDays = Math.floor(diffSeconds / 86400);
+            timeString = diffDays + " day" + (diffDays !== 1 ? "s" : "") + " ago";
+        }
+
+        // Update the paragraph element with the calculated time string
+        pElement.innerHTML = timeString;
+    });
+}, 1000);
+

@@ -1,6 +1,7 @@
 database:
-  port: "5432"
   host: "postgres"
+  port: "5432"
   user: "sae"
-  password: "sae"
   database: "sae"
+  password: "sae"
+debug: true

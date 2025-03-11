@@ -9,7 +9,9 @@
                 <span class="badge badge-warning ml-2">Admin</span>
             <% } %>
         </span>
-        <small class="text-muted d-block"><%=message.getTimeAgo()%>
+        <small class="text-muted d-block timeAgo">
+            <span style="display: none"><%= message.getDateSend().getTime() / 1000 %></span>
+            <p><%=message.getTimeAgo()%><p>
         </small>
     </div>
 </div>
