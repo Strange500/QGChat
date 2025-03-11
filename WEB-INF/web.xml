@@ -22,7 +22,7 @@
     </session-config>
 
     <welcome-file-list>
-        <welcome-file>login.html</welcome-file>
+        <welcome-file>home</welcome-file>
     </welcome-file-list>
 
 </web-app>
