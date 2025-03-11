@@ -39,6 +39,7 @@ public class MainController extends AbstractController {
 
     private void handleLogout(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         req.getSession().invalidate();
+        req.removeAttribute("id");
         forwardToJSP(req, res, JSP.LOGIN);
     }
 
