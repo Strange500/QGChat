@@ -27,11 +27,6 @@ import java.util.List;
 
 @WebServlet("/channel")
 public class ChannelController extends AbstractController {
-    private static final String MODIFY_CHANNEL_JSP = "ModifChannel.jsp";
-    private static final String CREATE_CHANNEL_JSP = "createChannel.jsp";
-    private static final String SHARE_JSP = "share.jsp";
-    private static final String INVITE_JSP = "join.jsp";
-
 
     private void handleCreateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, ChannelCreationException, DataAccessException, UserNotFoundException, ChannelNotFoundException, AdminCreationException {
         String name = req.getParameter("name");
@@ -89,10 +84,10 @@ public class ChannelController extends AbstractController {
         return true;
     }
 
-    private void handleShareChannel(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    private void handleShareChannel(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         String channelID = req.getParameter("channelID");
         req.setAttribute("channelID", channelID);
-        forwardToJSP(req, res, SHARE_JSP);
+        forwardToJSP(req, res, JSP.SHARE_CHANNEL);
     }
 
     private void handleUnsubscribeUser(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, UserNotFoundException, ChannelNotFoundException, SubscriptionNotFoundException, DataAccessException {
@@ -167,10 +162,10 @@ public class ChannelController extends AbstractController {
                 handleUpdateChannel(req, res, uid);
                 break;
             case "modifchannel":
-                forwardToJSP(req, res, MODIFY_CHANNEL_JSP);
+                forwardToJSP(req, res, JSP.EDIT_CHANNEL);
                 break;
             case "createchannel":
-                forwardToJSP(req, res, CREATE_CHANNEL_JSP);
+                forwardToJSP(req, res, JSP.CREATE_CHANNEL);
                 break;
             case "share":
                 handleShareChannel(req, res);
@@ -179,7 +174,7 @@ public class ChannelController extends AbstractController {
                 handleAcceptInvite(req, res, uid);
                 break;
             case "join":
-                forwardToJSP(req, res, INVITE_JSP);
+                forwardToJSP(req, res, JSP.INVITE);
                 break;
             case "quit":
                 handleUnsubscribeUser(req, res, uid);

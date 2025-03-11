@@ -1,3 +1,4 @@
+<%@ page import="fr.univ.lille.s4a021.dto.User" %>
 <%
     String UserProfilePicture = (String) request.getAttribute("UserProfilePicture");
     User currentUser = (User) request.getAttribute("currentUser");

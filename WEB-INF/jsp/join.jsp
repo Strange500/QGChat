@@ -74,6 +74,7 @@
 <a href="?action=logout" class="btn btn-danger mb-3">Logout</a>
 
 <a href="home" class="btn btn-primary mb-3">Back</a>
+<%@ include file="components/TopBar.jsp" %>
 
 <div class="card">
   <div class="card-header">

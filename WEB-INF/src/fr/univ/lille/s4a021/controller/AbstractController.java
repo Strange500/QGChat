@@ -10,7 +10,6 @@ import fr.univ.lille.s4a021.exception.dao.CreationException;
 import fr.univ.lille.s4a021.exception.dao.NotFoundException;
 import fr.univ.lille.s4a021.exception.dao.UpdateException;
 import fr.univ.lille.s4a021.model.bdd.Util;
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,10 +20,6 @@ import java.io.IOException;
 
 
 public abstract class AbstractController extends HttpServlet {
-
-
-    public static final String LOGIN_JSP = "login.jsp";
-    public static final String ERROR_JSP = "error.jsp";
 
     protected ChannelDAO channelDAO;
     protected MessageDAO messageDAO;
@@ -57,7 +52,7 @@ public abstract class AbstractController extends HttpServlet {
         }
         try {
             sendErrorPage(errorCode, message, req, res);
-        } catch (ServletException | IOException e) {
+        } catch (ServletException | IOException | MyDiscordException e) {
             e.printStackTrace();
         }
     }
@@ -76,26 +71,21 @@ public abstract class AbstractController extends HttpServlet {
         return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
 
-    private static void sendErrorPage(int errorCode, String message, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    private static void sendErrorPage(int errorCode, String message, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         req.setAttribute("errorCode", errorCode);
         req.setAttribute("message", message);
-        forwardToJSP(req, res, ERROR_JSP);
+        forwardToJSP(req, res, JSP.ERROR);
     }
 
-    public static void forwardToJSP(HttpServletRequest req, HttpServletResponse res, String jsp) throws ServletException, IOException {
-        RequestDispatcher rd = req.getRequestDispatcher(getJSPPath(jsp));
-        rd.forward(req, res);
+    public static void forwardToJSP(HttpServletRequest req, HttpServletResponse res, JSP jsp) throws ServletException, IOException, MyDiscordException {
+        jsp.launch(req, res);
     }
 
-    public static String getJSPPath(String jsp) {
-        return "/WEB-INF/jsp/" + jsp;
-    }
+
 
     protected void service(HttpServletRequest req, HttpServletResponse res) {
         HttpSession session = req.getSession();
         String action = req.getParameter("action");
-
-
         try {
 
             processNoAuthAction(action, req, res);
@@ -105,7 +95,7 @@ public abstract class AbstractController extends HttpServlet {
             }
 
             if (!Util.userIsConnected(session)) {
-                forwardToJSP(req, res, LOGIN_JSP);
+                forwardToJSP(req, res, JSP.LOGIN);
                 return;
             }
 
