@@ -57,19 +57,7 @@ public enum JSP {
             }
         }
     },
-    LOGIN("login.jsp") {
-        @Override
-        public void prepare(HttpServletRequest req, HttpServletResponse res) {
-            Integer uid = (Integer) req.getAttribute("id");
-            if (uid != null) {
-                try {
-                    res.sendRedirect("home");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    },
+    LOGIN("login.jsp"),
     EDIT_USER("editUser.jsp"),
     FRIEND("friend.jsp") {
         @Override

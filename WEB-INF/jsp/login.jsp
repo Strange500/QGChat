@@ -11,6 +11,10 @@
 </head>
 <body class="container mt-5">
 
+<% if (request.getAttribute("id") != null) { %>
+<jsp:forward page="home.jsp"/>
+<% } %>
+
 <%
     if (request.getAttribute("error") != null) {
 %>
