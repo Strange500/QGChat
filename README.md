@@ -26,45 +26,68 @@ QGChat est une application web permettant aux utilisateurs de créer et gérer d
 ### Création des Tables
 ```sql
 CREATE TABLE Utilisateur (
-    uid SERIAL PRIMARY KEY,
-    username VARCHAR(1024) NOT NULL,
-    mail VARCHAR(1024) UNIQUE NOT NULL,
-    password VARCHAR(1024) NOT NULL
+                             uid SERIAL PRIMARY KEY,
+                             username VARCHAR(1024) NOT NULL,
+                             mail VARCHAR(1024) NOT NULL UNIQUE,
+                             password VARCHAR(1024) NOT NULL,
+                             profile_picture TEXT,
+                             CONSTRAINT check_mail_not_empty CHECK (mail <> ''),
+                             CONSTRAINT check_username_not_empty CHECK (username <> ''),
+                             CONSTRAINT check_password_not_empty CHECK (password <> '')
 );
 
+CREATE TABLE isFriend (
+                          uid1 INT,
+                          uid2 INT,
+                          PRIMARY KEY (uid1, uid2),
+                          FOREIGN KEY (uid1) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+                          FOREIGN KEY (uid2) REFERENCES Utilisateur(uid) ON DELETE CASCADE
+);
+
+-- Création de la table Channel
 CREATE TABLE Channel (
-    cid SERIAL PRIMARY KEY,
-    name VARCHAR(1024) NOT NULL
+                         cid SERIAL PRIMARY KEY,
+                         minuteBeforeExpiration INT DEFAULT -1,
+                         name VARCHAR(1024) NOT NULL
 );
 
+-- Création de la table Message
 CREATE TABLE Message (
-    mid SERIAL PRIMARY KEY,
-    contenu VARCHAR(1024) NOT NULL,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                         mid SERIAL PRIMARY KEY ,
+                         uid INT NOT NULL,
+                         cid INT NOT NULL,
+                         contenu TEXT NOT NULL,
+                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         CONSTRAINT fk_user FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+
+                         CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
+-- Table de liaison estAbonne (User - Channel)
 CREATE TABLE estAbonne (
-    uid INT,
-    cid INT,
-    PRIMARY KEY (uid, cid),
-    FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-    FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
+                           uid INT,
+                           cid INT,
+                           PRIMARY KEY (uid, cid),
+                           FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+                           FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
-CREATE TABLE aEnvoyer (
-    uid INT,
-    mid INT,
-    PRIMARY KEY (uid, mid),
-    FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-    FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE
+CREATE TABLE isAdmin (
+                         uid INT,
+                         cid INT,
+                         PRIMARY KEY (uid, cid),
+                         FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+                         FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
-CREATE TABLE contient (
-    cid INT,
-    mid INT UNIQUE,
-    PRIMARY KEY (cid, mid),
-    FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE,
-    FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE
+-- Tabme de liaison likes (Message - Utilisateur)
+CREATE TABLE likes (
+                       mid INT,
+                       uid INT,
+                       emoji VARCHAR(5),
+                       PRIMARY KEY (mid, uid),
+                       CONSTRAINT fk_likes_message FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE,
+                       CONSTRAINT fk_likes_utilisateur FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE
 );
 ```
 
@@ -141,15 +164,146 @@ INSERT INTO estAbonne (uid, cid) VALUES (?, ?);
 # Arborescence Globale de l’Application
 ```
 /Projet_SAE
-│── src/
-│   ├── dto/
-│   ├── model/
-│   ├── servlet/
-│   ├── dao/
-│── web/
-│   ├── js/
-│── doc/
-│── README.md
+├───res
+│   └───documentation
+│           MCD.png
+│           SI.PNG
+│
+├───scripts
+│       home.js
+│
+└───WEB-INF
+    │   WEB-INF.iml
+    │   web.xml
+    │
+    ├───classes
+    │   │   config.yml
+    │   │   default1.png
+    │   │   default2.png
+    │   │   default3.png
+    │   └───default4.png
+    │
+    ├───jsp
+    │   │   createChannel.jsp
+    │   │   editUser.jsp
+    │   │   error.jsp
+    │   │   friend.jsp
+    │   │   home.jsp
+    │   │   join.jsp
+    │   │   login.jsp
+    │   │   ModifChannel.jsp
+    │   │   share.jsp
+    │   │
+    │   └───components
+    │       │   message.jsp
+    │       │   TopBar.jsp
+    │       │
+    │       └───messagePart
+    │               DeleteAndAditForm.jsp
+    │               ReactionForm.jsp
+    │               UserProfile.jsp
+    │
+    ├───lib
+    │       jackson-annotations-2.15.3.jar
+    │       jackson-core-2.15.3.jar
+    │       jackson-databind-2.15.3.jar
+    │       jackson-dataformat-xml-2.15.3.jar
+    │       jjwt-api-0.12.5.jar
+    │       jjwt-impl-0.12.5.jar
+    │       jjwt-jackson-0.12.5.jar
+    │       postgresql-42.7.5.jar
+    │       snakeyaml-2.4.jar
+    │
+    └───src
+        └───fr
+            └───univ
+                └───lille
+                    └───s4a021
+                        │   Config.java
+                        │
+                        ├───controller
+                        │       AbstractController.java
+                        │       ChannelController.java
+                        │       JSP.java
+                        │       MainController.java
+                        │       MessageController.java
+                        │       UserController.java
+                        │
+                        ├───dao
+                        │   │   AdminsDAO.java
+                        │   │   ChannelDAO.java
+                        │   │   FriendDAO.java
+                        │   │   MessageDAO.java
+                        │   │   ReactionDAO.java
+                        │   │   SubscriptionDAO.java
+                        │   │   UserDAO.java
+                        │   │
+                        │   └───impl
+                        │           AdminsDAOSql.java
+                        │           ChannelDAOSql.java
+                        │           DaoSql.java
+                        │           FriendDAOSql.java
+                        │           MessageDAOSql.java
+                        │           ReactionDaoSql.java
+                        │           SubscriptionDAOSql.java
+                        │           UserDAOSql.java
+                        │
+                        ├───dto
+                        │       Channel.java
+                        │       ImgMessage.java
+                        │       Message.java
+                        │       User.java
+                        │
+                        ├───exception
+                        │   │   BadParameterException.java
+                        │   │   ConfigErrorException.java
+                        │   │   MyDiscordException.java
+                        │   │   UnauthorizedException.java
+                        │   │
+                        │   └───dao
+                        │       │   CreationException.java
+                        │       │   DaoException.java
+                        │       │   DataAccessException.java
+                        │       │   NotFoundException.java
+                        │       │   UpdateException.java
+                        │       │
+                        │       ├───admin
+                        │       │       AdminCreationException.java
+                        │       │       AdminNotFoundException.java
+                        │       │
+                        │       ├───channel
+                        │       │       ChannelCreationException.java
+                        │       │       ChannelNotFoundException.java
+                        │       │       ChannelUpdateException.java
+                        │       │
+                        │       ├───message
+                        │       │       MessageCreationException.java
+                        │       │       MessageNotFoundException.java
+                        │       │       MessageUpdateException.java
+                        │       │
+                        │       ├───reaction
+                        │       │       ReactionCreationException.java
+                        │       │       ReactionNotFoundException.java
+                        │       │       ReactionUpdateException.java
+                        │       │
+                        │       │
+                        │       ├───subscription
+                        │       │       SubscriptionNotFoundException.java
+                        │       │
+                        │       └───user
+                        │               UserCreationException.java
+                        │               UserNotFoundException.java
+                        │               UserUpdateException.java
+                        │
+                        ├───model
+                        │   └───bdd
+                        │           Connect.java
+                        │           Util.java
+                        │
+                        └───util
+                                JwtManager.java
+                                Pair.java
+
 ```
 
 # Liste des Entrées des Contrôleurs
