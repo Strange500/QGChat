@@ -47,23 +47,6 @@ public class FriendDAOSql extends DaoSql implements FriendDAO {
     }
 
     @Override
-    public void clearFriends(int uid) throws UserNotFoundException, DataAccessException {
-        if (userDAO.userExists(uid)) {
-            throw new UserNotFoundException("User not found");
-        }
-        deleteFriendChannel(uid, uid);
-        String query = "DELETE FROM isFriend WHERE uid1 = ? OR uid2 = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setInt(1, uid);
-            stmt.setInt(2, uid);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new DataAccessException("Error while clearing friends: " + e.getMessage(), e);
-        }
-
-    }
-
-    @Override
     public boolean isFriend(int uid, int friendId) throws UserNotFoundException, DataAccessException {
         if (!userDAO.userExists(uid) || !userDAO.userExists(friendId)) {
             throw new UserNotFoundException("User not found");
