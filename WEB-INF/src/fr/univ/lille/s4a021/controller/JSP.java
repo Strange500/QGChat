@@ -8,6 +8,7 @@ import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.model.bdd.Util;
+import fr.univ.lille.s4a021.util.Pair;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public enum JSP {
     HOME("home.jsp") {
@@ -29,21 +31,30 @@ public enum JSP {
             List<Channel> subscribedChannels = subscriptionDAO.getSubscribedChannels(uid);
             req.setAttribute("subscribedChannels", subscribedChannels);
 
-            int channelToViewId = req.getParameter("channelID") == null ? -1 : Integer.parseInt(req.getParameter("channelID"));
-            boolean showChannel = channelToViewId != -1 && subscribedChannels.stream().anyMatch(channel -> channel.getCid() == channelToViewId);
-            req.setAttribute("showChannel", showChannel);
-            if (showChannel) {
+            List<Pair<User, Channel>> friendChannels = friendDAO.getFriendChannels(uid);
+            req.setAttribute("friendChannels", friendChannels);
 
+            List<User> friendRequests = friendDAO.getFriendRequests(uid);
+            req.setAttribute("friendRequests", friendRequests);
+
+            int channelToViewId = req.getParameter("channelID") == null ? -1 : Integer.parseInt(req.getParameter("channelID"));
+            boolean friendChannel = friendChannels.stream().anyMatch(pair -> pair.getSecond().getCid() == channelToViewId);
+            req.setAttribute("friendChannel", friendChannel);
+            boolean showChannel = subscribedChannels.stream().anyMatch(channel -> channel.getCid() == channelToViewId);
+            req.setAttribute("showChannel", showChannel || friendChannel);
+            if (showChannel || friendChannel) {
                 req.setAttribute("channelToViewId", channelToViewId);
-                List<User> listAdmins = adminDAO.getAdmins(channelToViewId);
-                Boolean isAdmin = listAdmins.stream().anyMatch(user -> user.getUid() == uid);
+                if (!friendChannel) {
+                    List<User> listAdmins = adminDAO.getAdmins(channelToViewId);
+                    Boolean isAdmin = listAdmins.stream().anyMatch(user -> user.getUid() == uid);
+                    req.setAttribute("listAdmins", listAdmins);
+                    req.setAttribute("isAdmin", isAdmin);
+                }
                 int editMid = req.getParameter("editMid") == null ? -1 : Integer.parseInt(req.getParameter("editMid"));
                 String sendError = req.getAttribute("senderror") == null ? "" : req.getAttribute("senderror").toString();
                 Channel channel = channelDAO.getChannelById(channelToViewId);
                 List<Message> messages = messageDAO.getMessagesAndImgMessagesByChannelId(channelToViewId);
 
-                req.setAttribute("listAdmins", listAdmins);
-                req.setAttribute("isAdmin", isAdmin);
                 req.setAttribute("editMid", editMid);
                 req.setAttribute("sendError", sendError);
                 req.setAttribute("channel", channel);
@@ -51,6 +62,11 @@ public enum JSP {
                 if (!messages.isEmpty()) {
                     req.setAttribute("userDAO", userDAO);
                     req.setAttribute("reactionDAO", reactionDAO);
+                }
+
+                if (friendChannel) {
+                    User friend = friendDAO.getFriendForChannel(channelToViewId, uid);
+                    req.setAttribute("friend", friend);
                 }
 
 
@@ -67,6 +83,11 @@ public enum JSP {
             User currentUser = userDAO.getUserById(uid);
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
+
+            List<User> notFriends = friendDAO.getNotFriends(uid);
+            Map<Integer, String> base64ProfilePictures = userDAO.getUserProfilePictures(notFriends.stream().map(User::getUid).toList());
+            req.setAttribute("notFriends", notFriends);
+            req.setAttribute("base64ProfilePictures", base64ProfilePictures);
         }
     },
     EDIT_CHANNEL("ModifChannel.jsp") {
@@ -117,6 +138,7 @@ public enum JSP {
     protected final AdminsDAO adminDAO;
     protected final MessageDAO messageDAO;
     protected final ReactionDAO reactionDAO;
+    protected final FriendDAO friendDAO;
     private final String jsp;
 
 
@@ -129,6 +151,7 @@ public enum JSP {
             this.adminDAO = Config.getConfig().getAdminsDAO();
             this.messageDAO = Config.getConfig().getMessageDAO();
             this.reactionDAO = Config.getConfig().getReactionDAO();
+            this.friendDAO = Config.getConfig().getFriendDAO();
         } catch (ConfigErrorException e) {
             throw new RuntimeException("Failed to initialize DAOs", e);
         }

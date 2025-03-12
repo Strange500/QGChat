@@ -1,12 +1,5 @@
-<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
-<%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-<%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
-<%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
-<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
-<%@ page import="fr.univ.lille.s4a021.Config" %>
-<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -23,63 +16,38 @@
 
 <%@ include file="components/TopBar.jsp" %>
 
-
-<%
-  ChannelDAO channelDAO;
-    try {
-        channelDAO = Config.getConfig().getChannelDAO();
-    } catch (ConfigErrorException e) {
-        AbstractController.handleError(e, request, response);
-        return;
-    }
-
-
-  int chanelID = Integer.parseInt(request.getParameter("channelID"));
-  Channel ch;
-  try {
-    ch = channelDAO.getChannelById(chanelID);
-    if (ch == null) {
-      AbstractController.handleError(new ChannelNotFoundException("The channel with ID " + chanelID + " was not found"), request, response);
-      return;
-    }
-  } catch (ChannelNotFoundException | DataAccessException e) {
-    AbstractController.handleError(e, request, response);
-    return;
-  }
-
-  int userID = Util.getUid(session);
-
-
-  String token = new JwtManager().createJwtForChannelLink(userID, chanelID);
-
-  String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/channel?action=join&token=" + token;
-
-%>
-
-<a href="home?action=logout" class="btn btn-danger mb-3">Logout</a>
-
 <a href="home" class="btn btn-primary mb-3">Back</a>
 
-<h1 class="mb-4">Share Friend Request <%=ch.getName()%></h1>
+<h1 class="mb-4">Create friend request</h1>
 
-<div class="alert alert-info" role="alert">
-  <strong>Share this link:</strong>
-  <small>This link is valid for 1 hour, anyone with this link can join your friend list</small>
-  <input type="text" class="form-control" value="<%= url %>" readonly onclick="this.select();">
-</div>
+  <%
+  List<User> notFriends = (List<User>) request.getAttribute("notFriends");
+  Map<Integer, String> base64ProfilePictures = (Map<Integer, String>) request.getAttribute("base64ProfilePictures");
+%>
 
-<div id="qrcode" class="d-flex justify-content-center my-4"></div>
+<form action="user" method="get">
+  <input type="hidden" name="action" value="sendFriendRequest">
 
-<script defer>
-    var qrcode = new QRCode(document.getElementById("qrcode"), {
-        text: "<%= url %>",
-        width: 256,
-        height: 256,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.Q
-    });
-</script>
+  <div class="form-group">
+    <label for="friend">Select a friend</label>
+    <select class="form-control" id="friend" name="uid">
+      <%
+        for (User user : notFriends) {
+      %>
+      <option value="<%= user.getUid() %>">
+        <%= user.getUsername() %>
+      </option>
+      <%
+        }
+      %>
+    </select>
+
+    <button type="submit" class="btn btn-primary mt-3">Send friend request</button>
+
+  </div>
+
+</form>
+
 
 
 </html>

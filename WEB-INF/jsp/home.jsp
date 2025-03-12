@@ -15,15 +15,14 @@
 </head>
 <body class="container">
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-    <%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
     <%@ page import="fr.univ.lille.s4a021.dto.Message" %>
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
     <%@ page import="java.util.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
     <%@ page import="java.util.stream.Collectors" %>
-    <%@ page import="fr.univ.lille.s4a021.Config" %>
     <%@ page import="fr.univ.lille.s4a021.dao.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
+    <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
 
     <div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
@@ -38,6 +37,8 @@
             int uid = (Integer) request.getAttribute("id");
             List<Channel> subscribedChannels = (List<Channel>) request.getAttribute("subscribedChannels");
 
+            List<Pair<User, Channel>> friendsChannels = (List<Pair<User, Channel>>) request.getAttribute("friendChannels");
+            List<User> friendRequests = (List<User>) request.getAttribute("friendRequests");
     %>
 
 
@@ -63,12 +64,42 @@
                     }
                 %>
             </section>
+            <section id="friendsChannel">
+                <h1 class="mt-4">Friends</h1>
+                <a href="user?action=addFriend" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
+                <% for (User user : friendRequests) { %>
+                <div class="list-group-item list-group-item-action">
+                    <h2 class="h5"><%=user.getUsername()%>
+                    </h2>
+                    <a href="user?action=acceptFriendRequest&uid=<%=user.getUid()%>" class="btn btn-success">
+                        <i class="bi bi-check"></i>
+                    </a>
+                    <a href="user?action=declineFriendRequest&uid=<%=user.getUid()%>" class="btn btn-danger">
+                        <i class="bi bi-x"></i>
+                    </a>
+                </div>
+                <% } %>
+                <%
+                    for (Pair<User, Channel> pair : friendsChannels) {
+                        Channel channel = pair.getSecond();
+                        User friend = pair.getFirst();
+                %>
+                <a href="?action=viewFriend&channelID=<%=channel.getCid()%>"
+                   class="list-group-item list-group-item-action">
+                    <h2 class="h5"><%=friend.getUsername()%>
+                    </h2>
+                </a>
+                <%
+                    }
+                %>
+            </section>
         </div>
 
         <!-- CONVERSATION -->
 
         <%
             Boolean showChannel = (Boolean) request.getAttribute("showChannel");
+            Boolean friendChannel = (Boolean) request.getAttribute("friendChannel");
             if (showChannel) {
                 Integer channelToViewId = (Integer) request.getAttribute("channelToViewId");
                 List<User> listAdmins = (List<User>) request.getAttribute("listAdmins");
@@ -77,7 +108,7 @@
                 String sendError = (String) request.getAttribute("sendError");
                 Channel channel = (Channel) request.getAttribute("channel");
                 List<Message> messages = (List<Message>) request.getAttribute("messages");
-
+                User friend = (User) request.getAttribute("friend");
                 int minuteBeforeExpiration = channel.getMinuteBeforeExpiration();
         %>
 
@@ -86,9 +117,14 @@
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
+                                    <% if (friendChannel) { %>
+                                    <h2 class="mb-4">Conversation with <%= friend.getUsername() %>
+                                    </h2>
+                                    <% } else { %>
                                     <h2 class="mb-4"><%=channel.getName()%></h2>
+                                    <% } %>
                                     <%
-                                        if (isAdmin) {
+                                        if (!friendChannel && isAdmin) {
                                     %>
                                     <a href="channel?action=delete&channelID=<%=channelToViewId%>"
                                        class="btn btn-danger mb-3">
@@ -101,13 +137,14 @@
 
 
                                 <div>
-                                    <% if (isAdmin) { %>
+                                    <% if (!friendChannel && isAdmin) { %>
 
                                     <a id="editLink" href="channel?action=modifchannel&channelID=<%=channelToViewId%>"
                                        class="btn btn-primary mb-3">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                     <% } %>
+                                    <% if (!friendChannel) { %>
                                     <a id="shareLink" href="channel?action=share&channelID=<%=channelToViewId%>"
                                        class="btn btn-primary mb-3">
                                         <i class="bi bi-share"></i>
@@ -116,6 +153,7 @@
                                        class="btn btn-danger mb-3">
                                         <i class="bi bi-box-arrow-right"></i>
                                     </a>
+                                    <% } %>
                                 </div>
 
                             </div>
@@ -127,10 +165,10 @@
                                         ReactionDAO reactionDAO = (ReactionDAO) request.getAttribute("reactionDAO");
                                         for (Message message : messages) {
                                             User sender = userDAO.getUserById(message.getSenderId());
-                                            boolean userCanEdit = message.getSenderId() == uid || isAdmin;
+                                            boolean userCanEdit = message.getSenderId() == uid || (!friendChannel && isAdmin);
                                             boolean messageRequireEdit = editMid == message.getMid();
                                             boolean isImgMessage = message.getImg() != null;
-                                            boolean senderIsAdmin = listAdmins.stream().anyMatch(user -> user.getUid() == sender.getUid());
+                                            boolean senderIsAdmin = !friendChannel && listAdmins.stream().anyMatch(user -> user.getUid() == sender.getUid());
                                             String imgBase64 = userDAO.getUserProfilePicture(sender.getUid());
                                             String displayName = sender.getUid() == uid ? "You" : sender.getUsername();
                                             Map<ReactionDAO.Reaction, Set<Integer>> usersForReactionMap = reactionDAO.getReactionsForMessage(message.getMid());
@@ -197,6 +235,7 @@
     <jsp:forward page="error.jsp"/>
 
     <% } else {
+        e.printStackTrace();
         out.println("An error occurred: " + e.getMessage());
     }
     }

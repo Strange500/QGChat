@@ -1,10 +1,11 @@
-DROP TABLE IF EXISTS likes CASCADE;
-DROP TABLE IF EXISTS contient CASCADE;
-DROP TABLE IF EXISTS Message CASCADE;
-DROP TABLE IF EXISTS estabonne CASCADE;
-DROP TABLE IF EXISTS isAdmin CASCADE;
-DROP TABLE IF EXISTS Channel CASCADE;
-DROP TABLE IF EXISTS Utilisateur CASCADE;
+DROP TABLE IF EXISTS likes;
+DROP TABLE IF EXISTS estAbonne;
+DROP TABLE IF EXISTS isAdmin;
+DROP TABLE IF EXISTS FriendRequest;
+DROP TABLE IF EXISTS isFriend;
+DROP TABLE IF EXISTS Message;
+DROP TABLE IF EXISTS Utilisateur;
+DROP TABLE IF EXISTS Channel;
 
 
 
@@ -19,13 +20,7 @@ CREATE TABLE Utilisateur (
                         CONSTRAINT check_password_not_empty CHECK (password <> '')
 );
 
-CREATE TABLE isFriend (
-                      uid1 INT,
-                      uid2 INT,
-                      PRIMARY KEY (uid1, uid2),
-                      FOREIGN KEY (uid1) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-                      FOREIGN KEY (uid2) REFERENCES Utilisateur(uid) ON DELETE CASCADE
-);
+
 
 -- Création de la table Channel
 CREATE TABLE Channel (
@@ -33,6 +28,29 @@ CREATE TABLE Channel (
                          minuteBeforeExpiration INT DEFAULT -1,
                          name VARCHAR(1024) NOT NULL
 );
+
+CREATE TABLE isFriend
+(
+    uid1 INT,
+    uid2 INT,
+    cid  INT,
+    PRIMARY KEY (uid1, uid2),
+    FOREIGN KEY (uid1) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    FOREIGN KEY (uid2) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    FOREIGN KEY (cid) REFERENCES Channel (cid) ON DELETE CASCADE,
+    CHECK ( uid1 <> uid2 )
+);
+
+CREATE TABLE FriendRequest
+(
+    senderUid   INT,
+    receiverUid INT,
+    PRIMARY KEY (senderUid, receiverUid),
+    FOREIGN KEY (senderUid) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    FOREIGN KEY (receiverUid) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    CHECK ( senderUid <> receiverUid )
+);
+
 
 -- Création de la table Message
 CREATE TABLE Message (

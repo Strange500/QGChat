@@ -27,6 +27,7 @@ public abstract class AbstractController extends HttpServlet {
     protected ReactionDAO reactionDAO;
     protected AdminsDAO adminDAO;
     protected UserDAO userDAO;
+    protected FriendDAO friendDAO;
 
     @Override
     public void init() throws ServletException {
@@ -38,6 +39,7 @@ public abstract class AbstractController extends HttpServlet {
             this.reactionDAO = Config.getConfig().getReactionDAO();
             this.adminDAO = Config.getConfig().getAdminsDAO();
             this.userDAO = Config.getConfig().getUserDAO();
+            this.friendDAO = Config.getConfig().getFriendDAO();
         } catch (ConfigErrorException e) {
             throw new ServletException("Failed to initialize DAOs", e);
         }

@@ -31,6 +31,9 @@ public class MainController extends AbstractController {
             case "view":
                 forwardToJSP(req, res, JSP.HOME);
                 break;
+            case "viewFriend":
+                forwardToJSP(req, res, JSP.HOME);
+                break;
             default:
                 handleError(new NotFoundException("Action not found"), req, res);
                 break;

@@ -78,8 +78,20 @@ public class UserController extends AbstractController {
                 forwardToJSP(req, res, JSP.EDIT_USER);
                 break;
 
-            case "friend":
+            case "addFriend":
                 forwardToJSP(req, res, JSP.FRIEND);
+                break;
+
+            case "sendFriendRequest":
+                handleSendFriendRequest(uid, req, res);
+                break;
+
+            case "acceptFriendRequest":
+                handleAcceptFriendRequest(uid, req, res);
+                break;
+
+            case "declineFriendRequest":
+                handleDeclineFriendRequest(uid, req, res);
                 break;
 
             case "delete":
@@ -98,6 +110,18 @@ public class UserController extends AbstractController {
                 res.sendRedirect("home");
                 break;
         }
+    }
+
+    private void handleDeclineFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws UserNotFoundException, DataAccessException, IOException, BadParameterException {
+        int senderuid = parseUidParameter(req);
+        friendDAO.declineFriendRequest(senderuid, uid);
+        res.sendRedirect("home");
+    }
+
+    private void handleAcceptFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws UserNotFoundException, DataAccessException, IOException, BadParameterException {
+        int senderuid = parseUidParameter(req);
+        friendDAO.acceptFriendRequest(senderuid, uid);
+        res.sendRedirect("home");
     }
 
     private void handleDeleteUser(int uid, HttpServletRequest req, HttpServletResponse res) throws IOException, BadParameterException, UnauthorizedException, UserNotFoundException, DataAccessException {
@@ -139,6 +163,12 @@ public class UserController extends AbstractController {
         userDAO.setUserProfilePicture(base64Img, uidToSetProfilePic);
         res.sendRedirect("home");
 
+    }
+
+    private void handleSendFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws IOException, BadParameterException, UserNotFoundException, DataAccessException {
+        int friendId = parseUidParameter(req);
+        friendDAO.sendFriendRequest(uid, friendId);
+        res.sendRedirect("user?action=addFriend");
     }
 
     private void validateProfilePicture(Part imgPart) throws BadParameterException {

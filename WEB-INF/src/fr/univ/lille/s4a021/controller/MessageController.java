@@ -58,11 +58,27 @@ public class MessageController extends AbstractController {
 
     private void handleSendMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageCreationException, ChannelNotFoundException, DataAccessException, BadParameterException {
         String channelID = req.getParameter("channelID");
-        if (!checkSubscription(uid, channelID)) return;
+        if (checkSubscription(uid, channelID)) {
+            sendMessage(req, channelID);
+            res.sendRedirect("home?action=view&channelID=" + channelID);
+            return;
+        } else if (checkFriendChannel(uid, channelID)) {
+            sendMessage(req, channelID);
+            res.sendRedirect("home?action=viewFriend&channelID=" + channelID);
+            return;
+        }
+        handleError(new ChannelNotFoundException("Channel not found"), req, res);
+    }
 
-        sendMessage(req, channelID);
-        res.sendRedirect("home?action=view&channelID=" + channelID);
-
+    private boolean checkFriendChannel(int uid, String channelID) {
+        try {
+            if (!friendDAO.isFriendChannel(uid, Integer.parseInt(channelID))) {
+                return false;
+            }
+        } catch (UserNotFoundException | DataAccessException e) {
+            return false;
+        }
+        return true;
     }
 
     private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException, BadParameterException {
@@ -87,12 +103,19 @@ public class MessageController extends AbstractController {
     private void handleLikeMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, UserNotFoundException, MessageNotFoundException, ReactionUpdateException, ReactionCreationException, ReactionNotFoundException, DataAccessException {
         int mid = Integer.parseInt(req.getParameter("mid"));
         String emoji = req.getParameter("emoji");
-
-        if (!isSubscribedToMessage(uid, mid, req, res)) return;
-        likeMessage(mid, uid, emoji);
         int channelId = messageDAO.getMessageById(mid).getChannelId();
-        res.sendRedirect("home?action=view&channelID=" + channelId);
 
+        if (checkSubscription(uid, String.valueOf(channelId))) {
+            likeMessage(mid, uid, emoji);
+            res.sendRedirect("home?action=view&channelID=" + channelId);
+            return;
+        } else if (checkFriendChannel(uid, String.valueOf(channelId))) {
+            likeMessage(mid, uid, emoji);
+            res.sendRedirect("home?action=viewFriend&channelID=" + channelId);
+            return;
+        }
+
+        handleError(new ChannelNotFoundException("Channel not found"), req, res);
     }
 
     private void likeMessage(int mid, int uid, String emoji) throws ReactionNotFoundException, UserNotFoundException, ReactionCreationException, DataAccessException, ReactionUpdateException, MessageNotFoundException {
@@ -129,11 +152,12 @@ public class MessageController extends AbstractController {
     }
 
     private boolean hasDeletePermission(int uid, Message message) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
-        if (!subscriptionDAO.isSubscribedTo(uid, message.getChannelId())) {
+        boolean isfriendChannel = checkFriendChannel(uid, String.valueOf(message.getChannelId()));
+        if (!checkSubscription(uid, String.valueOf(message.getChannelId())) && !isfriendChannel) {
             return false;
         }
 
-        return message.getSenderId() == uid || adminDAO.userIsAdmin(uid, message.getChannelId());
+        return message.getSenderId() == uid || (!isfriendChannel && adminDAO.userIsAdmin(uid, message.getChannelId()));
     }
 
     private void handleEditMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, MessageNotFoundException, DataAccessException, UserNotFoundException, ChannelNotFoundException, MessageUpdateException {
@@ -150,7 +174,7 @@ public class MessageController extends AbstractController {
     }
 
     private boolean hasEditPermission(int uid, Message message) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
-        if (!subscriptionDAO.isSubscribedTo(uid, message.getChannelId())) {
+        if (!subscriptionDAO.isSubscribedTo(uid, message.getChannelId()) && !friendDAO.isFriendChannel(uid, message.getChannelId())) {
             return false;
         }
 
@@ -166,15 +190,5 @@ public class MessageController extends AbstractController {
             return false;
         }
         return true;
-    }
-
-    private boolean isSubscribedToMessage(int uid, int mid, HttpServletRequest req, HttpServletResponse res) {
-        try {
-            int channelId = messageDAO.getMessageById(mid).getChannelId();
-            return checkSubscription(uid, String.valueOf(channelId));
-        } catch (MessageNotFoundException | DataAccessException e) {
-            handleError(e, req, res);
-            return false;
-        }
     }
 }
