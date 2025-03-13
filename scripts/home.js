@@ -29,29 +29,61 @@ if (messageList) {
     imgInput.addEventListener('change', () => {
         const previewCard = document.getElementById('preview');
         preview.style.display = 'block';
-        const previewImg = previewCard.querySelector('img');
+
         const reader = new FileReader();
         reader.onload = (e) => {
-            const contentTypes = ['image/jpeg', 'image/png'];
-            if (!contentTypes.includes(imgInput.files[0].type)) {
+            const contentType = imgInput.files[0].type;
+            console.log(contentType);
 
-            } else {
-                previewImg.src = e.target.result;
-                previewImg.style.display = 'block';
+            if (!contentType.startsWith('image') && !contentType.startsWith('video') && !contentType.startsWith('audio')) {
+                alert('Invalid file type');
+                imgInput.value = '';
+                return;
             }
 
-        };
+
+            let result;
+
+// Media element size
+            const mediaWidth = '150px'; // Set fixed width for media
+            const mediaHeight = '100px'; // Set fixed height for media
+
+            if (contentType.startsWith('image')) {
+                result = `<img src="${e.target.result}" class="img-fluid" alt="preview" style="width: ${mediaWidth}; height: ${mediaHeight}; object-fit: cover;">`;
+            } else if (contentType.startsWith('video')) {
+                result = `<video controls style="width: ${mediaWidth}; height: ${mediaHeight}; object-fit: cover;">                     
+                <source src="${e.target.result}" type="${contentType}">                 
+              </video>`;
+            } else if (contentType.startsWith('audio')) {
+                result = `<audio controls style="width: ${mediaWidth};">                     
+                <source src="${e.target.result}" type="${contentType}">                 
+              </audio>`;
+            }
+
+            const uuid = Math.floor(Math.random() * 1000000);
+            previewCard.style.display = 'block';
+            previewCard.innerHTML = `
+                          <div class="card-body p-0">
+                              <a class="position-absolute top-0 end-0 p-1" id="${uuid}" style="color: blue; cursor: pointer; z-index: 1000;">
+                                  <i class="bi bi-x-octagon"></i>
+                              </a>
+                              ${result}
+                          </div>`;
+            const cancelBtn = document.getElementById(uuid);
+            cancelBtn.addEventListener('click', () => {
+                previewCard.style.display = 'none';
+                previewCard.removeChild(cancelBtn.parentElement);
+                const imgInput = document.querySelector('input[type="file"]');
+                imgInput.value = '';
+            });
+
+
+            }
+
+
         reader.readAsDataURL(imgInput.files[0]);
     });
 
-
-    const previewCardCancelBtn = document.querySelector('#preview a');
-    previewCardCancelBtn.addEventListener('click', () => {
-        const previewCard = document.getElementById('preview');
-        previewCard.style.display = 'none';
-        const imgInput = document.querySelector('input[type="file"]');
-        imgInput.value = '';
-    });
 
     function displaySheep() {
 

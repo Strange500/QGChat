@@ -208,19 +208,15 @@
                             <input type="hidden" name="channelID" value="<%=channelToViewId%>">
                             <div class="form-group">
                                 <div class="card" style="max-width: 100px; display: none" id="preview">
-                                    <div class="card-body p-0">
-                                        <a class="position-absolute top-0 end-0 p-1">
-                                            <i class="bi bi-x-octagon"></i>
-                                        </a>
-                                        <img src="" alt="preview" class="img-fluid" >
-                                    </div>
+
                                 </div>
                                 <% if (minuteBeforeExpiration > 0) { %>
                                 <label>Message (will expire in <%=minuteBeforeExpiration%> minutes)</label>
                                 <% } %>
                                 <input type="text" class="form-control" name="message" placeholder="Enter your message">
                             </div>
-                            <input type="file" accept="image/jpeg" class="form-control-file" name="img" id="imgInput" style="display: none;">
+                            <input type="file" accept="image/*,video/*,audio/*" class="form-control-file" name="img"
+                                   id="imgInput" style="display: none;">
                             <a class="btn btn-secondary" onclick="document.getElementById('imgInput').click();">
                                 <i class="bi bi-paperclip"></i>
                             </a>
