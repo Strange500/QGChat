@@ -63,7 +63,7 @@ CREATE TABLE Message (
                             CONSTRAINT fk_user FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
                          CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel (cid) ON DELETE CASCADE,
                          CONSTRAINT check_contenu_not_empty CHECK (contenu <> ''),
-                         CONSTRAINT check_type CHECK (type IN ('text', 'image'))
+                         CONSTRAINT check_type CHECK (type IN ('text', 'image', 'video', 'audio'))
 );
 
 -- Table de liaison estAbonne (User - Channel)

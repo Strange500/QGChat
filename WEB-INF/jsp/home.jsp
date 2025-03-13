@@ -181,6 +181,8 @@
                                             boolean userCanEdit = message.getSenderId() == uid || (!friendChannel && isAdmin);
                                             boolean messageRequireEdit = editMid == message.getMid();
                                             boolean isImgMessage = message.getType().equals(MsgType.IMAGE);
+                                            boolean isVideoMessage = message.getType().equals(MsgType.VIDEO);
+                                            boolean isAudioMessage = message.getType().equals(MsgType.AUDIO);
                                             boolean senderIsAdmin = !friendChannel && listAdmins.stream().anyMatch(user -> user.getUid() == sender.getUid());
                                             String imgBase64 = userDAO.getUserProfilePicture(sender.getUid());
                                             String displayName = sender.getUid() == uid ? "You" : sender.getUsername();

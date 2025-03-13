@@ -82,20 +82,42 @@ public class MessageController extends AbstractController {
         return true;
     }
 
+    private static MsgType getMsgType(Part imgPart) throws BadParameterException {
+        MsgType type = MsgType.TEXT;
+        if (imgPart.getSize() > 0) {
+            if (imgPart.getContentType().startsWith("image/")) {
+                type = MsgType.IMAGE;
+            } else if (imgPart.getContentType().startsWith("video/")) {
+                type = MsgType.VIDEO;
+            } else if (imgPart.getContentType().startsWith("audio/")) {
+                type = MsgType.AUDIO;
+            } else {
+                throw new BadParameterException("Invalid file type");
+            }
+        }
+        return type;
+    }
+
     private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException, BadParameterException {
         Part imgPart = req.getPart("img");
         String msg = formatMessage(req.getParameter("message"), imgPart);
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
         int usr = (int) req.getSession().getAttribute("id");
-        messageDAO.createMessage(msg, usr, channel.getCid(), req.getPart("img").getSize() > 0 ? MsgType.IMAGE : MsgType.TEXT);
+        MsgType type = getMsgType(imgPart);
+        messageDAO.createMessage(msg, usr, channel.getCid(), type);
     }
 
     private String formatMessage(String msg, Part imgPart) throws IOException, BadParameterException {
         if (imgPart.getSize() > 0) {
-            if (!imgPart.getContentType().startsWith("image/")) {
-                throw new BadParameterException("Invalid image format");
+            if (imgPart.getContentType().startsWith("image/")) {
+                return Base64.getEncoder().encodeToString(imgPart.getInputStream().readAllBytes());
+            } else if (imgPart.getContentType().startsWith("video/")) {
+                return Base64.getEncoder().encodeToString(imgPart.getInputStream().readAllBytes());
+            } else if (imgPart.getContentType().startsWith("audio/")) {
+                return Base64.getEncoder().encodeToString(imgPart.getInputStream().readAllBytes());
+            } else {
+                throw new BadParameterException("Invalid file type");
             }
-            return Base64.getEncoder().encodeToString(imgPart.getInputStream().readAllBytes());
         }
         return StringEscapeUtils.escapeHtml4(msg);
     }

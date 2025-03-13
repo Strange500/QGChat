@@ -2,7 +2,9 @@ package fr.univ.lille.s4a021.dto;
 
 public enum MsgType {
     TEXT("text"),
-    IMAGE("image");
+    IMAGE("image"),
+    VIDEO("video"),
+    AUDIO("audio");
 
 
     private String type;
