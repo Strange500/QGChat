@@ -16,6 +16,9 @@ public class Config {
 
     private static Config instance = null;
     public static boolean DEBUG;
+    public static Integer VIDEO_MAX_SIZE;
+    public static Integer AUDIO_MAX_SIZE;
+    public static Integer IMAGE_MAX_SIZE;
 
     private final DatabaseConfig databaseConfig;
     private final Map<String, Object> config;
@@ -53,6 +56,10 @@ public class Config {
         this.config = loadConfig();
         this.databaseConfig = loadDatabaseConfig();
         DEBUG = loadDebugMode();
+        Map<String, Integer> uploadConfig = loadUploadConfig();
+        VIDEO_MAX_SIZE = uploadConfig.get("video");
+        AUDIO_MAX_SIZE = uploadConfig.get("audio");
+        IMAGE_MAX_SIZE = uploadConfig.get("image");
     }
 
     private DatabaseConfig loadDatabaseConfig() {
@@ -72,6 +79,20 @@ public class Config {
         } catch (Exception e) {
             throw new ConfigErrorException("Error while reading the debug mode");
         }
+    }
+
+    private Map<String, Integer> loadUploadConfig() {
+        Map<String, String> uploadConfig = (Map<String, String>) config.get("upload");
+        return Map.of(
+                "video", convertMoToOctet(uploadConfig.get("video_max_size")),
+                "audio", convertMoToOctet(uploadConfig.get("audio_max_size")),
+                "image", convertMoToOctet(uploadConfig.get("image_max_size"))
+        );
+    }
+
+    private Integer convertMoToOctet(String moString) {
+        int mo = Integer.parseInt(moString.replace("mo", ""));
+        return mo * 1024 * 1024;
     }
 
     private Map<String, Object> loadConfig() throws ConfigErrorException {

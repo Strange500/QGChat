@@ -1,5 +1,6 @@
 package fr.univ.lille.s4a021.controller;
 
+import fr.univ.lille.s4a021.Config;
 import fr.univ.lille.s4a021.dao.ReactionDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
@@ -104,7 +105,31 @@ public class MessageController extends AbstractController {
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
         int usr = (int) req.getSession().getAttribute("id");
         MsgType type = getMsgType(imgPart);
+        checkFileSize(imgPart, type);
         messageDAO.createMessage(msg, usr, channel.getCid(), type);
+    }
+
+    private void checkFileSize(Part imgPart, MsgType type) throws BadParameterException {
+        int maxSize = 0;
+        String msg = switch (type) {
+            case IMAGE -> {
+                maxSize = Config.IMAGE_MAX_SIZE;
+                yield "Your image should be less than " + maxSize / (1024 * 1024) + "MB";
+            }
+            case VIDEO -> {
+                maxSize = Config.VIDEO_MAX_SIZE;
+                yield "Your video should be less than " + maxSize / (1024 * 1024) + "MB";
+            }
+            case AUDIO -> {
+                maxSize = Config.AUDIO_MAX_SIZE;
+                yield "Your audio should be less than " + maxSize / (1024 * 1024) + "MB";
+            }
+            default -> "";
+        };
+        if (imgPart.getSize() > maxSize) {
+            throw new BadParameterException(msg);
+        }
+
     }
 
     private String formatMessage(String msg, Part imgPart) throws IOException, BadParameterException {

@@ -5,3 +5,7 @@ database:
   database: "sae"
   password: "sae"
 debug: true
+upload:
+    video_max_size: "20mo"
+    audio_max_size: "20mo"
+    image_max_size: "20mo"
