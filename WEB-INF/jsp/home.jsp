@@ -210,10 +210,13 @@
                                 <div class="card" style="max-width: 100px; display: none" id="preview">
 
                                 </div>
+                                <div id="textInputDiv">
                                 <% if (minuteBeforeExpiration > 0) { %>
+
                                 <label>Message (will expire in <%=minuteBeforeExpiration%> minutes)</label>
                                 <% } %>
                                 <input type="text" class="form-control" name="message" placeholder="Enter your message">
+                                </div>
                             </div>
                             <input type="file" accept="image/*,video/*,audio/*" class="form-control-file" name="img"
                                    id="imgInput" style="display: none;">

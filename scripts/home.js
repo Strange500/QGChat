@@ -24,20 +24,22 @@ if (messageList) {
 
     });
 
-
+    const textInputDiv = document.getElementById('textInputDiv');
     const imgInput = document.querySelector('input[type="file"]');
     imgInput.addEventListener('change', () => {
         const previewCard = document.getElementById('preview');
         preview.style.display = 'block';
+        textInputDiv.style.display = 'none';
 
         const reader = new FileReader();
         reader.onload = (e) => {
             const contentType = imgInput.files[0].type;
-            console.log(contentType);
 
             if (!contentType.startsWith('image') && !contentType.startsWith('video') && !contentType.startsWith('audio')) {
                 alert('Invalid file type');
                 imgInput.value = '';
+                previewCard.style.display = 'none';
+                textInputDiv.style.display = 'block';
                 return;
             }
 
@@ -75,6 +77,7 @@ if (messageList) {
                 previewCard.removeChild(cancelBtn.parentElement);
                 const imgInput = document.querySelector('input[type="file"]');
                 imgInput.value = '';
+                textInputDiv.style.display = 'block';
             });
 
 
