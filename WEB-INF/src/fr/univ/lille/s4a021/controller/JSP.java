@@ -22,6 +22,7 @@ public enum JSP {
     HOME("home.jsp") {
         @Override
         public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+            req.removeAttribute("referer");
             Integer uid = (Integer) req.getAttribute("id");
             String userProfilePicture = this.userDAO.getUserProfilePicture(Util.getUid(req.getSession()));
             User currentUser = userDAO.getUserById(uid);
@@ -74,7 +75,16 @@ public enum JSP {
         }
     },
     LOGIN("login.jsp"),
-    EDIT_USER("editUser.jsp"),
+    EDIT_USER("editUser.jsp") {
+        @Override
+        public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+            Integer uid = (Integer) req.getAttribute("id");
+            String userProfilePicture = this.userDAO.getUserProfilePicture(Util.getUid(req.getSession()));
+            User currentUser = userDAO.getUserById(uid);
+            req.setAttribute("UserProfilePicture", userProfilePicture);
+            req.setAttribute("currentUser", currentUser);
+        }
+    },
     FRIEND("friend.jsp") {
         @Override
         public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
@@ -120,7 +130,7 @@ public enum JSP {
             req.setAttribute("currentUser", currentUser);
         }
     },
-    INVITE("invite.jsp") {
+    JOIN("join.jsp") {
         @Override
         public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
             Integer uid = (Integer) req.getAttribute("id");
@@ -165,6 +175,7 @@ public enum JSP {
     }
 
     public void launch(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
+        req.setAttribute("referer", req.getHeader("referer"));
         prepare(req, res);
         RequestDispatcher dispatcher = req.getRequestDispatcher(getJSPPath(jsp));
         dispatcher.forward(req, res);

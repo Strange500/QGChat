@@ -54,8 +54,6 @@
 
 %>
 
-
-<a href="home" class="btn btn-primary mb-3">Back</a>
 <%@ include file="components/TopBar.jsp" %>
 
 

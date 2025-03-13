@@ -42,7 +42,7 @@
 
 %>
 
-<a href="home?action=logout" class="btn btn-danger mb-3">Logout</a>
+<%@ include file="components/TopBar.jsp" %>
 
 <section id="userInfo" class="mt-5">
   <a href="home" class="btn btn-secondary mb-3">

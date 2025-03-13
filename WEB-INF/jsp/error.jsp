@@ -49,6 +49,8 @@
     String message = (String) request.getAttribute("message");
     Throwable exception = (Throwable) request.getAttribute("exception");
     response.setStatus(errorCode);
+
+    String referer = (String) request.getAttribute("referer");
 %>
 <div class="error-container">
     <i class="bi bi-exclamation-triangle error-icon"></i>
@@ -56,7 +58,9 @@
     </h1>
     <p class="lead"><%= message != null ? message : "An unknown error has occurred. Please try again later." %>
     </p>
-    <a href="home" class="btn btn-primary btn-lg back-btn">Back to Homepage</a>
+    <% if (referer != null) { %>
+    <a href="<%= referer %>" class="btn btn-primary mb-3">Back</a>
+    <% } %>
 
     <% if (Config.DEBUG) {
         exception.printStackTrace();

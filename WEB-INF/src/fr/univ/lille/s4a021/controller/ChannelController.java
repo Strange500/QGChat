@@ -175,7 +175,7 @@ public class ChannelController extends AbstractController {
                 handleAcceptInvite(req, res, uid);
                 break;
             case "join":
-                forwardToJSP(req, res, JSP.INVITE);
+                forwardToJSP(req, res, JSP.JOIN);
                 break;
             case "quit":
                 handleUnsubscribeUser(req, res, uid);

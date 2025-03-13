@@ -16,7 +16,6 @@
 
 <%@ include file="components/TopBar.jsp" %>
 
-<a href="home" class="btn btn-primary mb-3">Back</a>
 
 <h1 class="mb-4">Create friend request</h1>
 

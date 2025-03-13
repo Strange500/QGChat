@@ -2,10 +2,14 @@
 <%
     String UserProfilePicture = (String) request.getAttribute("UserProfilePicture");
     User currentUser = (User) request.getAttribute("currentUser");
+    String referer = (String) request.getAttribute("referer");
 %>
 
 <div class="container mt-4">
     <a href="home?action=logout" class="btn btn-danger mb-3">Logout</a>
+    <% if (referer != null) { %>
+    <a href="<%= referer %>" class="btn btn-primary mb-3">Back</a>
+    <% } %>
 
     <section class="text-left mb-4">
         <div class="d-flex align-items-center">
