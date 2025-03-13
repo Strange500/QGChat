@@ -39,6 +39,9 @@
 
             List<Pair<User, Channel>> friendsChannels = (List<Pair<User, Channel>>) request.getAttribute("friendChannels");
             List<User> friendRequests = (List<User>) request.getAttribute("friendRequests");
+
+            Boolean friendChannel = (Boolean) request.getAttribute("friendChannel");
+
     %>
 
 
@@ -50,48 +53,61 @@
 
     <div class="row">
         <div class="col-md-4">
-            <section id="channels">
-                <h1 class="mt-4">Channels</h1>
-                <a href="channel?action=createchannel" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
-                <%
-                    for (Channel channel : subscribedChannels) {
-                %>
-                <a href="?action=view&channelID=<%=channel.getCid()%>" class="list-group-item list-group-item-action">
-                    <h2 class="h5"><%=channel.getName()%>
-                    </h2>
-                </a>
-                <%
-                    }
-                %>
-            </section>
-            <section id="friendsChannel">
-                <h1 class="mt-4">Friends</h1>
-                <a href="user?action=addFriend" class="btn btn-primary mb-3"><i class="bi bi-plus"></i></a>
-                <% for (User user : friendRequests) { %>
-                <div class="list-group-item list-group-item-action">
-                    <h2 class="h5"><%=user.getUsername()%>
-                    </h2>
-                    <a href="user?action=acceptFriendRequest&uid=<%=user.getUid()%>" class="btn btn-success">
-                        <i class="bi bi-check"></i>
+            <ul class="nav nav-tabs mb-4">
+                <li class="nav-item">
+                    <a class="nav-link <%= !friendChannel ? "active" : "" %>" aria-current="page" href="#"
+                       id="channelTab">Channels</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= friendChannel ? "active" : "" %>" href="#" id="friendTab">Friends</a>
+                </li>
+            </ul>
+
+            <section id="channels" class="mb-4">
+                <a href="channel?action=createchannel" class="btn btn-primary mb-3">Create New Channel</a>
+                <div class="list-group">
+                    <% for (Channel channel : subscribedChannels) { %>
+                    <a href="?action=view&channelID=<%=channel.getCid()%>"
+                       class="list-group-item list-group-item-action">
+                        <h5 class="mb-1"><%=channel.getName()%>
+                        </h5>
                     </a>
-                    <a href="user?action=declineFriendRequest&uid=<%=user.getUid()%>" class="btn btn-danger">
-                        <i class="bi bi-x"></i>
-                    </a>
+                    <% } %>
                 </div>
-                <% } %>
-                <%
-                    for (Pair<User, Channel> pair : friendsChannels) {
+            </section>
+
+            <section id="friendsChannel" style="display: none">
+                <a href="user?action=addFriend" class="btn btn-primary mb-3">Add Friend</a>
+                <div class="list-group">
+                    <% for (User user : friendRequests) { %>
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><%=user.getUsername()%>
+                        </h5>
+                        <div>
+                            <a href="user?action=acceptFriendRequest&uid=<%=user.getUid()%>"
+                               class="btn btn-success btn-sm mx-1">
+                                <i class="bi bi-check"></i>
+                            </a>
+                            <a href="user?action=declineFriendRequest&uid=<%=user.getUid()%>"
+                               class="btn btn-danger btn-sm mx-1">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <div class="list-group">
+                    <% for (Pair<User, Channel> pair : friendsChannels) {
                         Channel channel = pair.getSecond();
-                        User friend = pair.getFirst();
-                %>
-                <a href="?action=viewFriend&channelID=<%=channel.getCid()%>"
-                   class="list-group-item list-group-item-action">
-                    <h2 class="h5"><%=friend.getUsername()%>
-                    </h2>
-                </a>
-                <%
-                    }
-                %>
+                        User friend = pair.getFirst(); %>
+                    <a href="?action=viewFriend&channelID=<%=channel.getCid()%>"
+                       class="list-group-item list-group-item-action">
+                        <h5 class="mb-1"><%=friend.getUsername()%>
+                        </h5>
+                    </a>
+                    <% } %>
+                </div>
             </section>
         </div>
 
@@ -99,7 +115,6 @@
 
         <%
             Boolean showChannel = (Boolean) request.getAttribute("showChannel");
-            Boolean friendChannel = (Boolean) request.getAttribute("friendChannel");
             if (showChannel) {
                 Integer channelToViewId = (Integer) request.getAttribute("channelToViewId");
                 List<User> listAdmins = (List<User>) request.getAttribute("listAdmins");

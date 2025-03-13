@@ -79,7 +79,7 @@ if (messageList) {
     });
 }
 
-const profileLink = document.getElementById('pofileLink');
+const profileLink = document.getElementById('profileLink');
 profileLink.addEventListener('mouseenter', () => {
     profileLink.querySelector('i').style.display = 'block';
 });
@@ -141,3 +141,35 @@ setInterval(() => {
     });
 }, 1000);
 
+
+const channelTab = document.querySelector('#channelTab');
+const channels = document.querySelector('#channels');
+const friendTab = document.querySelector('#friendTab');
+const friendsChannel = document.querySelector('#friendsChannel');
+
+if (channelTab.classList.contains('active')) {
+    channels.style.display = 'block';
+    friendsChannel.style.display = 'none';
+}
+
+if (friendTab.classList.contains('active')) {
+    channels.style.display = 'none';
+    friendsChannel.style.display = 'block';
+}
+
+channelTab.addEventListener('click', (e) => {
+    e.preventDefault();
+    channels.style.display = 'block';
+    friendsChannel.style.display = 'none';
+    channelTab.classList.add('active');
+    friendTab.classList.remove('active');
+
+});
+
+friendTab.addEventListener('click', (e) => {
+    e.preventDefault()
+    channels.style.display = 'none';
+    friendsChannel.style.display = 'block';
+    channelTab.classList.remove('active');
+    friendTab.classList.add('active');
+});
