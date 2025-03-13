@@ -54,7 +54,7 @@ public enum JSP {
                 int editMid = req.getParameter("editMid") == null ? -1 : Integer.parseInt(req.getParameter("editMid"));
                 String sendError = req.getAttribute("senderror") == null ? "" : req.getAttribute("senderror").toString();
                 Channel channel = channelDAO.getChannelById(channelToViewId);
-                List<Message> messages = messageDAO.getMessagesAndImgMessagesByChannelId(channelToViewId);
+                List<Message> messages = messageDAO.getMessageByChannelId(channelToViewId);
 
                 req.setAttribute("editMid", editMid);
                 req.setAttribute("sendError", sendError);

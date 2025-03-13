@@ -3,6 +3,7 @@ package fr.univ.lille.s4a021.controller;
 import fr.univ.lille.s4a021.dao.ReactionDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.dto.MsgType;
 import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
@@ -86,7 +87,7 @@ public class MessageController extends AbstractController {
         String msg = formatMessage(req.getParameter("message"), imgPart);
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
         int usr = (int) req.getSession().getAttribute("id");
-        messageDAO.createMessage(msg, usr, channel.getCid());
+        messageDAO.createMessage(msg, usr, channel.getCid(), req.getPart("img").getSize() > 0 ? MsgType.IMAGE : MsgType.TEXT);
     }
 
     private String formatMessage(String msg, Part imgPart) throws IOException, BadParameterException {
@@ -94,8 +95,7 @@ public class MessageController extends AbstractController {
             if (!imgPart.getContentType().startsWith("image/")) {
                 throw new BadParameterException("Invalid image format");
             }
-            String imgBase64 = Base64.getEncoder().encodeToString(imgPart.getInputStream().readAllBytes());
-            return "img:" + imgBase64;
+            return Base64.getEncoder().encodeToString(imgPart.getInputStream().readAllBytes());
         }
         return StringEscapeUtils.escapeHtml4(msg);
     }
@@ -148,7 +148,6 @@ public class MessageController extends AbstractController {
         messageDAO.deleteMessage(mid);
         int channelId = message.getChannelId();
         res.sendRedirect("home?action=view&channelID=" + channelId);
-
     }
 
     private boolean hasDeletePermission(int uid, Message message) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
@@ -164,21 +163,25 @@ public class MessageController extends AbstractController {
         int mid = Integer.parseInt(req.getParameter("mid"));
         String newMessageContent = req.getParameter("message");
         Message message = messageDAO.getMessageById(mid);
-        if (!hasEditPermission(uid, message)) return;
+        int channelId = message.getChannelId();
+        if (!hasEditPermission(uid, message)) {
+            res.sendRedirect("home?action=view&channelID=" + channelId);
+            return;
+        }
 
         message.setContenu(StringEscapeUtils.escapeHtml4(newMessageContent));
         messageDAO.updateMessage(mid, message.getContenu());
-        int channelId = message.getChannelId();
         res.sendRedirect("home?action=view&channelID=" + channelId);
 
     }
 
     private boolean hasEditPermission(int uid, Message message) throws UserNotFoundException, ChannelNotFoundException, DataAccessException {
-        if (!subscriptionDAO.isSubscribedTo(uid, message.getChannelId()) && !friendDAO.isFriendChannel(uid, message.getChannelId())) {
+        boolean isFriendChannel = checkFriendChannel(uid, String.valueOf(message.getChannelId()));
+        if (!subscriptionDAO.isSubscribedTo(uid, message.getChannelId()) && !isFriendChannel) {
             return false;
         }
 
-        return message.getSenderId() == uid;
+        return message.getSenderId() == uid || (!isFriendChannel && adminDAO.userIsAdmin(uid, message.getChannelId()));
     }
 
     private boolean checkSubscription(int uid, String channelID) {

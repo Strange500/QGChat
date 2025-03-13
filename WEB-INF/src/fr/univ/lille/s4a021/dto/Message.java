@@ -9,17 +9,18 @@ public class Message {
     private int senderId;
     private int channelId;
     private final String timestamp;
+    private MsgType type;
 
     private Date dateSend;
 
 
-
-    public Message(int mid, String contenu, int senderId, int channelId, String timestamp) {
+    public Message(int mid, String contenu, int senderId, int channelId, String timestamp, MsgType type) {
         this.mid = mid;
         this.contenu = contenu;
         this.senderId = senderId;
         this.channelId = channelId;
         this.timestamp = timestamp;
+        this.type = type;
         try {
             this.dateSend = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(timestamp);
         } catch (Exception e) {
@@ -66,6 +67,10 @@ public class Message {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    public MsgType getType() {
+        return type;
     }
 
 

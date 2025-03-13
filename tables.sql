@@ -55,13 +55,15 @@ CREATE TABLE FriendRequest
 -- Création de la table Message
 CREATE TABLE Message (
                          mid SERIAL PRIMARY KEY ,
+                         type varchar(1024) NOT NULL default 'text',
                          uid INT NOT NULL,
                          cid INT NOT NULL,
                          contenu TEXT NOT NULL,
                          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             CONSTRAINT fk_user FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-
-                            CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
+                         CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel (cid) ON DELETE CASCADE,
+                         CONSTRAINT check_contenu_not_empty CHECK (contenu <> ''),
+                         CONSTRAINT check_type CHECK (type IN ('text', 'image'))
 );
 
 -- Table de liaison estAbonne (User - Channel)

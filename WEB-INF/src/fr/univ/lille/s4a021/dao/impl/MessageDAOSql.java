@@ -2,6 +2,7 @@ package fr.univ.lille.s4a021.dao.impl;
 
 import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.dto.MsgType;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.message.MessageCreationException;
 import fr.univ.lille.s4a021.exception.dao.message.MessageNotFoundException;
@@ -18,13 +19,14 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
     }
 
 
-    // Création d'un message
-    public Message createMessage(String contenu, int senderId, int channelId) throws MessageCreationException, DataAccessException {
-        String insertMessageQuery = "INSERT INTO Message (contenu,uid,cid) VALUES (?, ?, ?)";
+    @Override
+    public Message createMessage(String contenu, int senderId, int channelId, MsgType type) throws MessageCreationException, DataAccessException {
+        String insertMessageQuery = "INSERT INTO Message (contenu,uid,cid,type) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(insertMessageQuery, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, contenu);
             stmt.setInt(2, senderId);
             stmt.setInt(3, channelId);
+            stmt.setString(4, type.getType());
             int r = stmt.executeUpdate();
             if (r == 0) {
                 throw new MessageCreationException("Message not created");
@@ -45,7 +47,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
     @Override
     public List<Message> getMessageByChannelId(int cid) throws DataAccessException {
         deleteExpiredMessages();
-        String query = "SELECT mid, contenu, uid, cid, timestamp FROM Message WHERE cid = ? ORDER BY timestamp";
+        String query = "SELECT mid, contenu, uid, cid, timestamp, type FROM Message WHERE cid = ? ORDER BY timestamp";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, cid);
             ResultSet rs = stmt.executeQuery();
@@ -65,7 +67,8 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
                 int cid = rs.getInt("cid");
                 String contenu = rs.getString("contenu");
                 String timestamp = rs.getString("timestamp");
-                messages.add(new Message(mid, contenu, uid, cid, timestamp));
+                String type = rs.getString("type");
+                messages.add(new Message(mid, contenu, uid, cid, timestamp, MsgType.fromString(type)));
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error while building messages from result set: " + e.getMessage(), e);
@@ -75,7 +78,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
 
     public Message getMessageById(int mid) throws MessageNotFoundException, DataAccessException {
         deleteExpiredMessages();
-        String query = "SELECT mid, contenu, uid, cid, timestamp FROM Message WHERE mid = ? ";
+        String query = "SELECT mid, contenu, uid, cid, timestamp, type FROM Message WHERE mid = ? ";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, mid);
             ResultSet rs = stmt.executeQuery();

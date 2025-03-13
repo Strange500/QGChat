@@ -8,7 +8,7 @@
     </div>
 
     <% if (isImgMessage) { %>
-    <img src="data:image/jpeg;base64,<%= message.getImg() %>" class="img-fluid my-2" alt="img">
+    <img src="data:image/jpeg;base64,<%= message.getContenu() %>" class="img-fluid my-2" alt="img">
     <% } else { %>
     <% if (messageRequireEdit && userCanEdit) { %>
     <form action="message" method="POST" class="mt-4">

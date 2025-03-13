@@ -14,17 +14,15 @@
 
 </head>
 <body class="container">
-    <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-    <%@ page import="fr.univ.lille.s4a021.dto.Message" %>
-    <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-    <%@ page import="java.util.*" %>
+<%@ page import="java.util.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
     <%@ page import="java.util.stream.Collectors" %>
     <%@ page import="fr.univ.lille.s4a021.dao.*" %>
     <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
     <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
+<%@ page import="fr.univ.lille.s4a021.dto.*" %>
 
-    <div id="hover-div"
+<div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
          style="display: none; position: absolute; z-index: 1000;">
     </div>
@@ -182,7 +180,7 @@
                                             User sender = userDAO.getUserById(message.getSenderId());
                                             boolean userCanEdit = message.getSenderId() == uid || (!friendChannel && isAdmin);
                                             boolean messageRequireEdit = editMid == message.getMid();
-                                            boolean isImgMessage = message.getImg() != null;
+                                            boolean isImgMessage = message.getType().equals(MsgType.IMAGE);
                                             boolean senderIsAdmin = !friendChannel && listAdmins.stream().anyMatch(user -> user.getUid() == sender.getUid());
                                             String imgBase64 = userDAO.getUserProfilePicture(sender.getUid());
                                             String displayName = sender.getUid() == uid ? "You" : sender.getUsername();
