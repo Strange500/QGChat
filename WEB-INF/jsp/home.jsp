@@ -53,7 +53,7 @@
 
     <div class="row">
         <div class="col-md-4">
-            <ul class="nav nav-tabs mb-4">
+            <ul class="nav nav-tabs nav-fill mb-4">
                 <li class="nav-item">
                     <a class="nav-link <%= !friendChannel ? "active" : "" %>" aria-current="page" href="#"
                        id="channelTab">Channels</a>
