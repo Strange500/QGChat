@@ -56,4 +56,6 @@ public interface MessageDAO {
         messages.sort(Comparator.comparing(Message::getDateSend));
         return messagesList;
     }
+
+    Message getLastMessageByUserInChannel(int usr, int cid) throws DataAccessException;
 }

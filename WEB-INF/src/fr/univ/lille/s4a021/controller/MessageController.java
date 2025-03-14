@@ -24,6 +24,7 @@ import jakarta.servlet.http.Part;
 import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Base64;
 
 @MultipartConfig
@@ -56,7 +57,7 @@ public class MessageController extends AbstractController {
         }
     }
 
-    private void handleSendMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageCreationException, ChannelNotFoundException, DataAccessException, BadParameterException {
+    private void handleSendMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageCreationException, ChannelNotFoundException, BadParameterException, DataAccessException, MessageNotFoundException, MessageUpdateException {
         String channelID = req.getParameter("channelID");
         if (!checkSubscription(uid, channelID)) return;
 
@@ -65,13 +66,28 @@ public class MessageController extends AbstractController {
 
     }
 
-    private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException, BadParameterException {
+    private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException, BadParameterException, MessageNotFoundException, MessageUpdateException {
         Part imgPart = req.getPart("img");
-        String msg = formatMessage(req.getParameter("message"), imgPart);
+        String newMsg = formatMessage(req.getParameter("message"), imgPart);
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
         int usr = (int) req.getSession().getAttribute("id");
-        messageDAO.createMessage(msg, usr, channel.getCid());
+
+        Message lastMessage = messageDAO.getLastMessageByUserInChannel(usr, channel.getCid());
+        if (lastMessage != null && isWithinTimeFrame(lastMessage.getTimestamp(), 10)) {
+            String mergedContent = lastMessage.getContenu() + "\n" + newMsg;
+            messageDAO.updateMessage(lastMessage.getMid(), mergedContent);
+        } else {
+            messageDAO.createMessage(newMsg, usr, channel.getCid());
+        }
     }
+
+    private boolean isWithinTimeFrame(String lastTimestamp, int seconds) {
+        Timestamp lastTime = Timestamp.valueOf(lastTimestamp);
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        long diff = (currentTime.getTime() - lastTime.getTime()) / 1000;
+        return diff <= seconds;
+    }
+
 
     private String formatMessage(String msg, Part imgPart) throws IOException, BadParameterException {
         if (imgPart.getSize() > 0) {
