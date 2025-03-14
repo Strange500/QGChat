@@ -155,4 +155,18 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
             throw new DataAccessException("Error while deleting expired messages: " + e.getMessage(), e);
         }
     }
+
+    @Override
+    public Message getLastMessageByUserInChannel(int usr, int cid) throws DataAccessException {
+        String query = "SELECT mid, contenu, uid, cid, timestamp, type FROM Message WHERE uid = ? AND cid = ? ORDER BY timestamp DESC LIMIT 1";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, usr);
+            stmt.setInt(2, cid);
+            ResultSet rs = stmt.executeQuery();
+            List<Message> messages = buildMessagesFromResultSet(rs);
+            return messages.isEmpty() ? null : messages.get(0);
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while getting last message by user in channel: " + e.getMessage(), e);
+        }
+    }
 }

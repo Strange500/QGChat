@@ -28,4 +28,6 @@ public interface MessageDAO {
 
     void deleteExpiredMessages() throws DataAccessException;
 
+    public Message getLastMessageByUserInChannel(int usr, int cid) throws DataAccessException;
+
 }

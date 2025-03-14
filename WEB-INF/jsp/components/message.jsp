@@ -31,7 +31,7 @@
             <input type="text" class="form-control" name="message" value="<%= message.getContenu() %>">
         </form>
         <% } else { %>
-        <p class="my-2 text-muted"><%= message.getContenu() %>
+        <p class="my-2 text-muted" style="white-space: pre-wrap"><%= message.getContenu() %>
         </p>
         <% } %>
         <% } %>
