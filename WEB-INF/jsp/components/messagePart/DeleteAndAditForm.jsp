@@ -1,5 +1,5 @@
 <div class="d-flex">
-    <% if (!isImgMessage) { %>
+    <% if (!isImgMessage && !isVideoMessage && !isAudioMessage) { %>
     <a href="?channelID=<%=message.getChannelId()%>&editMid=<%=message.getMid()%>"
        class="btn btn-link p-0"><i class="bi bi-pencil"></i></a>
     <% } %>
