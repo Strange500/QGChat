@@ -14,6 +14,10 @@ import java.io.IOException;
 @WebServlet("/home")
 public class MainController extends AbstractController {
 
+    private static final String ACTION_VIEW = "view";
+    private static final String ACTION_VIEW_FRIEND = "viewFriend";
+    private static final String ACTION_LOGOUT = "logout";
+
     public static void main(String[] args) {
         System.out.println("Hello World");
     }
@@ -25,13 +29,13 @@ public class MainController extends AbstractController {
         }
 
         switch (action) {
-            case "logout":
+            case ACTION_LOGOUT:
                 handleLogout(req, res);
                 break;
-            case "view":
+            case ACTION_VIEW:
                 forwardToJSP(req, res, JSP.HOME);
                 break;
-            case "viewFriend":
+            case ACTION_VIEW_FRIEND:
                 forwardToJSP(req, res, JSP.HOME);
                 break;
             default:

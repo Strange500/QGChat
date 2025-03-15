@@ -31,6 +31,18 @@ public class UserController extends AbstractController {
     private static final int MAX_FILE_SIZE = 1024 * 1024 * 2; // 2MB
     List<String> defaultProfilePics = Arrays.asList("default1.png", "default2.png", "default3.png", "default4.png");
 
+    private static final String ACTION_EDIT = "edit";
+    private static final String ACTION_ADD_FRIEND = "addFriend";
+    private static final String ACTION_SEND_FRIEND_REQUEST = "sendFriendRequest";
+    private static final String ACTION_ACCEPT_FRIEND_REQUEST = "acceptFriendRequest";
+    private static final String ACTION_DECLINE_FRIEND_REQUEST = "declineFriendRequest";
+    private static final String ACTION_DELETE = "delete";
+    private static final String ACTION_UPDATE = "update";
+    private static final String ACTION_SET_PROFILE_PIC = "setprofilepic";
+
+    private static final String ACTION_AUTH = "auth";
+    private static final String ACTION_REGISTER = "register";
+
     private String getDefaultProfilePic() throws IOException {
         try (InputStream st = getClass().getClassLoader().getResourceAsStream(defaultProfilePics.get((int) (Math.random() * defaultProfilePics.size())))) {
             if (st == null) {
@@ -46,14 +58,14 @@ public class UserController extends AbstractController {
     protected void processNoAuthAction(String action, HttpServletRequest req, HttpServletResponse res)
             throws IOException, UserNotFoundException, DataAccessException, UserCreationException, UserUpdateException {
 
-        if ("auth".equalsIgnoreCase(action)) {
+        if (ACTION_AUTH.equalsIgnoreCase(action)) {
             if (authenticateUser(req)) {
                 res.sendRedirect("home");
                 return;
             }
         }
 
-        if ("register".equalsIgnoreCase(action)) {
+        if (ACTION_REGISTER.equalsIgnoreCase(action)) {
             handleUserRegistration(req, res);
         }
     }
@@ -74,35 +86,35 @@ public class UserController extends AbstractController {
         int uid = Util.getUid(req.getSession());
 
         switch (action) {
-            case "edit":
+            case ACTION_EDIT:
                 forwardToJSP(req, res, JSP.EDIT_USER);
                 break;
 
-            case "addFriend":
+            case ACTION_ADD_FRIEND:
                 forwardToJSP(req, res, JSP.FRIEND);
                 break;
 
-            case "sendFriendRequest":
+            case ACTION_SEND_FRIEND_REQUEST:
                 handleSendFriendRequest(uid, req, res);
                 break;
 
-            case "acceptFriendRequest":
+            case ACTION_ACCEPT_FRIEND_REQUEST:
                 handleAcceptFriendRequest(uid, req, res);
                 break;
 
-            case "declineFriendRequest":
+            case ACTION_DECLINE_FRIEND_REQUEST:
                 handleDeclineFriendRequest(uid, req, res);
                 break;
 
-            case "delete":
+            case ACTION_DELETE:
                 handleDeleteUser(uid, req, res);
                 break;
 
-            case "update":
+            case ACTION_UPDATE:
                 handleUpdateUser(uid, req, res);
                 break;
 
-            case "setprofilepic":
+            case ACTION_SET_PROFILE_PIC:
                 handleSetProfilePicture(uid, req, res);
                 break;
 

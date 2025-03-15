@@ -28,6 +28,16 @@ import java.util.List;
 @WebServlet("/channel")
 public class ChannelController extends AbstractController {
 
+    private static final String ACTION_CREATE = "create";
+    private static final String ACTION_DELETE = "delete";
+    private static final String ACTION_UPDATE = "update";
+    private static final String ACTION_MODIFCHANNEL = "modifchannel";
+    private static final String ACTION_CREATECHANNEL = "createchannel";
+    private static final String ACTION_SHARE = "share";
+    private static final String ACTION_ACCEPT_INVITE = "acceptInvite";
+    private static final String ACTION_JOIN = "join";
+    private static final String ACTION_QUIT = "quit";
+
     private void handleCreateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, ChannelCreationException, DataAccessException, UserNotFoundException, ChannelNotFoundException, AdminCreationException {
         String name = req.getParameter("name");
         List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
@@ -153,31 +163,31 @@ public class ChannelController extends AbstractController {
         }
         int uid = Util.getUid(req.getSession());
         switch (action) {
-            case "create":
+            case ACTION_CREATE:
                 handleCreateChannel(req, res, uid);
                 break;
-            case "delete":
+            case ACTION_DELETE:
                 handleDeleteChannel(req, res, uid);
                 break;
-            case "update":
+            case ACTION_UPDATE:
                 handleUpdateChannel(req, res, uid);
                 break;
-            case "modifchannel":
+            case ACTION_MODIFCHANNEL:
                 forwardToJSP(req, res, JSP.EDIT_CHANNEL);
                 break;
-            case "createchannel":
+            case ACTION_CREATECHANNEL:
                 forwardToJSP(req, res, JSP.CREATE_CHANNEL);
                 break;
-            case "share":
+            case ACTION_SHARE:
                 handleShareChannel(req, res);
                 break;
-            case "acceptInvite":
+            case ACTION_ACCEPT_INVITE:
                 handleAcceptInvite(req, res, uid);
                 break;
-            case "join":
+            case ACTION_JOIN:
                 forwardToJSP(req, res, JSP.JOIN);
                 break;
-            case "quit":
+            case ACTION_QUIT:
                 handleUnsubscribeUser(req, res, uid);
                 break;
             default:
