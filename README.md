@@ -11,6 +11,19 @@ geometry: margin=2.5cm
 # Description Générale de l'Application
 QGChat est une application web permettant aux utilisateurs de créer et gérer des fils de discussion avec un ou plusieurs participants. Chaque utilisateur peut poster et lire des messages dans ces fils. L’application suit une architecture MVC en JEE, avec une interface responsive compatible avec ordinateur et mobile.
 
+## Fonctionnalités
+
+- **Authentification** : Les utilisateurs peuvent s'inscrire, se connecter et se déconnecter.
+- **Création de Channels** : Les utilisateurs peuvent créer des channels.
+- **Partage de Channels** : Les utilisateurs peuvent partager des channels avec d'autres utilisateurs via un lien ou un QR code proteger via des tokens JWT temporaires.
+- **Messages** : Les utilisateurs peuvent poster des messages dans les channels (texte, images, video, audio), les modifier et les supprimer si ils sont les auteurs.
+- **Réactions** : Les utilisateurs peuvent réagir aux messages avec des emojis.
+- **Abonnements** : Les utilisateurs peuvent s'abonner à des channels si ils ont été invités ou ajoutés.
+- **Administration** : Les utilisateurs peuvent être administrateurs de channels (ajouter des membres, supprimer des messages, promouvoir des administrateurs, changer le nom, durée de vie des messages).
+- **Amis** : Les utilisateurs peuvent ajouter des amis et envoyer des messages privés.
+- **Personnalisation** : Les utilisateurs peuvent modifier leur profil (photo de profil, nom d'utilisateur, mail).
+
+
 # Modélisation
 
 ## Modèle Conceptuel de Données (MCD)
