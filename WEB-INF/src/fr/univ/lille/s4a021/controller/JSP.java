@@ -88,6 +88,7 @@ public enum JSP {
     FRIEND("friend.jsp") {
         @Override
         public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+            req.setAttribute("referer", "home");
             Integer uid = (Integer) req.getAttribute("id");
             String userProfilePicture = this.userDAO.getUserProfilePicture(Util.getUid(req.getSession()));
             User currentUser = userDAO.getUserById(uid);
