@@ -24,6 +24,72 @@ QGChat est une application web permettant aux utilisateurs de créer et gérer d
 - **Personnalisation** : Les utilisateurs peuvent modifier leur profil (photo de profil, nom d'utilisateur, mail).
 
 
+# Installation et Utilisation
+
+## Docker
+### Demarrage
+Pour lancer l'application avec Docker, il suffit de lancer la commande suivante :
+```bash
+docker compose -f compose.prod.yml up -d --build
+```
+### Configuration
+l'application à bessoin d'un fichier config.yml a la racine du projet pour fonctionner, voici un exemple de fichier de configuration :
+```yaml
+database:
+  host: "postgres"
+  port: "5432"
+  user: "sae"
+  database: "sae"
+  password: "sae"
+debug: false
+upload:
+  video_max_size: "20mo"
+  audio_max_size: "20mo"
+  image_max_size: "2mo"
+```
+### Initialisation de la base de données
+il faut lancer le script `tables.sql` pour créer les tables et les données de test.
+```bash
+docker exec -it postgres bash
+psql -U sae
+\i docker-entrypoint-initdb.d/tables.sql
+```
+
+## Utilisation
+L'application est accessible à l'adresse suivante : [http://localhost:6998/sae/home](http://localhost:6998/sae/home)
+
+## Installation Manuelle
+Il vous faut installer tomcat et mettre en place une base de données PostgreSQL.
+placer le projet dans le dossier webapps de tomcat.
+puis compiler le projet.
+### Compilation
+```bash
+cd /path/to/tomcat/webapps/sae
+javac -cp /path/to/tomcat/lib/*:/path/to/tomcat/webapps/sae/WEB-INF/lib/* $(find /path/to/tomcat/webapps/sae/WEB-INF/src/ -name "*.java") -d /path/to/tomcat/webapps/sae/WEB-INF/classes/
+```
+
+### Configuration
+Il faut configurer le fichier `config.yml` à la racine du projet.
+```yaml
+database:
+  host: "localhost"
+  port: "5432"
+  user: "sae"
+  database: "sae"
+  password: "sae"
+debug: false
+upload:
+  video_max_size: "20mo"
+  audio_max_size: "20mo"
+  image_max_size: "2mo"
+```
+
+### Initialisation de la base de données
+il faut lancer le script `tables.sql` pour créer les tables.
+
+### Utilisation
+L'application est accessible à l'adresse suivante : [http://localhost:8080/sae/home](http://localhost:8080/sae/home)
+
 # Modélisation
 
 ## Modèle Conceptuel de Données (MCD)
