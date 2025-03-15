@@ -37,6 +37,7 @@
 
             List<Pair<User, Channel>> friendsChannels = (List<Pair<User, Channel>>) request.getAttribute("friendChannels");
             List<User> friendRequests = (List<User>) request.getAttribute("friendRequests");
+            List<User> pendingFriendRequests = (List<User>) request.getAttribute("pendingFriendRequests");
 
             Boolean friendChannel = (Boolean) request.getAttribute("friendChannel");
 
@@ -93,6 +94,21 @@
                         </div>
                     </div>
                     <% } %>
+                    <% for (User user : pendingFriendRequests) { %>
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><%=user.getUsername()%>
+                        </h5>
+                        <div>
+                            <i class="bi bi-clock"></i>
+                            Waiting for response
+                            <a href="user?action=cancelFriendRequest&uid=<%=user.getUid()%>"
+                               class="btn btn-danger btn-sm mx-1">
+                                <i class="bi bi-x"></i>
+                            </a>
+
+                        </div>
+                    </div>
+                    <% } %>
                 </div>
 
                 <div class="list-group">
@@ -100,8 +116,9 @@
                         Channel channel = pair.getSecond();
                         User friend = pair.getFirst(); %>
                     <a href="?action=viewFriend&channelID=<%=channel.getCid()%>"
-                       class="list-group-item list-group-item-action">
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <h5 class="mb-1"><%=friend.getUsername()%>
+
                         </h5>
                     </a>
                     <% } %>
@@ -146,6 +163,12 @@
                                     <%
                                         }
                                     %>
+                                    <% if (friendChannel) { %>
+                                        <a href="user?action=removeFriend&uid=<%=friend.getUid()%>"
+                                           class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    <% } %>
                                 </div>
 
 

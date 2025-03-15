@@ -47,6 +47,24 @@ public class FriendDAOSql extends DaoSql implements FriendDAO {
     }
 
     @Override
+    public void removeFriend(int uid, int friendId) throws UserNotFoundException, DataAccessException {
+        if (!isFriend(uid, friendId)) {
+            return;
+        }
+        deleteFriendChannel(uid, friendId);
+        String query = "DELETE FROM isFriend WHERE (uid1 = ? AND uid2 = ?) OR (uid1 = ? AND uid2 = ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            stmt.setInt(2, friendId);
+            stmt.setInt(3, friendId);
+            stmt.setInt(4, uid);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while removing friend: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
     public boolean isFriend(int uid, int friendId) throws UserNotFoundException, DataAccessException {
         if (!userDAO.userExists(uid) || !userDAO.userExists(friendId)) {
             throw new UserNotFoundException("User not found");
@@ -256,6 +274,26 @@ public class FriendDAOSql extends DaoSql implements FriendDAO {
             throw new DataAccessException("Error while getting friend for channel: " + e.getMessage(), e);
         }
         throw new ChannelNotFoundException("Channel not found");
+    }
+
+    @Override
+                public List<User> getFriendRequestSent(int uid) throws UserNotFoundException, DataAccessException {
+        if (!userDAO.userExists(uid)) {
+            throw new UserNotFoundException("User not found");
+        }
+        String query = """
+                SELECT u.uid, u.username, u.mail, u.password
+                FROM Utilisateur u
+                JOIN friendrequest f ON u.uid = f.receiveruid
+                WHERE f.senderuid = ?;
+                """;
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, uid);
+            ResultSet rs = stmt.executeQuery();
+            return buildUsersFromResultSet(rs);
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while getting friend requests: " + e.getMessage(), e);
+        }
     }
 
     private void deleteFriendChannel(int uid, int friendId) throws UserNotFoundException, DataAccessException {

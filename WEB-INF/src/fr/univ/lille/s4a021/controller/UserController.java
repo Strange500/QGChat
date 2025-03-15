@@ -33,9 +33,11 @@ public class UserController extends AbstractController {
 
     private static final String ACTION_EDIT = "edit";
     private static final String ACTION_ADD_FRIEND = "addFriend";
+    private static final String ACTION_REMOVE_FRIEND = "removeFriend";
     private static final String ACTION_SEND_FRIEND_REQUEST = "sendFriendRequest";
     private static final String ACTION_ACCEPT_FRIEND_REQUEST = "acceptFriendRequest";
     private static final String ACTION_DECLINE_FRIEND_REQUEST = "declineFriendRequest";
+    private static final String ACTION_CANCEL_FRIEND_REQUEST = "cancelFriendRequest";
     private static final String ACTION_DELETE = "delete";
     private static final String ACTION_UPDATE = "update";
     private static final String ACTION_SET_PROFILE_PIC = "setprofilepic";
@@ -117,11 +119,28 @@ public class UserController extends AbstractController {
             case ACTION_SET_PROFILE_PIC:
                 handleSetProfilePicture(uid, req, res);
                 break;
-
+            case ACTION_CANCEL_FRIEND_REQUEST:
+                handleCancelFriendRequest(uid, req, res);
+                break;
+            case ACTION_REMOVE_FRIEND:
+                handleRemoveFriend(uid, req, res);
+                break;
             default:
                 res.sendRedirect("home");
                 break;
         }
+    }
+
+    private void handleRemoveFriend(int uid, HttpServletRequest req, HttpServletResponse res) throws BadParameterException, UserNotFoundException, DataAccessException, IOException {
+        int friendId = parseUidParameter(req);
+        friendDAO.removeFriend(uid, friendId);
+        res.sendRedirect("home");
+    }
+
+    private void handleCancelFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws BadParameterException, UserNotFoundException, DataAccessException, IOException {
+        int receiveruid = parseUidParameter(req);
+        friendDAO.declineFriendRequest(uid, receiveruid);
+        res.sendRedirect("home");
     }
 
     private void handleDeclineFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws UserNotFoundException, DataAccessException, IOException, BadParameterException {

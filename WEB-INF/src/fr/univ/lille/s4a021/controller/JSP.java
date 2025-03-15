@@ -38,6 +38,9 @@ public enum JSP {
             List<User> friendRequests = friendDAO.getFriendRequests(uid);
             req.setAttribute("friendRequests", friendRequests);
 
+            List<User> pendingFriendRequests = friendDAO.getFriendRequestSent(uid);
+            req.setAttribute("pendingFriendRequests", pendingFriendRequests);
+
             int channelToViewId = req.getParameter("channelID") == null ? -1 : Integer.parseInt(req.getParameter("channelID"));
             boolean friendChannel = friendChannels.stream().anyMatch(pair -> pair.getSecond().getCid() == channelToViewId);
             req.setAttribute("friendChannel", friendChannel);

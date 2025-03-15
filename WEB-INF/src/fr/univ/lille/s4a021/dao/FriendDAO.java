@@ -13,6 +13,8 @@ public interface FriendDAO {
 
     public void addFriend(int uid, int friendId) throws UserNotFoundException, DataAccessException;
 
+    public void removeFriend(int uid, int friendId) throws UserNotFoundException, DataAccessException;
+
     public boolean isFriend(int uid, int friendId) throws UserNotFoundException, DataAccessException;
 
     List<Pair<User, Channel>> getFriendChannels(int uid) throws UserNotFoundException, DataAccessException;
@@ -30,4 +32,7 @@ public interface FriendDAO {
     public boolean isFriendChannel(int uid, int channelId) throws UserNotFoundException, DataAccessException;
 
     public User getFriendForChannel(int channelId, int myUid) throws ChannelNotFoundException, DataAccessException;
+
+    public List<User> getFriendRequestSent(int uid) throws UserNotFoundException, DataAccessException;
+
 }
