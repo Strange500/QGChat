@@ -16,78 +16,95 @@ QGChat est une application web permettant aux utilisateurs de créer et gérer d
 ## Modèle Conceptuel de Données (MCD)
 ![MCD](./res/documentation/MCD.png)
 
+
+
 ## Modèle Logique de Données (MLD)
-```
-// Insérer ici le MLD sous forme textuelle
-```
+Utilisateur(_uid_, username, mail, password, profile_picture)
+
+Channel(__cid__, name, minuteBeforeExpiration)
+
+isFriend(__#uid1,#uid2__, cid)
+
+FriendRequest(__#senderUid,#receiverUid__)
+
+Message(__mid__, type, #uid, #cid, contenu, timestamp)
+
+estAbonne(__#uid,#cid__)
+
+isAdmin(__#uid,#cid__)
+
+likes(__#mid,#uid__, emoji)
+
 
 # Requêtes SQL Pertinentes
+Fichier de création des tables et des données :
+[Fichier](tables.sql)
 
 ### Création des Tables
 ```sql
 CREATE TABLE Utilisateur (
-                             uid SERIAL PRIMARY KEY,
-                             username VARCHAR(1024) NOT NULL,
-                             mail VARCHAR(1024) NOT NULL UNIQUE,
-                             password VARCHAR(1024) NOT NULL,
-                             profile_picture TEXT,
-                             CONSTRAINT check_mail_not_empty CHECK (mail <> ''),
-                             CONSTRAINT check_username_not_empty CHECK (username <> ''),
-                             CONSTRAINT check_password_not_empty CHECK (password <> '')
+    uid SERIAL PRIMARY KEY,
+    username VARCHAR(1024) NOT NULL,
+    mail VARCHAR(1024) NOT NULL UNIQUE,
+    password VARCHAR(1024) NOT NULL,
+    profile_picture TEXT,
+    CONSTRAINT check_mail_not_empty CHECK (mail <> ''),
+    CONSTRAINT check_username_not_empty CHECK (username <> ''),
+    CONSTRAINT check_password_not_empty CHECK (password <> '')
 );
 
 CREATE TABLE isFriend (
-                          uid1 INT,
-                          uid2 INT,
-                          PRIMARY KEY (uid1, uid2),
-                          FOREIGN KEY (uid1) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-                          FOREIGN KEY (uid2) REFERENCES Utilisateur(uid) ON DELETE CASCADE
+    uid1 INT,
+    uid2 INT,
+    PRIMARY KEY (uid1, uid2),
+    FOREIGN KEY (uid1) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+    FOREIGN KEY (uid2) REFERENCES Utilisateur(uid) ON DELETE CASCADE
 );
 
 -- Création de la table Channel
 CREATE TABLE Channel (
-                         cid SERIAL PRIMARY KEY,
-                         minuteBeforeExpiration INT DEFAULT -1,
-                         name VARCHAR(1024) NOT NULL
+    cid SERIAL PRIMARY KEY,
+    minuteBeforeExpiration INT DEFAULT -1,
+    name VARCHAR(1024) NOT NULL
 );
 
 -- Création de la table Message
 CREATE TABLE Message (
-                         mid SERIAL PRIMARY KEY ,
-                         uid INT NOT NULL,
-                         cid INT NOT NULL,
-                         contenu TEXT NOT NULL,
-                         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                         CONSTRAINT fk_user FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-
-                         CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
+    mid SERIAL PRIMARY KEY ,
+    uid INT NOT NULL,
+    cid INT NOT NULL,
+    contenu TEXT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+    
+    CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
 -- Table de liaison estAbonne (User - Channel)
 CREATE TABLE estAbonne (
-                           uid INT,
-                           cid INT,
-                           PRIMARY KEY (uid, cid),
-                           FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-                           FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
+    uid INT,
+    cid INT,
+    PRIMARY KEY (uid, cid),
+    FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+    FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
 CREATE TABLE isAdmin (
-                         uid INT,
-                         cid INT,
-                         PRIMARY KEY (uid, cid),
-                         FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-                         FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
+    uid INT,
+    cid INT,
+    PRIMARY KEY (uid, cid),
+    FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
+    FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
 -- Tabme de liaison likes (Message - Utilisateur)
 CREATE TABLE likes (
-                       mid INT,
-                       uid INT,
-                       emoji VARCHAR(5),
-                       PRIMARY KEY (mid, uid),
-                       CONSTRAINT fk_likes_message FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE,
-                       CONSTRAINT fk_likes_utilisateur FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE
+    mid INT,
+    uid INT,
+    emoji VARCHAR(5),
+    PRIMARY KEY (mid, uid),
+    CONSTRAINT fk_likes_message FOREIGN KEY (mid) REFERENCES Message(mid) ON DELETE CASCADE,
+    CONSTRAINT fk_likes_utilisateur FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE
 );
 ```
 
@@ -98,67 +115,105 @@ INSERT INTO Utilisateur (username, mail, password) VALUES
 ('user2', 'user2@example.com', MD5('password2')),
 ('user3', 'user3@example.com', MD5('password3'));
 
+
 INSERT INTO Channel (name) VALUES
 ('General'),
 ('Random'),
 ('Announcements');
 
-INSERT INTO Message (contenu) VALUES
-('Welcome to the General channel!'),
-('This is a random message.'),
-('Important announcement: Meeting at 3 PM.');
+INSERT INTO isAdmin (uid, cid) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
+
+INSERT INTO Message (contenu, uid, cid) VALUES
+('Hello World', 1, 1),
+('Bonjour le monde', 2, 1),
+('Hola Mundo', 3, 1),
+('Random message', 1, 2),
+('Another random message', 2, 2),
+('Un autre message random', 3, 2),
+('Announcement', 1, 3),
+('Another announcement', 2, 3),
+('Un autre annonce', 3, 3);
 
 INSERT INTO estAbonne (uid, cid) VALUES
-(1, 1),
-(2, 1),
-(3, 2);
+ (1, 1),
+ (2, 1),
+ (2,3),
+ (3, 2);
 
-INSERT INTO aEnvoyer (uid, mid) VALUES
-(1, 1),
-(2, 2),
-(3, 3);
-
-INSERT INTO contient (cid, mid) VALUES
-(1, 1),
-(2, 2),
-(3, 3);
 ```
 
 ### Requêtes Fréquentes
 ```sql
--- Récupérer tous les utilisateurs
+-- 1. Récupérer les messages d'un channel
+SELECT * FROM Message WHERE cid = ?;
+
+-- 2. Récupérer les messages d'un utilisateur dans un channel
+SELECT * FROM Message WHERE cid = ? AND uid = ?;
+
+-- 3. Récupérer les likes d'un message
+SELECT * FROM likes WHERE mid = ?;
+
+-- 4. Récupérer les administrateurs d'un channel
+SELECT * FROM isAdmin WHERE cid = ?;
+
+-- 5. Récupérer les abonnés d'un channel
+SELECT * FROM estAbonne WHERE cid = ?;
+
+-- 6. Récupérer les amis d'un utilisateur
+SELECT * FROM isFriend WHERE uid1 = ? OR uid2 = ?;
+
+-- 7. Récupérer les demandes d'amis d'un utilisateur
+SELECT * FROM FriendRequest WHERE receiverUid = ?;
+
+-- 8. Récupérer les utilisateurs qui ne sont pas amis avec un utilisateur
+WITH friends(uid) AS (
+    SELECT uid1 AS uid FROM isFriend WHERE uid2 = ?
+    UNION
+    SELECT uid2 AS uid FROM isFriend WHERE uid1 = ?
+)
+SELECT * FROM Utilisateur WHERE uid NOT IN (SELECT uid FROM friends) AND uid != ?;
+
+-- 9. creer un utilisateur
+INSERT INTO Utilisateur (username, mail, password) VALUES (?, ?, ?);
+
+-- 10. creer un message
+INSERT INTO Message (type, uid, cid, contenu) VALUES (?, ?, ?, ?);
+
+-- 11. creer un channel
+INSERT INTO Channel (name) VALUES (?);
+
+-- 12. creer une demande d'amis
+INSERT INTO FriendRequest (senderUid, receiverUid) VALUES (?, ?);
+
+-- 13. creer un like
+INSERT INTO likes (mid, uid, emoji) VALUES (?, ?, ?);
+
+-- 14. creer un abonnement
+INSERT INTO estAbonne (uid, cid) VALUES (?, ?);
+
+-- 15. creer un administrateur
+INSERT INTO isAdmin (uid, cid) VALUES (?, ?);
+
+-- 16. supprimer un utilisateur
+DELETE FROM Utilisateur WHERE uid = ?;
+
+-- 17. supprimer un message
+DELETE FROM Message WHERE mid = ?;
+
+-- 18. supprimer un channel
+DELETE FROM Channel WHERE cid = ?;
+
+-- 19. supprimer une demande d'amis
+DELETE FROM FriendRequest WHERE senderUid = ? AND receiverUid = ?;
+
+-- 20. Récupérer tous les utilisateurs
 SELECT * FROM Utilisateur;
 
--- Récupérer tous les canaux
+-- 21. Récupérer tous les canaux
 SELECT * FROM Channel;
-
--- Récupérer tous les messages d’un canal donné
-SELECT m.* FROM Message m
-JOIN contient c ON m.mid = c.mid
-WHERE c.cid = ?;
-
--- Récupérer tous les abonnements d’un utilisateur
-SELECT c.* FROM Channel c
-JOIN estAbonne e ON c.cid = e.cid
-WHERE e.uid = ?;
-
--- Récupérer les messages envoyés par un utilisateur
-SELECT m.* FROM Message m
-JOIN aEnvoyer a ON m.mid = a.mid
-WHERE a.uid = ?;
-
--- Vérifier si un utilisateur est abonné à un canal
-SELECT * FROM estAbonne WHERE uid = ? AND cid = ?;
-
--- Ajouter un nouvel utilisateur
-INSERT INTO Utilisateur (username, mail, password) VALUES (?, ?, MD5(?));
-
--- Ajouter un nouveau message dans un canal
-INSERT INTO Message (contenu) VALUES (?);
-INSERT INTO contient (cid, mid) VALUES (?, LAST_INSERT_ID());
-
--- Ajouter un abonnement
-INSERT INTO estAbonne (uid, cid) VALUES (?, ?);
 ```
 
 # Arborescence Globale de l’Application
@@ -306,20 +361,22 @@ INSERT INTO estAbonne (uid, cid) VALUES (?, ?);
 
 ```
 
+# UML de l’Application
+[voir ici](UML.png)
+![UML](UML.png)
+
 # Liste des Entrées des Contrôleurs
-| Route | Fonctionnalité |
-|---|---|
-| `/register` | Inscription d’un utilisateur |
-| `/login` | Connexion d’un utilisateur |
-| `/fil/create` | Création d’un fil de discussion |
-| `/fil/{id}` | Consultation d’un fil |
-| `/message/post` | Publication d’un message |
+| Route           | Fonctionnalité              |
+|-----------------|-----------------------------|
+| `/home`         | page principale             |
+| `/user`         | contrôleur des utilisateurs |
+| `/channel`      | contrôleur des channels     |
+| `/message`      | contrôleur des messages     |
 
 # Points Techniques Difficiles et Résolutions
 
 - **Sécurité des requêtes SQL** : Utilisation de requêtes préparées pour éviter les injections SQL.
-- **XSS Protection** : Filtrage des entrées utilisateur avec `HTMLEncode`.
-- **Gestion des sessions** : Implémentation d’un système sécurisé basé sur des tokens JWT.
+- **XSS Protection** : Filtrage des entrées utilisateur avec `escapeHtml4`.
 
 ---
 **Fin du document**
