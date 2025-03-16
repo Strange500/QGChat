@@ -1,11 +1,5 @@
-<%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
-<%@ page import="fr.univ.lille.s4a021.Config" %>
-<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
 <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 
 <%
   String title = "Edit User";
@@ -68,11 +62,7 @@
         <i class="bi bi-trash"></i> Delete Account
       </button>
     </form>
-
-
 </section>
-
-
 <script>
   function previewImage(event) {
     const previewContainer = document.getElementById('preview-container');
@@ -106,7 +96,5 @@
     }
   }
 %>
-
-
 </body>
 </html>

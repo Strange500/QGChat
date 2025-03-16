@@ -46,7 +46,6 @@ public class UserDAOSql extends DaoSql implements UserDAO {
         }
     }
 
-    // Authentification d'un utilisateur
     public boolean authenticateUser(String mail, String password) throws DataAccessException {
         if (mail == null || password == null || mail.isEmpty() || password.isEmpty()) {
             return false;
@@ -131,7 +130,6 @@ public class UserDAOSql extends DaoSql implements UserDAO {
         }
     }
 
-    // Suppression d'un utilisateur par son ID
     public void deleteUser(int uid) throws UserNotFoundException, DataAccessException {
         String query = "DELETE FROM Utilisateur WHERE uid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {

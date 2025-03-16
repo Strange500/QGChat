@@ -11,7 +11,6 @@ public class Channel {
         this.minuteBeforeExpiration = minuteBeforeExpiration;
     }
 
-    // Getters and Setters
     public int getCid() {
         return cid;
     }

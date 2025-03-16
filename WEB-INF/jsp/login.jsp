@@ -20,20 +20,15 @@
     try {
         if (request.getAttribute("error") != null) {
 %>
-
     <div class="alert alert-danger" role="alert">
         <%= request.getAttribute("error") %>
     </div>
-
 <%
     }
 %>
 
 
 <h1 class="mb-4">Connection</h1>
-
-
-
 
 <form action="user" method="post" class="mb-4">
     <input type="hidden" name="action" value="auth">

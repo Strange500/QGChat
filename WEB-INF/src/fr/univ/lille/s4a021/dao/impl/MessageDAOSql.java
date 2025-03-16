@@ -147,7 +147,6 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
 
         try (PreparedStatement stmt = connection.prepareStatement(deleteQuery)) {
             int deletedCount = stmt.executeUpdate();
-            // Optional: Log the number of deleted messages
             if (deletedCount > 0) {
                 System.out.println(deletedCount + " expired messages deleted.");
             }

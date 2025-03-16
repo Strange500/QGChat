@@ -37,11 +37,7 @@
          style="display: none; position: absolute; z-index: 1000;">
     </div>
 
-
     <canvas style="display: none; position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1000;"></canvas>
-
-
-
 
     <!-- TOP BAR -->
 
@@ -277,6 +273,11 @@
     }
     %>
 
+<script >
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
 
 </body>
 

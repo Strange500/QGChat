@@ -20,11 +20,7 @@
 
 </head>
 <body class="container">
-    
-
     <%@ include file="components/TopBar.jsp" %>
-
-
     <section id="channel">
         <h1 class="mt-4">Edit <%=channel.getName()%></h1>
         <form action="channel" method="get">

@@ -17,10 +17,7 @@
 
 <%@ include file="components/TopBar.jsp" %>
 
-
 <h1 class="mb-4">Create friend request</h1>
-
-
 
 <form action="user" method="get">
   <input type="hidden" name="action" value="sendFriendRequest">

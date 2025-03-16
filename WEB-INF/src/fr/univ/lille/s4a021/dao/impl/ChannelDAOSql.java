@@ -76,7 +76,6 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
         throw new ChannelNotFoundException("Channel not found");
     }
 
-    // Suppression d'un canal par son ID
     public void deleteChannel(int cid) throws ChannelNotFoundException, DataAccessException {
         String query = "DELETE FROM Channel WHERE cid = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
@@ -91,7 +90,6 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
 
     }
 
-    // Mise à jour des informations d'un canal
     public void updateChannel(int cid, String newName, int expiration) throws ChannelNotFoundException, ChannelUpdateException, DataAccessException {
         if (newName == null || newName.isEmpty()) {
             throw new ChannelUpdateException("Channel name cannot be empty");
@@ -111,7 +109,6 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
         }
     }
 
-    // Récupération de tous les canaux
     public List<Channel> getAllChannels() throws DataAccessException {
         List<Channel> channels = new ArrayList<>();
         String query = "SELECT * FROM Channel";

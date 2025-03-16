@@ -28,7 +28,6 @@ public class Message {
         }
     }
 
-    // Getters and Setters
     public int getMid() {
         return mid;
     }

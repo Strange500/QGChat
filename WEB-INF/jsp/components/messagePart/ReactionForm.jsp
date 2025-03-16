@@ -15,7 +15,7 @@
 
             int likeCount = usersForReactionMap.get(reaction).size();
     %>
-    <span class="reactSpan">
+    <span class="">
 
         <form action="message" method="POST" class="d-inline-block mx-1">
             <input type="hidden" name="action" value="like">
@@ -24,8 +24,28 @@
             <div class="d-flex align-items-center rounded">
                 <input type="submit" class="btn btn-link p-0"
                        value="<%= reaction.getEmoji() %>" style="display: none;">
-                <button onclick="this.form.submit()" class="btn btn-<%= (likeCount == 0) ? "secondary" : "primary" %> position-relative"
-                        style="font-size: 0.9em;">
+                <button onclick="this.form.submit()" class="btn btn-<%= (likeCount == 0) ? "secondary" : "primary" %> position-relative p-1"
+                        style="font-size: 0.9em;"
+                        data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom" data-bs-title='
+                        <% if (usersForReactionMap.isEmpty() || likeCount == 0) { %>
+                            <span class="text-muted">No likes yet</span>
+                        <% } else {
+                            for (int i = 0; i < Math.min(4, likeCount); i++) {
+                                User reactionUser = users.get(i);
+                        %>
+                        <div class="d-flex align-items-center my-1" style="width: 30px; height: 30px; ">
+                            <img src="data:image/jpeg;base64,<%= usersProfilePictures.get(reactionUser.getUid()) %>"
+                                 alt="profile picture"
+                                 class="img-fluid rounded-circle popupImage"
+                                 >
+                            <span class="ml-2"><%= reactionUser.getUsername() %></span>
+                        </div>
+                        <% }
+                            if (likeCount > 4) { %>
+                        <span class="text-muted">and <%= likeCount - 4 %> others</span>
+                        <% }
+                        } %>
+                        '>
                     <%= reaction.getEmoji() %>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                     <%= likeCount %>
@@ -33,31 +53,9 @@
                 </button>
             </div>
         </form>
-
-                <section class="d-none reactDetails">
-                    <% if (usersForReactionMap.isEmpty() || likeCount == 0) { %>
-                        <span class="text-muted">No likes yet</span>
-                    <% } else {
-                        for (int i = 0; i < Math.min(4, likeCount); i++) {
-                            User reactionUser = users.get(i);
-                    %>
-                            <div class="d-flex align-items-center my-1">
-                                <img src="data:image/jpeg;base64,<%= usersProfilePictures.get(reactionUser.getUid()) %>"
-                                     alt="profile picture"
-                                     class="img-fluid rounded-circle"
-                                     style="width: 30px; height: 30px; object-fit: cover;">
-                                <span class="ml-2"><%= reactionUser.getUsername() %></span>
-                            </div>
-                    <% }
-                        if (likeCount > 4) { %>
-                                <span class="text-muted">and <%= likeCount - 4 %> others</span>
-                    <% }
-                    } %>
-                </section>
             </span>
     <% } %>
 
-    <!-- Other reaction options -->
     <div class="d-flex align-items-center otherReact">
         <a class="btn btn-link p-0 text-muted">...</a>
         <%
@@ -77,4 +75,11 @@
             }
         %>
     </div>
+    <style>
+        .popupImage {
+            height: 30px;
+            width: 30px;
+            object-fit: cover;
+        }
+    </style>
 </div>

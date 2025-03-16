@@ -16,9 +16,6 @@
 </head>
 <body class="container mt-5">
 
-
-
-
 <%@ include file="components/TopBar.jsp" %>
 
 <div class="card">
@@ -34,8 +31,6 @@
     </form>
   </div>
 </div>
-
-
 
 </body>
 <%
