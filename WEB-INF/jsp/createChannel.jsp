@@ -14,27 +14,11 @@
 
 <%@ page import="java.util.List" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-<%@ page import="java.util.ArrayList" %>
 <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
-<%@ page import="fr.univ.lille.s4a021.Config" %>
-<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 
 <%
-
-    UserDAO userDAO;
-
     try {
-        userDAO = Config.getConfig().getUserDAO();
-    } catch (ConfigErrorException e) {
-        AbstractController.handleError(e, request, response);
-        return;
-    }
-
-
-    try {
-        List<User> users = new ArrayList<>(userDAO.getAllUsers());
+        List<User> users = (List<User>) request.getAttribute("users");
 %>
 
 <%@ include file="components/TopBar.jsp" %>
@@ -72,9 +56,19 @@
 </body>
 
 <%
-    } catch (DataAccessException e) {
-        AbstractController.handleError(e, request, response);
-        return;
+    } catch (Exception e) {
+        request.setAttribute("message", e.getMessage());
+        request.setAttribute("errorCode", AbstractController.getErrorCode(e));
+        request.setAttribute("exception", e);
+
+        if (!response.isCommitted()) { %>
+
+            <jsp:forward page="error.jsp"/>
+
+        <% } else {
+            e.printStackTrace();
+            out.println("An error occurred: " + e.getMessage());
+            }
     }
 %>
 

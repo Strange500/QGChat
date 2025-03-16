@@ -26,49 +26,9 @@
 
 
 <%
-    UserDAO userDAO;
-    ChannelDAO channelDAO;
-
-    try {
-        userDAO = Config.getConfig().getUserDAO();
-        channelDAO = Config.getConfig().getChannelDAO();
-    } catch (ConfigErrorException e) {
-        AbstractController.handleError(e, request, response);
-        return;
-    }
-
-  String token = request.getParameter("token");
-  if (token == null) {
-      AbstractController.handleError(new IllegalArgumentException("The token is missing"), request, response);
-      return;
-  }
-    Pair<Integer, Integer> pair;
-    try {
-        pair = new JwtManager().getUidAndCidFromChannelInviteToken(token)   ;
-    } catch (JwtException e) {
-        AbstractController.handleError(e, request, response);
-        return;
-    }
-
-
-  if (pair == null) {
-      AbstractController.handleError(new IllegalArgumentException("The token is invalid"), request, response);
-      return;
-  }
-
-  int userID = pair.getFirst();
-  int channelID = pair.getSecond();
-
-    User user ;
-    Channel channel;
-    try {
-        user = userDAO.getUserById(userID);
-        channel = channelDAO.getChannelById(channelID);
-    } catch (UserNotFoundException | ChannelNotFoundException | DataAccessException e) {
-        AbstractController.handleError(e, request, response);
-        return;
-    }
-
+    String token = (String) request.getAttribute("token");
+    User user = (User) request.getAttribute("user");
+    Channel channel = (Channel) request.getAttribute("channel");
 %>
 
 

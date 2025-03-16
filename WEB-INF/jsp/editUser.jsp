@@ -22,23 +22,9 @@
 <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 
 <%
-  UserDAO userDAO ;
-  int uid = Util.getUid(session);
+  try {
+    User user = (User) request.getAttribute("user");
 
-    try {
-        userDAO = Config.getConfig().getUserDAO();
-    } catch (ConfigErrorException e) {
-      AbstractController.handleError(e, request, response);
-        return;
-    }
-
-    User user;
-    try {
-        user = userDAO.getUserById(uid);
-    } catch (UserNotFoundException | DataAccessException e) {
-      AbstractController.handleError(e, request, response);
-        return;
-    }
 
 %>
 
@@ -109,7 +95,22 @@
   }
 </script>
 
+<%
+  } catch (Exception e) {
+  request.setAttribute("message", e.getMessage());
+  request.setAttribute("errorCode", AbstractController.getErrorCode(e));
+  request.setAttribute("exception", e);
 
+  if (!response.isCommitted()) { %>
+
+    <jsp:forward page="error.jsp"/>
+
+  <% } else {
+      e.printStackTrace();
+      out.println("An error occurred: " + e.getMessage());
+    }
+  }
+%>
 
 
 </body>

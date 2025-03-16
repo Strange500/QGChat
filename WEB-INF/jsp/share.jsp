@@ -1,12 +1,4 @@
-<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-<%@ page import="fr.univ.lille.s4a021.model.bdd.Util" %>
-<%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
-<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
-<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
-<%@ page import="fr.univ.lille.s4a021.Config" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -24,33 +16,8 @@
 
 <%
 
-  ChannelDAO channelDAO ;
-    try {
-        channelDAO = Config.getConfig().getChannelDAO();
-    } catch (ConfigErrorException e) {
-        AbstractController.handleError(e, request, response);
-        return;
-    }
-
-  int chanelID = Integer.parseInt(request.getParameter("channelID"));
-  Channel ch ;
-  try {
-    ch = channelDAO.getChannelById(chanelID);
-    if (ch == null) {
-      AbstractController.handleError(new ChannelNotFoundException("The channel with ID " + chanelID + " was not found"), request, response);
-      return;
-    }
-  } catch (ChannelNotFoundException | DataAccessException e) {
-    AbstractController.handleError(e, request, response);
-    return;
-  }
-
-  int userID = Util.getUid(session);
-
-
-  String token = new JwtManager().createJwtForChannelLink(userID, chanelID);
-
-  String url = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/channel?action=join&token=" + token;
+  Channel ch = (Channel) request.getAttribute("channel");
+  String url = (String) request.getAttribute("url");
 
 %>
 

@@ -15,53 +15,14 @@
     <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
     <%@ page import="java.util.List" %>
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
-    <%@ page import="fr.univ.lille.s4a021.Config" %>
-    <%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
-    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.SubscriptionDAO" %>
-    <%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
-    <%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.AdminsDAO" %>
     <%@ page import="java.util.Map" %>
 
     <%
-        ChannelDAO channelDAO ;
-        UserDAO userDAO;
-        SubscriptionDAO subscriptionDAO;
-        AdminsDAO adminsDAO ;
 
-        try {
-            channelDAO = Config.getConfig().getChannelDAO();
-            userDAO = Config.getConfig().getUserDAO();
-            subscriptionDAO = Config.getConfig().getSubscriptionDAO();
-            adminsDAO = Config.getConfig().getAdminsDAO();
-        } catch (ConfigErrorException e) {
-            AbstractController.handleError(e, request, response);
-            return;
-        }
-
-        String channelID = request.getParameter("channelID");
-        if (channelID == null) {
-            response.sendRedirect("home");
-            return;
-        }
-
-        Channel channel;
-
-        List<User> users;
-        List<User> subscribers;
-        List<User> admins ;
-        try {
-            channel = channelDAO.getChannelById(Integer.parseInt(channelID));
-            users = userDAO.getAllUsers();
-            subscribers = subscriptionDAO.getSubscribedUsers(channel.getCid());
-            admins = adminsDAO.getAdmins(channel.getCid());
-        } catch (ChannelNotFoundException | DataAccessException e) {
-            AbstractController.handleError(e, request, response);
-            return;
-        }
+        Channel channel = (Channel) request.getAttribute("channel");
+        List<User> users = (List<User>) request.getAttribute("users");
+        List<User> subscribers = (List<User>) request.getAttribute("subscribers");
+        List<User> admins = (List<User>) request.getAttribute("admins");
     %>
 
     <%@ include file="components/TopBar.jsp" %>
@@ -162,9 +123,5 @@
             <a href="channel?action=delete&channelID=<%=channel.getCid()%>" class="btn btn-danger">Delete</a>
         </form>
     </section>
-
-
-
-
 </body>
 </html>

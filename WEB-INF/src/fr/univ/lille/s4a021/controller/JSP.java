@@ -8,7 +8,9 @@ import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.model.bdd.Util;
+import fr.univ.lille.s4a021.util.JwtManager;
 import fr.univ.lille.s4a021.util.Pair;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -86,6 +88,9 @@ public enum JSP {
             User currentUser = userDAO.getUserById(uid);
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
+
+            User user = userDAO.getUserById(uid);
+            req.setAttribute("user", user);
         }
     },
     FRIEND("friend.jsp") {
@@ -106,12 +111,27 @@ public enum JSP {
     },
     EDIT_CHANNEL("ModifChannel.jsp") {
         @Override
-        public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+        public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException, IOException {
             Integer uid = (Integer) req.getAttribute("id");
             String userProfilePicture = this.userDAO.getUserProfilePicture(Util.getUid(req.getSession()));
             User currentUser = userDAO.getUserById(uid);
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
+
+            String channelID = req.getParameter("channelID");
+            if (channelID == null) {
+                res.sendRedirect("home");
+                return;
+            }
+
+            Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
+            List<User> admins = adminDAO.getAdmins(channel.getCid());
+            List<User> users = userDAO.getAllUsers();
+            List<User> subscribers = subscriptionDAO.getSubscribedUsers(channel.getCid());
+            req.setAttribute("channel", channel);
+            req.setAttribute("admins", admins);
+            req.setAttribute("users", users);
+            req.setAttribute("subscribers", subscribers);
         }
     },
     CREATE_CHANNEL("createChannel.jsp") {
@@ -122,6 +142,9 @@ public enum JSP {
             User currentUser = userDAO.getUserById(uid);
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
+
+            List<User> users = userDAO.getAllUsers();
+            req.setAttribute("users", users);
         }
     },
     SHARE_CHANNEL("share.jsp") {
@@ -132,6 +155,13 @@ public enum JSP {
             User currentUser = userDAO.getUserById(uid);
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
+
+            int chanelID = Integer.parseInt(req.getParameter("channelID"));
+            Channel channel = channelDAO.getChannelById(chanelID);
+            String token = new JwtManager().createJwtForChannelLink(uid, chanelID);
+            String url = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getContextPath() + "/channel?action=join&token=" + token;
+            req.setAttribute("channel", channel);
+            req.setAttribute("url", url);
         }
     },
     JOIN("join.jsp") {
@@ -142,6 +172,33 @@ public enum JSP {
             User currentUser = userDAO.getUserById(uid);
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
+
+            String token = req.getParameter("token");
+            if (token == null) {
+                AbstractController.handleError(new IllegalArgumentException("The token is missing"), req, res);
+                return;
+            }
+            Pair<Integer, Integer> pair;
+            try {
+                pair = new JwtManager().getUidAndCidFromChannelInviteToken(token)   ;
+            } catch (JwtException e) {
+                AbstractController.handleError(e, req, res);
+                return;
+            }
+            if (pair == null) {
+                AbstractController.handleError(new IllegalArgumentException("The token is invalid"), req, res);
+                return;
+            }
+
+            int userID = pair.getFirst();
+            int channelID = pair.getSecond();
+
+            User user = userDAO.getUserById(userID);
+            Channel channel = channelDAO.getChannelById(channelID);
+            req.setAttribute("token", token);
+            req.setAttribute("user", user);
+            req.setAttribute("channel", channel);
+
         }
     },
     ERROR("error.jsp");
@@ -175,7 +232,7 @@ public enum JSP {
         return "/WEB-INF/jsp/" + jsp;
     }
 
-    public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+    public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException, IOException {
     }
 
     public void launch(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
