@@ -25,4 +25,5 @@ public interface ChannelDAO {
 
     boolean channelExists(int cid) throws DataAccessException;
 
+    List<Channel> getSubscribedChannels(int userId) throws DataAccessException;
 }

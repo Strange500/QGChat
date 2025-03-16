@@ -148,4 +148,25 @@ public class ChannelDAOSql extends DaoSql implements ChannelDAO {
         dao.deleteChannel(1);
         System.out.println(dao.getAllChannels());
     }
+
+    public List<Channel> getSubscribedChannels(int userId) throws DataAccessException {
+        String query = "SELECT c.cid, c.name, c.minuteBeforeExpiration " +
+                "FROM Channel c " +
+                "JOIN estAbonne e ON c.cid = e.cid " +
+                "WHERE e.uid = ?";
+        List<Channel> channels = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int cid = rs.getInt("cid");
+                String name = rs.getString("name");
+                int minuteBeforeExpiration = rs.getInt("minuteBeforeExpiration");
+                channels.add(new Channel(cid, name, minuteBeforeExpiration));
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Error while retrieving subscribed channels: " + e.getMessage(), e);
+        }
+        return channels;
+    }
 }
