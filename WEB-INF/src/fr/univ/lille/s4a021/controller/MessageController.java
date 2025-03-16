@@ -102,6 +102,7 @@ public class MessageController extends AbstractController {
 
     private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException, BadParameterException, MessageNotFoundException, MessageUpdateException {
         Part imgPart = req.getPart("img");
+        if (imgPart.getSize() == 0 && (req.getParameter("message") == null || req.getParameter("message").isEmpty())) return;
         String newMsg = formatMessage(req.getParameter("message"), imgPart);
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
         int usr = (int) req.getSession().getAttribute("id");
