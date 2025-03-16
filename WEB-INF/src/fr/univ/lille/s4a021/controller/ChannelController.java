@@ -40,6 +40,9 @@ public class ChannelController extends AbstractController {
 
     private void handleCreateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, ChannelCreationException, DataAccessException, UserNotFoundException, ChannelNotFoundException, AdminCreationException {
         String name = req.getParameter("name");
+        if (name == null || name.isEmpty()) {
+            throw new BadParameterException("Channel name cannot be empty");
+        }
         List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
         subscribers.add(Util.getUid(req.getSession()));
 
@@ -164,7 +167,12 @@ public class ChannelController extends AbstractController {
         int uid = Util.getUid(req.getSession());
         switch (action) {
             case ACTION_CREATE:
-                handleCreateChannel(req, res, uid);
+                try {
+                    handleCreateChannel(req, res, uid);
+                } catch (BadParameterException e) {
+                    req.setAttribute("channelNameError", e.getMessage());
+                    forwardToJSP(req, res, JSP.CREATE_CHANNEL);
+                }
                 break;
             case ACTION_DELETE:
                 handleDeleteChannel(req, res, uid);

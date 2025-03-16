@@ -26,6 +26,11 @@
     <input type="hidden" name="action" value="create">
 
     <div class="form-group">
+        <% if (request.getAttribute("channelNameError") != null) { %>
+        <div class="alert alert-danger" role="alert">
+            <%= request.getAttribute("channelNameError") %>
+        </div>
+        <% } %>
         <label for="channelName">Channel Name</label>
         <input type="text" class="form-control" id="channelName" name="name" placeholder="Enter the name of the channel">
     </div>
