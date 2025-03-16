@@ -26,6 +26,7 @@
 
 
 <%
+    try {
     String token = (String) request.getAttribute("token");
     User user = (User) request.getAttribute("user");
     Channel channel = (Channel) request.getAttribute("channel");
@@ -51,5 +52,20 @@
 
 
 </body>
+<%
+} catch (Exception e) {
+    request.setAttribute("message", e.getMessage());
+    request.setAttribute("errorCode", AbstractController.getErrorCode(e));
+    request.setAttribute("exception", e);
 
+    if (!response.isCommitted()) { %>
+
+<jsp:forward page="error.jsp"/>
+
+<% } else {
+    e.printStackTrace();
+    out.println("An error occurred: " + e.getMessage());
+}
+}
+%>
 </html>

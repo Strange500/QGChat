@@ -1,3 +1,4 @@
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -16,6 +17,7 @@
 <% } %>
 
 <%
+    try {
     if (request.getAttribute("error") != null) {
 %>
 
@@ -78,4 +80,20 @@
 </form>
 
 </body>
+<%
+} catch (Exception e) {
+    request.setAttribute("message", e.getMessage());
+    request.setAttribute("errorCode", AbstractController.getErrorCode(e));
+    request.setAttribute("exception", e);
+
+    if (!response.isCommitted()) { %>
+
+<jsp:forward page="error.jsp"/>
+
+<% } else {
+    e.printStackTrace();
+    out.println("An error occurred: " + e.getMessage());
+}
+}
+%>
 </html>

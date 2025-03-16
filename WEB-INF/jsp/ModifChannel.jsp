@@ -16,8 +16,10 @@
     <%@ page import="java.util.List" %>
     <%@ page import="fr.univ.lille.s4a021.dto.User" %>
     <%@ page import="java.util.Map" %>
+    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 
     <%
+        try {
 
         Channel channel = (Channel) request.getAttribute("channel");
         List<User> users = (List<User>) request.getAttribute("users");
@@ -124,4 +126,20 @@
         </form>
     </section>
 </body>
+<%
+} catch (Exception e) {
+    request.setAttribute("message", e.getMessage());
+    request.setAttribute("errorCode", AbstractController.getErrorCode(e));
+    request.setAttribute("exception", e);
+
+    if (!response.isCommitted()) { %>
+
+<jsp:forward page="error.jsp"/>
+
+<% } else {
+    e.printStackTrace();
+    out.println("An error occurred: " + e.getMessage());
+}
+}
+%>
 </html>

@@ -1,5 +1,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <!doctype html>
 <html lang="en">
 <head>
@@ -20,6 +21,7 @@
 <h1 class="mb-4">Create friend request</h1>
 
   <%
+  try {
   List<User> notFriends = (List<User>) request.getAttribute("notFriends");
   Map<Integer, String> base64ProfilePictures = (Map<Integer, String>) request.getAttribute("base64ProfilePictures");
 %>
@@ -47,6 +49,21 @@
 
 </form>
 
+<%
+   } catch (Exception e) {
+        request.setAttribute("message", e.getMessage());
+        request.setAttribute("errorCode", AbstractController.getErrorCode(e));
+        request.setAttribute("exception", e);
 
+        if (!response.isCommitted()) { %>
+
+<jsp:forward page="error.jsp"/>
+
+  <% } else {
+            e.printStackTrace();
+            out.println("An error occurred: " + e.getMessage());
+            }
+    }
+%>
 
 </html>
