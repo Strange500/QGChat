@@ -22,6 +22,7 @@ QGChat est une application web permettant aux utilisateurs de créer et gérer d
 - **Administration** : Les utilisateurs peuvent être administrateurs de channels (ajouter des membres, supprimer des messages, promouvoir des administrateurs, changer le nom, durée de vie des messages).
 - **Amis** : Les utilisateurs peuvent ajouter des amis et envoyer des messages privés.
 - **Personnalisation** : Les utilisateurs peuvent modifier leur profil (photo de profil, nom d'utilisateur, mail).
+- **Configuration** : Le serveur est configurable via un fichier `config.yml` dans son dossier `WEB-INF/classes`. (debug, taille max des fichiers, connexion à la base de données).
 
 
 # Installation et Utilisation
