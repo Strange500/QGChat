@@ -103,7 +103,10 @@ public class UserController extends AbstractController {
     @Override
     protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         int uid = Util.getUid(req.getSession());
-
+        if (action == null || action.isEmpty()) {
+            res.sendRedirect("home");
+            return;
+        }
         switch (action) {
             case ACTION_EDIT:
                 forwardToJSP(req, res, JSP.EDIT_USER);
@@ -130,11 +133,22 @@ public class UserController extends AbstractController {
                 break;
 
             case ACTION_UPDATE:
-                handleUpdateUser(uid, req, res);
+                try {
+                    handleUpdateUser(uid, req, res);
+                } catch (BadParameterException e) {
+                    req.setAttribute("editException", e.getMessage());
+                    forwardToJSP(req, res, JSP.EDIT_USER);
+                }
+
                 break;
 
             case ACTION_SET_PROFILE_PIC:
-                handleSetProfilePicture(uid, req, res);
+                try {
+                    handleSetProfilePicture(uid, req, res);
+                } catch (BadParameterException e) {
+                    req.setAttribute("editException", e.getMessage());
+                    forwardToJSP(req, res, JSP.EDIT_USER);
+                }
                 break;
             case ACTION_CANCEL_FRIEND_REQUEST:
                 handleCancelFriendRequest(uid, req, res);
@@ -191,7 +205,12 @@ public class UserController extends AbstractController {
 
         String username = req.getParameter("username");
         String email = req.getParameter("email");
-
+        if (username == null || username.isEmpty()) {
+            throw new BadParameterException("Username cannot be empty");
+        }
+        if (email == null || email.isEmpty()) {
+            throw new BadParameterException("Email cannot be empty");
+        }
         userDAO.updateUser(uidToUpdate, username, email);
         res.sendRedirect("home");
 

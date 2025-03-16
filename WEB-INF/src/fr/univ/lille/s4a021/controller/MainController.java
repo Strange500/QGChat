@@ -23,7 +23,7 @@ public class MainController extends AbstractController {
     }
 
     protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
-        if (action == null) {
+        if (action == null || action.isEmpty()) {
             forwardToJSP(req, res, JSP.HOME);
             return;
         }

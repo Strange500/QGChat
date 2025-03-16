@@ -160,7 +160,7 @@ public class ChannelController extends AbstractController {
 
     @Override
     protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
-        if (action == null) {
+        if (action == null || action.isEmpty()) {
             res.sendRedirect("home");
             return;
         }

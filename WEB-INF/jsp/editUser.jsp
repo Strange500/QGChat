@@ -24,6 +24,11 @@
     <i class="bi bi-arrow-left"></i> Back
   </a>
   <h1 class="mb-4">Edit <%=user.getUsername()%></h1>
+  <% if (request.getAttribute("editException") != null) { %>
+  <div class="alert alert-danger" role="alert">
+    <%= request.getAttribute("editException") %>
+  </div>
+  <% } %>
   <form action="user" method="get" class="mb-4">
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="uid" value="<%=user.getUid()%>">

@@ -41,6 +41,10 @@ public class MessageController extends AbstractController {
     @Override
     protected void processAction(String action, HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
         int uid = Util.getUid(req.getSession());
+        if (action == null || action.isEmpty()) {
+            res.sendRedirect("home");
+            return;
+        }
         switch (action) {
             case ACTION_SEND:
                 handleSendMessage(req, res, uid);
@@ -229,6 +233,11 @@ public class MessageController extends AbstractController {
         Message message = messageDAO.getMessageById(mid);
         int channelId = message.getChannelId();
         if (!hasEditPermission(uid, message)) {
+            res.sendRedirect("home?action=view&channelID=" + channelId);
+            return;
+        }
+        if (newMessageContent == null || newMessageContent.isEmpty()) {
+            messageDAO.deleteMessage(mid);
             res.sendRedirect("home?action=view&channelID=" + channelId);
             return;
         }
