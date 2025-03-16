@@ -1,15 +1,18 @@
 <%@ page import="fr.univ.lille.s4a021.Config" %>
 <%@ page import="org.apache.tomcat.jakartaee.commons.lang3.exception.ExceptionUtils" %>
+<%
+    Integer errorCode = (Integer) request.getAttribute("errorCode");
+    String message = (String) request.getAttribute("message");
+    Throwable exception = (Throwable) request.getAttribute("exception");
+    response.setStatus(errorCode);
+
+    String referer = (String) request.getAttribute("referer");
+    String title = "Error " + errorCode;
+%>
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Error Page</title>
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <%@include file="components/head.jsp"%>
     <style>
         body {
             background-color: #f8f9fa;
@@ -26,10 +29,6 @@
             color: #dc3545;
         }
 
-        .back-btn {
-            margin-top: 20px;
-        }
-
         .stacktrace {
             text-align: left;
             white-space: pre-wrap;
@@ -39,19 +38,12 @@
             padding: 15px;
             margin-top: 20px;
             max-height: 400px;
-            overflow-y: auto; /* Enable scrolling */
+            overflow-y: auto; 
         }
     </style>
 </head>
 <body>
-<%
-    Integer errorCode = (Integer) request.getAttribute("errorCode");
-    String message = (String) request.getAttribute("message");
-    Throwable exception = (Throwable) request.getAttribute("exception");
-    response.setStatus(errorCode);
 
-    String referer = (String) request.getAttribute("referer");
-%>
 <div class="error-container">
     <i class="bi bi-exclamation-triangle error-icon"></i>
     <h1 class="display-4 text-danger">Error <%= errorCode %>

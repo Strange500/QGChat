@@ -1,31 +1,26 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <!-- import bootstreap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
+<%@ page import="java.util.List" %>
+<%@ page import="fr.univ.lille.s4a021.dto.User" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 
-</head>
-<body class="container">
-    <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-    <%@ page import="java.util.List" %>
-    <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-    <%@ page import="java.util.Map" %>
-    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
-
-    <%
-        try {
+<%
+    String title = "Edit Channel";
+    try {
 
         Channel channel = (Channel) request.getAttribute("channel");
         List<User> users = (List<User>) request.getAttribute("users");
         List<User> subscribers = (List<User>) request.getAttribute("subscribers");
         List<User> admins = (List<User>) request.getAttribute("admins");
-    %>
+%>
+<!doctype html>
+<html lang="en">
+<head>
+    <%@include file="components/head.jsp"%>
+
+</head>
+<body class="container">
+    
 
     <%@ include file="components/TopBar.jsp" %>
 

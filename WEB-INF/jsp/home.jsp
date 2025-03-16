@@ -1,26 +1,36 @@
+<%@ page import="java.util.*" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
+<%@ page import="java.util.stream.Collectors" %>
+<%@ page import="fr.univ.lille.s4a021.dao.*" %>
+<%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
+<%@ page import="fr.univ.lille.s4a021.util.Pair" %>
+<%@ page import="fr.univ.lille.s4a021.dto.*" %>
+
+<%
+    String title = "Home";
+    try {
+        int uid = (Integer) request.getAttribute("id");
+        List<Channel> subscribedChannels = (List<Channel>) request.getAttribute("subscribedChannels");
+
+        List<Pair<User, Channel>> friendsChannels = (List<Pair<User, Channel>>) request.getAttribute("friendChannels");
+        List<User> friendRequests = (List<User>) request.getAttribute("friendRequests");
+        List<User> pendingFriendRequests = (List<User>) request.getAttribute("pendingFriendRequests");
+
+        Boolean friendChannel = (Boolean) request.getAttribute("friendChannel");
+
+
+%>
+
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-    <!-- import bootstreap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <%@include file="components/head.jsp" %>
     <script defer src="${pageContext.request.contextPath}/scripts/home.js"></script>
 
 </head>
 <body class="container">
-<%@ page import="java.util.*" %>
-    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
-    <%@ page import="java.util.stream.Collectors" %>
-    <%@ page import="fr.univ.lille.s4a021.dao.*" %>
-    <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
-    <%@ page import="fr.univ.lille.s4a021.util.Pair" %>
-<%@ page import="fr.univ.lille.s4a021.dto.*" %>
+
 
 <div id="hover-div"
          class="popover bs-popover-top shadow bg-white rounded"
@@ -30,18 +40,7 @@
 
     <canvas style="display: none; position: absolute; top: 0; left: 0; height: 100vh; width: 100vw; z-index: 1000;"></canvas>
 
-    <%
-        try {
-            int uid = (Integer) request.getAttribute("id");
-            List<Channel> subscribedChannels = (List<Channel>) request.getAttribute("subscribedChannels");
 
-            List<Pair<User, Channel>> friendsChannels = (List<Pair<User, Channel>>) request.getAttribute("friendChannels");
-            List<User> friendRequests = (List<User>) request.getAttribute("friendRequests");
-            List<User> pendingFriendRequests = (List<User>) request.getAttribute("pendingFriendRequests");
-
-            Boolean friendChannel = (Boolean) request.getAttribute("friendChannel");
-
-    %>
 
 
     <!-- TOP BAR -->

@@ -1,36 +1,22 @@
 <%@ page import="fr.univ.lille.s4a021.controller.AbstractController" %>
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
-<%@ page import="fr.univ.lille.s4a021.util.JwtManager" %>
-<%@ page import="fr.univ.lille.s4a021.util.Pair" %>
-<%@ page import="io.jsonwebtoken.JwtException" %>
 <%@ page import="fr.univ.lille.s4a021.dto.User" %>
-<%@ page import="fr.univ.lille.s4a021.dao.UserDAO" %>
-<%@ page import="fr.univ.lille.s4a021.dao.ChannelDAO" %>
-<%@ page import="fr.univ.lille.s4a021.exception.ConfigErrorException" %>
-<%@ page import="fr.univ.lille.s4a021.Config" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException" %>
-<%@ page import="fr.univ.lille.s4a021.exception.dao.DataAccessException" %>
+
+<%
+    String title = "Join Channel";
+    try {
+        String token = (String) request.getAttribute("token");
+        User user = (User) request.getAttribute("user");
+        Channel channel = (Channel) request.getAttribute("channel");
+%>
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-  <!-- import bootstreap -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <%@include file="components/head.jsp"%>
 </head>
 <body class="container mt-5">
 
 
-<%
-    try {
-    String token = (String) request.getAttribute("token");
-    User user = (User) request.getAttribute("user");
-    Channel channel = (Channel) request.getAttribute("channel");
-%>
 
 
 <%@ include file="components/TopBar.jsp" %>

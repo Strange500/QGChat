@@ -1,25 +1,21 @@
 <%@ page import="fr.univ.lille.s4a021.dto.Channel" %>
+<%
+
+  Channel ch = (Channel) request.getAttribute("channel");
+  String url = (String) request.getAttribute("url");
+  String title = "Share Channel " + ch.getName();
+
+%>
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-  <!-- import bootstreap -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <%@include file="components/head.jsp"%>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="container mt-5">
 
 
-<%
 
-  Channel ch = (Channel) request.getAttribute("channel");
-  String url = (String) request.getAttribute("url");
-
-%>
 
 <%@ include file="components/TopBar.jsp" %>
 

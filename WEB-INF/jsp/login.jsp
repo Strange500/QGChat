@@ -18,7 +18,7 @@
 
 <%
     try {
-    if (request.getAttribute("error") != null) {
+        if (request.getAttribute("error") != null) {
 %>
 
     <div class="alert alert-danger" role="alert">
