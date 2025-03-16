@@ -49,11 +49,21 @@
         <div class="col-md-4">
             <ul class="nav nav-tabs nav-fill mb-4">
                 <li class="nav-item">
-                    <a class="nav-link <%= !friendChannel ? "active" : "" %>" aria-current="page" href="#"
-                       id="channelTab">Channels</a>
+                    <a class="nav-link <%= !friendChannel ? "active" : "" %> position-relative" aria-current="page"
+                       href="#"
+                       id="channelTab">Channels
+                    </a>
+
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <%= friendChannel ? "active" : "" %>" href="#" id="friendTab">Friends</a>
+                    <a class="nav-link <%= friendChannel ? "active" : "" %> position-relative" href="#" id="friendTab">
+                        Friends
+                        <% if (!friendRequests.isEmpty()) { %>
+                        <span class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle">
+                                <span class="visually-hidden">New Friend request</span>
+                            </span>
+                        <% } %>
+                    </a>
                 </li>
             </ul>
 
