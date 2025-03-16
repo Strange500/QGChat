@@ -7,6 +7,10 @@
         }
 
         for (ReactionDAO.Reaction reaction : ReactionDAO.Reaction.values()) {
+            if (ReactionDAO.Reaction.EMPTY.equals(reaction)) {
+                continue;
+            }
+
             // Skip reactions with no likes and handle the heart case
             if (usersForReactionMap.getOrDefault(reaction, Collections.emptySet()).isEmpty()
                     && (reaction != ReactionDAO.Reaction.HEART || !forceHeart)) {
@@ -15,9 +19,9 @@
 
             int likeCount = usersForReactionMap.get(reaction).size();
     %>
-    <span class="">
+    <span>
 
-        <form action="message" method="POST" class="d-inline-block mx-1">
+        <form action="message" method="POST" class="d-inline-block mx-1" style="font-family: 'Segoe UI Emoji',serif;">
             <input type="hidden" name="action" value="like">
             <input type="hidden" name="mid" value="<%= message.getMid() %>">
             <input type="hidden" name="emoji" value="<%= reaction.getEmoji() %>">
@@ -59,17 +63,24 @@
     <% } %>
 
     <div class="d-flex align-items-center otherReact">
-        <a class="btn btn-link p-0 text-muted">...</a>
+        <a class="btn btn-link p-0 text-muted" style="text-decoration: none">...</a>
         <%
             for (ReactionDAO.Reaction reaction : ReactionDAO.Reaction.values()) {
+                if (ReactionDAO.Reaction.EMPTY.equals(reaction)) {
+                    continue;
+                }
                 if (usersForReactionMap.getOrDefault(reaction, Collections.emptySet()).isEmpty()) { %>
-        <form action="message" method="POST" class="d-inline-block otherReactForm mx-1">
+        <form action="message" method="POST" class="d-inline-block otherReactForm mx-1"
+              style="font-family: 'Segoe UI Emoji',serif;">
             <input type="hidden" name="action" value="like">
             <input type="hidden" name="mid" value="<%= message.getMid() %>">
             <input type="hidden" name="emoji" value="<%= reaction.getEmoji() %>">
-            <div class="align-items-center rounded" style="display: none">
+            <div class="align-items-center rounded divReact" style="display: none"
+                 onmouseenter="this.classList.add('text-bg-primary')"
+                 onmouseleave="this.classList.remove('text-bg-primary')">
                 <input type="submit" class="btn btn-link p-0 text-muted"
-                       value="<%= reaction.getEmoji() %>" style="font-size: 0.8em;">
+
+                       value="<%= reaction.getEmoji() %>" style="font-size: 0.8em;text-decoration: none">
             </div>
         </form>
         <%
@@ -84,4 +95,5 @@
             object-fit: cover;
         }
     </style>
+
 </div>
