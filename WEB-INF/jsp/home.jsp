@@ -235,8 +235,8 @@
                             <input type="hidden" name="action" value="send">
                             <input type="hidden" name="channelID" value="<%=channelToViewId%>">
                             <div class="form-group">
-                                <div class="card" style="max-width: 100px; display: none" id="preview">
-
+                                <div class="row" id="preview" style="display: none;position: relative">
+                                    <!-- Preview elements will be inserted here dynamically -->
                                 </div>
                                 <div id="textInputDiv">
                                 <% if (minuteBeforeExpiration > 0) { %>
@@ -247,7 +247,7 @@
                                 </div>
                             </div>
                             <input type="file" accept="image/*,video/*,audio/*" class="form-control-file" name="img"
-                                   id="imgInput" style="display: none;">
+                                   id="imgInput" style="display: none;" multiple>
                             <a class="btn btn-secondary" onclick="document.getElementById('imgInput').click();">
                                 <i class="bi bi-paperclip"></i>
                             </a>

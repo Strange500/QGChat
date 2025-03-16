@@ -28,63 +28,78 @@ if (messageList) {
     const imgInput = document.querySelector('input[type="file"]');
     imgInput.addEventListener('change', () => {
         const previewCard = document.getElementById('preview');
-        preview.style.display = 'block';
-        textInputDiv.style.display = 'none';
+        const textInputDiv = document.getElementById('textInputDiv');
+        previewCard.innerHTML = '';
+        previewCard.style.display = 'flex';
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const contentType = imgInput.files[0].type;
+        const files = imgInput.files;
 
-            if (!contentType.startsWith('image') && !contentType.startsWith('video') && !contentType.startsWith('audio')) {
-                alert('Invalid file type');
-                imgInput.value = '';
-                previewCard.style.display = 'none';
-                textInputDiv.style.display = 'block';
-                return;
-            }
+        if (files.length === 0) {
+            alert('No files selected');
+            return;
+        }
 
+        Array.from(files).forEach((file) => {
+            const reader = new FileReader();
 
-            let result;
+            reader.onload = (e) => {
+                const contentType = file.type;
+                if (!contentType.startsWith('image') && !contentType.startsWith('video') && !contentType.startsWith('audio')) {
+                    alert('Invalid file type: ' + file.name);
+                    imgInput.value = '';
+                    previewCard.style.display = 'none';
+                    textInputDiv.style.display = 'block';
+                    return;
+                }
 
-// Media element size
-            const mediaWidth = '150px'; // Set fixed width for media
-            const mediaHeight = '100px'; // Set fixed height for media
+                let result;
+                const mediaWidth = '150px';
+                const mediaHeight = '100px';
 
-            if (contentType.startsWith('image')) {
-                result = `<img src="${e.target.result}" class="img-fluid" alt="preview" style="width: ${mediaWidth}; height: ${mediaHeight}; object-fit: cover;">`;
-            } else if (contentType.startsWith('video')) {
-                result = `<video controls style="width: ${mediaWidth}; height: ${mediaHeight}; object-fit: cover;">                     
-                <source src="${e.target.result}" type="${contentType}">                 
-              </video>`;
-            } else if (contentType.startsWith('audio')) {
-                result = `<audio controls style="width: ${mediaWidth};">                     
-                <source src="${e.target.result}" type="${contentType}">                 
-              </audio>`;
-            }
+                if (contentType.startsWith('image')) {
+                    result = `<img src="${e.target.result}" class="img-fluid preview-item" style="width: ${mediaWidth}; height: ${mediaHeight}; object-fit: cover;">`;
+                } else if (contentType.startsWith('video')) {
+                    result = `<video controls class="preview-item" style="width: ${mediaWidth}; height: ${mediaHeight};">
+                            <source src="${e.target.result}" type="${contentType}">
+                          </video>`;
+                } else if (contentType.startsWith('audio')) {
+                    result = `<audio controls class="preview-item" style="width: ${mediaWidth};">
+                            <source src="${e.target.result}" type="${contentType}">
+                          </audio>`;
+                }
+                const ra = Math.floor(Math.random() * 1000000);
+                // convert to base 64
+                const id = btoa(ra.toString());
 
-            const uuid = Math.floor(Math.random() * 1000000);
-            previewCard.style.display = 'block';
-            previewCard.innerHTML = `
-                          <div class="card-body p-0">
-                              <a class="position-absolute top-0 end-0 p-1" id="${uuid}" style="color: blue; cursor: pointer; z-index: 1000;">
-                                  <i class="bi bi-x-octagon"></i>
-                              </a>
-                              ${result}
-                          </div>`;
-            const cancelBtn = document.getElementById(uuid);
-            cancelBtn.addEventListener('click', () => {
-                previewCard.style.display = 'none';
-                previewCard.removeChild(cancelBtn.parentElement);
-                const imgInput = document.querySelector('input[type="file"]');
-                imgInput.value = '';
-                textInputDiv.style.display = 'block';
-            });
+                const cardHTML = `
+                <div class="col-6 col-sm-4 col-md-3 p-1 position-relative">
+                    <div class="card" style="width: 100%;">
+                        <div class="card-body p-0">
+                            
+                            ${result}
+                        </div>
+                    </div>
+                </div>`;
 
+                previewCard.innerHTML += cardHTML;
 
-            }
+            };
+            previewCard.innerHTML += `<a class="position-absolute" style="top: 0; right: 0; z-index: 1000;"
+                                style="color: blue; cursor: pointer;" onclick="{
+                                const previewCard = document.getElementById('preview');
+                                const textInputDiv = document.getElementById('textInputDiv');
+                                previewCard.style.display = 'none';
+                                textInputDiv.style.display = 'block';
+                                previewCard.innerHTML = '';    
+                                const imgInput = document.querySelector('input[type=file]');
+                                imgInput.value = '';
+                            }" >
+                                <i class="bi bi-x-octagon"></i>
+                            </a>
+            `
 
-
-        reader.readAsDataURL(imgInput.files[0]);
+            reader.readAsDataURL(file);
+        });
     });
 
 
@@ -149,12 +164,11 @@ setInterval(() => {
         const pElement = timeAgo.querySelector("p");
 
         if (!spanElement || !pElement) {
-            return; // Exit early if necessary elements are not present
+            return;
         }
 
         const secondSent = parseInt(spanElement.innerHTML, 10); // Parse the timestamp safely
 
-        // Calculate the difference
         const diffSeconds = now - secondSent;
         let timeString = "";
 
@@ -171,7 +185,6 @@ setInterval(() => {
             timeString = diffDays + " day" + (diffDays !== 1 ? "s" : "") + " ago";
         }
 
-        // Update the paragraph element with the calculated time string
         pElement.innerHTML = timeString;
     });
 }, 1000);

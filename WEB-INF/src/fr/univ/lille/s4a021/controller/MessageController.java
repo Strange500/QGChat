@@ -28,6 +28,7 @@ import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Base64;
+import java.util.Collection;
 
 @MultipartConfig
 @WebServlet("/message")
@@ -105,15 +106,26 @@ public class MessageController extends AbstractController {
     }
 
     private void sendMessage(HttpServletRequest req, String channelID) throws ChannelNotFoundException, MessageCreationException, IOException, ServletException, DataAccessException, BadParameterException, MessageNotFoundException, MessageUpdateException {
-        Part imgPart = req.getPart("img");
-        if (imgPart.getSize() == 0 && (req.getParameter("message") == null || req.getParameter("message").isEmpty())) return;
-        String newMsg = formatMessage(req.getParameter("message"), imgPart);
+        Collection<Part> parts = req.getParts();
+        boolean done = false;
         Channel channel = channelDAO.getChannelById(Integer.parseInt(channelID));
         int usr = (int) req.getSession().getAttribute("id");
-        MsgType type = getMsgType(imgPart);
-        checkFileSize(imgPart, type);
-
         Message lastMessage = messageDAO.getLastMessageByUserInChannel(usr, channel.getCid());
+
+        for (Part part : parts) {
+            if (part.getName().equals("img")) {
+                if (part.getSize() == 0) continue;
+                String newMsg = formatMessage(req.getParameter("message"), part);
+                MsgType type = getMsgType(part);
+                checkFileSize(part, type);
+                messageDAO.createMessage(newMsg, usr, channel.getCid(), type);
+                done = true;
+            }
+        }
+        if (done) return;
+        if (req.getParameter("message") == null || req.getParameter("message").isEmpty()) return;
+        String newMsg = StringEscapeUtils.escapeHtml4(req.getParameter("message"));
+        MsgType type = MsgType.TEXT;
         if (lastMessage != null && isWithinTimeFrame(lastMessage.getTimestamp(), 5*60) && lastMessage.getType() == MsgType.TEXT) {
             String mergedContent = lastMessage.getContenu() + "\n" + newMsg;
             messageDAO.updateMessage(lastMessage.getMid(), mergedContent);
