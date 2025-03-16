@@ -1,13 +1,11 @@
 <div style="width: 100px;" class="d-flex align-items-center justify-content-around likeForm rounded">
     <%
-        // Initialize reaction handling
         boolean forceHeart = false;
         if (usersForReactionMap.isEmpty()) {
             usersForReactionMap.put(ReactionDAO.Reaction.HEART, Collections.emptySet());
             forceHeart = true; // Force the heart reaction to be displayed if no reactions exist
         }
 
-        // Iterate through available reactions
         for (ReactionDAO.Reaction reaction : ReactionDAO.Reaction.values()) {
             // Skip reactions with no likes and handle the heart case
             if (usersForReactionMap.getOrDefault(reaction, Collections.emptySet()).isEmpty()
@@ -17,18 +15,24 @@
 
             int likeCount = usersForReactionMap.get(reaction).size();
     %>
-    <span class="badge badge-<%= (likeCount == 0) ? "secondary" : "primary" %> mx-1 reactSpan">
-                <%= likeCount %>
+    <span class="reactSpan">
 
-                <form action="message" method="POST" class="d-inline-block mx-1">
-                    <input type="hidden" name="action" value="like">
-                    <input type="hidden" name="mid" value="<%= message.getMid() %>">
-                    <input type="hidden" name="emoji" value="<%= reaction.getEmoji() %>">
-                    <div class="d-flex align-items-center rounded">
-                        <input type="submit" class="btn btn-link p-0"
-                               value="<%= reaction.getEmoji() %>" style="font-size: 0.9em;">
-                    </div>
-                </form>
+        <form action="message" method="POST" class="d-inline-block mx-1">
+            <input type="hidden" name="action" value="like">
+            <input type="hidden" name="mid" value="<%= message.getMid() %>">
+            <input type="hidden" name="emoji" value="<%= reaction.getEmoji() %>">
+            <div class="d-flex align-items-center rounded">
+                <input type="submit" class="btn btn-link p-0"
+                       value="<%= reaction.getEmoji() %>" style="display: none;">
+                <button onclick="this.form.submit()" class="btn btn-<%= (likeCount == 0) ? "secondary" : "primary" %> position-relative"
+                        style="font-size: 0.9em;">
+                    <%= reaction.getEmoji() %>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    <%= likeCount %>
+                  </span>
+                </button>
+            </div>
+        </form>
 
                 <section class="d-none reactDetails">
                     <% if (usersForReactionMap.isEmpty() || likeCount == 0) { %>
