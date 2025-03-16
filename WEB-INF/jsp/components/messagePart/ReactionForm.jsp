@@ -28,12 +28,12 @@
                         style="font-size: 0.9em;"
                         data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom" data-bs-title='
                         <% if (usersForReactionMap.isEmpty() || likeCount == 0) { %>
-                            <span class="text-muted">No likes yet</span>
+                            <span >No likes yet</span>
                         <% } else {
                             for (int i = 0; i < Math.min(4, likeCount); i++) {
                                 User reactionUser = users.get(i);
                         %>
-                        <div class="d-flex align-items-center my-1" style="width: 30px; height: 30px; ">
+                        <div class="d-flex align-items-center my-1" ">
                             <img src="data:image/jpeg;base64,<%= usersProfilePictures.get(reactionUser.getUid()) %>"
                                  alt="profile picture"
                                  class="img-fluid rounded-circle popupImage"
@@ -47,9 +47,11 @@
                         } %>
                         '>
                     <%= reaction.getEmoji() %>
+                    <% if (likeCount > 0) { %>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    <%= likeCount %>
-                  </span>
+                        <%= likeCount %>
+                     </span>
+                    <% } %>
                 </button>
             </div>
         </form>
