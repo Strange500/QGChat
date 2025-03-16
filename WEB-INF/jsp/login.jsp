@@ -18,10 +18,10 @@
 
 <%
     try {
-        if (request.getAttribute("error") != null) {
+        if (request.getAttribute("loginError") != null) {
 %>
     <div class="alert alert-danger" role="alert">
-        <%= request.getAttribute("error") %>
+        <%= request.getAttribute("loginError") %>
     </div>
 <%
     }
@@ -44,13 +44,11 @@
 </form>
 
 <%
-    if (request.getAttribute("registererror") != null) {
+    if (request.getAttribute("registerError") != null) {
 %>
-
         <div class="alert alert-danger" role="alert">
-            <%= request.getAttribute("registererror") %>
+            <%= request.getAttribute("registerError") %>
         </div>
-
 <%
     }
 %>

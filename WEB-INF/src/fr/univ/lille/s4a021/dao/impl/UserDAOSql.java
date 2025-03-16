@@ -6,6 +6,7 @@ import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.user.UserCreationException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserUpdateException;
+import org.apache.tomcat.dbcp.dbcp2.SQLExceptionList;
 
 import java.sql.*;
 import java.util.*;
@@ -42,7 +43,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
             }
             throw new UserCreationException("Error while creating user");
         } catch (SQLException e) {
-            throw new DataAccessException("Error while creating user: " + e.getMessage(), e);
+            throw new UserCreationException("An other user with this mail exist", e);
         }
     }
 

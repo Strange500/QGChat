@@ -58,17 +58,26 @@ public class UserController extends AbstractController {
 
     @Override
     protected void processNoAuthAction(String action, HttpServletRequest req, HttpServletResponse res)
-            throws IOException, UserNotFoundException, DataAccessException, UserCreationException, UserUpdateException {
+            throws IOException, MyDiscordException, ServletException {
 
         if (ACTION_AUTH.equalsIgnoreCase(action)) {
             if (authenticateUser(req)) {
                 res.sendRedirect("home");
                 return;
+            }else {
+                req.setAttribute("loginError", "Invalid credential");
+                forwardToJSP(req, res, JSP.LOGIN);
+                return;
             }
         }
 
         if (ACTION_REGISTER.equalsIgnoreCase(action)) {
-            handleUserRegistration(req, res);
+            try {
+                handleUserRegistration(req, res);
+            }catch (UserCreationException e) {
+                req.setAttribute("registerError", e.getMessage());
+                forwardToJSP(req, res, JSP.LOGIN);
+            }
         }
     }
 
@@ -76,7 +85,15 @@ public class UserController extends AbstractController {
         String username = StringEscapeUtils.escapeHtml4(req.getParameter("username"));
         String mail = StringEscapeUtils.escapeHtml4(req.getParameter("mail"));
         String password = req.getParameter("password");
-
+        if (password == null || password.isEmpty()) {
+            throw new UserCreationException("Password cannot be empty");
+        }
+        if (mail == null || mail.isEmpty()) {
+            throw new UserCreationException("Mail cannot be empty");
+        }
+        if (username == null || username.isEmpty()) {
+            throw new UserCreationException("Username cannot be empty");
+        }
         int uid = userDAO.createUser(username, mail, password);
         userDAO.setUserProfilePicture(getDefaultProfilePic(), uid);
         res.sendRedirect("home");
