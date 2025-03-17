@@ -1,10 +1,12 @@
 package fr.univ.lille.s4a021.controller;
 
+import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.User;
 import fr.univ.lille.s4a021.exception.BadParameterException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.UnauthorizedException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
+import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserCreationException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserUpdateException;
@@ -180,10 +182,11 @@ public class UserController extends AbstractController {
         res.sendRedirect("home");
     }
 
-    private void handleAcceptFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws UserNotFoundException, DataAccessException, IOException, BadParameterException {
+    private void handleAcceptFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws UserNotFoundException, DataAccessException, IOException, BadParameterException, ChannelNotFoundException {
         int senderuid = parseUidParameter(req);
         friendDAO.acceptFriendRequest(senderuid, uid);
-        res.sendRedirect("home");
+        Channel ch = friendDAO.getFriendChannel(uid, senderuid);
+        res.sendRedirect("home?action=viewFriend&channelID=" + ch.getCid());
     }
 
     private void handleDeleteUser(int uid, HttpServletRequest req, HttpServletResponse res) throws IOException, BadParameterException, UnauthorizedException, UserNotFoundException, DataAccessException {

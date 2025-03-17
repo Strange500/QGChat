@@ -19,6 +19,8 @@ public interface FriendDAO {
 
     List<Pair<User, Channel>> getFriendChannels(int uid) throws UserNotFoundException, DataAccessException;
 
+    Channel getFriendChannel(int uid, int friendId) throws UserNotFoundException, DataAccessException, ChannelNotFoundException;
+
     public List<User> getFriendRequests(int uid) throws UserNotFoundException, DataAccessException;
 
     public void acceptFriendRequest(int senderuid, int receiveruid) throws UserNotFoundException, DataAccessException;
