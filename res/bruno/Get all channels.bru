@@ -1,0 +1,16 @@
+meta {
+  name: Get all channels
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:8081/sae/api/channels
+  body: none
+  auth: basic
+}
+
+auth:basic {
+  username: user1@example.com
+  password: password1
+}
