@@ -1,28 +1,20 @@
 package fr.univ.lille.s4a021.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.univ.lille.s4a021.dao.ChannelDAO;
-import fr.univ.lille.s4a021.dao.MessageDAO;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
-import fr.univ.lille.s4a021.dto.User;
-import fr.univ.lille.s4a021.exception.ConfigErrorException;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
-import fr.univ.lille.s4a021.model.bdd.Util;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet("/api/*")
 public class ApiController extends AbstractController {
@@ -53,40 +45,95 @@ public class ApiController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        String info = req.getPathInfo();
-        String[] parts = info.split("/");
-
-        // Attribution compacte de ChanOrMes avec vérification de parts[1]: true for channel, false for message, null for anything else
-        Boolean ChanOrMes = (parts.length > 1) ? ("channel".equals(parts[1]) ? true : ("message".equals(parts[1]) ? false : null)) : null;
-        if(!ChanOrMes){
-            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Erreur : Valeur de l'argument invalide. Attendu : 'channel' ou 'message'.");
-        }
-
-
-
-        // Get all message per channel
-        String token = req.getHeader("Authorization");
-        Integer userId = getUserIdFromToken(token);
+    protected void doDelete(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        Integer userId = getUidFromheader(req, res);
         if (userId == null) {
-            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "You must be authenticated with a valid token");
             return;
         }
-        try {
-            List<Channel> channels = channelDAO.getSubscribedChannels(userId);
-            Map<Channel, List<Message>> channelMessages = new HashMap<>();
+        String info = req.getPathInfo();
+        String[] parts = info.split("/");
+        String entity = parts.length > 0 ? parts[1] : "";
 
-            for (Channel channel : channels) {
-                List<Message> messages = messageDAO.getMessageByChannelId(channel.getCid());
-                channelMessages.put(channel, messages);
-            }
-
-            // print channel: message
-            res.setContentType("application/json");
-            new ObjectMapper().writeValue(res.getOutputStream(), channelMessages);
-        } catch (DataAccessException | ChannelNotFoundException e) {
-            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error retrieving channels or messages");
+        switch (entity) {
+            case "channels":
+                try {
+                    if (parts.length == 3) {
+                        Channel ch = null;
+                        try {
+                            ch = channelDAO.getChannelById(Integer.parseInt(parts[2]));
+                        } catch (ChannelNotFoundException e) {
+                            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Channel not found");
+                            return;
+                        }
+                        try {
+                            if (!adminDAO.userIsAdmin(userId, ch.getCid())) {
+                                res.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not allowed to delete this channel");
+                                return;
+                            }
+                        } catch (UserNotFoundException | ChannelNotFoundException e) {
+                            res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error checking if user is admin");
+                            return;
+                        }
+                        channelDAO.deleteChannel(ch.getCid());
+                        res.setStatus(HttpServletResponse.SC_ACCEPTED);
+                        new ObjectMapper().writeValue(res.getOutputStream(), ch);
+                        return;
+                    }
+                    res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel id is missing");
+                } catch (DataAccessException e) {
+                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting channel");
+                } catch (ChannelNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_NOT_FOUND, "Channel not found");
+                }
+                break;
+            default:
+                res.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    private Integer getUidFromheader(HttpServletRequest req, HttpServletResponse res) {
+        String token = req.getHeader("Authorization");
+        return getUserIdFromToken(token);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        Integer userId = getUidFromheader(req, res);
+        if (userId == null) {
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "You must be authenticated with a valid token");
+            return;
+        }
+        String info = req.getPathInfo();
+        String[] parts = info.split("/");
+        String entity = parts.length > 0 ? parts[1] : "";
+
+        switch (entity) {
+            case "channels":
+                try {
+                    if (parts.length == 3) {
+                        Channel ch = channelDAO.getSubscribedChannels(userId).stream().filter(c -> c.getCid() == Integer.parseInt(parts[2])).findFirst().orElse(null);
+                        if (ch == null) {
+                            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Channel not found");
+                            return;
+                        }
+                        List<Message> messages = messageDAO.getMessageByChannelId(ch.getCid());
+                        ch.setMessages(messages);
+                        res.setContentType("application/json");
+                        new ObjectMapper().writeValue(res.getOutputStream(), ch);
+                        return;
+                    }
+                    List<Channel> channels = channelDAO.getSubscribedChannels(userId);
+                    res.setContentType("application/json");
+                    new ObjectMapper().writeValue(res.getOutputStream(), channels);
+                } catch (DataAccessException | ChannelNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error retrieving channels or messages");
+                }
+                break;
+            default:
+                res.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+
     }
 
     private Integer getUserIdFromToken(String baseToken) {
