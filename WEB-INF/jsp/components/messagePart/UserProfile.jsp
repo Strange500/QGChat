@@ -1,5 +1,6 @@
 <% boolean isFriend = friendsChannels.stream().anyMatch(p -> p.getFirst().getUid() == sender.getUid());
     boolean canSendFriendRequest = !isFriend && sender.getUid() != uid && friendRequests.stream().noneMatch(p -> p.getUid() == sender.getUid()) && pendingFriendRequests.stream().noneMatch(p -> p.getUid() == sender.getUid());
+    boolean friendRequestSent = pendingFriendRequests.stream().anyMatch(p -> p.getUid() == sender.getUid());
 %>
 
 <div class="d-flex align-items-center justify-content-between">
@@ -29,6 +30,12 @@
             <%
                 if (isFriend) { %>
                 <span class="badge text-bg-success ml-2">Friend</span>
+            <% } %>
+            <%
+                if (friendRequestSent) { %>
+                <span class="badge text-bg-info ml-2">
+                    <i class="bi bi-clock"></i> Pending
+                </span>
             <% } %>
         </span>
         <small class="text-muted d-block timeAgo">
