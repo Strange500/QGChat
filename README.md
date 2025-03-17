@@ -100,11 +100,11 @@ L'application est accessible à l'adresse suivante : [http://localhost:8080/sae/
 
 
 ## Modèle Logique de Données (MLD)
-Utilisateur(_uid_, username, mail, password, profile_picture)
+Utilisateur(__uid__, username, mail, password, profile_picture)
 
 Channel(__cid__, name, minuteBeforeExpiration)
 
-isFriend(__#uid1,#uid2__, cid)
+isFriend(__#uid1,#uid2,#cid__)
 
 FriendRequest(__#senderUid,#receiverUid__)
 
