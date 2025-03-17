@@ -6,7 +6,11 @@
         <span class="font-weight-bold text-dark">
             <%=displayName%>
             <% if (senderIsAdmin) { %>
-                <span class="badge badge-warning ml-2">Admin</span>
+                <span class="badge text-bg-warning ml-2">Admin</span>
+            <% } %>
+            <%
+                if (friendsChannels.stream().anyMatch(p -> p.getFirst().getUid() == sender.getUid())) { %>
+                <span class="badge text-bg-success ml-2">Friend</span>
             <% } %>
         </span>
         <small class="text-muted d-block timeAgo">
