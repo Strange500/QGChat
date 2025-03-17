@@ -69,10 +69,12 @@ public class FriendDAOSql extends DaoSql implements FriendDAO {
         if (!userDAO.userExists(uid) || !userDAO.userExists(friendId)) {
             throw new UserNotFoundException("User not found");
         }
-        String query = "SELECT 1 FROM isFriend WHERE uid1 = ? AND uid2 = ?";
+        String query = "SELECT 1 FROM isFriend WHERE (uid1 = ? AND uid2 = ?) OR (uid1 = ? AND uid2 = ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, uid);
             stmt.setInt(2, friendId);
+            stmt.setInt(3, friendId);
+            stmt.setInt(4, uid);
             ResultSet rs = stmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {

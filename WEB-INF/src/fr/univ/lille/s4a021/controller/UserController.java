@@ -191,7 +191,6 @@ public class UserController extends AbstractController {
         if (uid != paramUid) {
             throw new UnauthorizedException("Unauthorized");
         }
-
         userDAO.deleteUser(uid);
         res.sendRedirect("home");
 
