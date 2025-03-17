@@ -5,6 +5,8 @@ import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
+import fr.univ.lille.s4a021.exception.dao.admin.AdminCreationException;
+import fr.univ.lille.s4a021.exception.dao.channel.ChannelCreationException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.subscription.SubscriptionNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
@@ -159,6 +161,43 @@ public class ApiController extends AbstractController {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
 
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+        Integer userId = getUidFromheader(req, res);
+        if (userId == null) {
+            res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "You must be authenticated with a valid token");
+            return;
+        }
+        String info = req.getPathInfo();
+        String[] parts = info.split("/");
+        String entity = parts.length > 0 ? parts[1] : "";
+
+        switch (entity) {
+            case "channels":
+                String name = req.getParameter("name");
+                if (name == null) {
+                    res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel name is missing");
+                    return;
+                }
+                try {
+                    Channel ch = channelDAO.createChannel(name);
+                    subscriptionDAO.subscribeUsersTo(ch, List.of(userId));
+                    adminDAO.setAdmin(ch.getCid(), userId);
+                    res.setStatus(HttpServletResponse.SC_CREATED);
+                    new ObjectMapper().writeValue(res.getOutputStream(), ch);
+                } catch (DataAccessException | ChannelCreationException | AdminCreationException |
+                         ChannelNotFoundException | UserNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                }
+
+
+                break;
+
+            default:
+                res.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
     }
 
     private Integer getUserIdFromToken(String baseToken) {
