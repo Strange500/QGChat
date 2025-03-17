@@ -31,11 +31,17 @@
             <input type="text" class="form-control" name="message" value="<%= message.getContenu() %>">
         </form>
         <% } else { %>
-        <p class="my-2 text-muted" style="white-space: pre-wrap"><%= message.getContenu() %>
+        <p class="messageText mb-0" style="white-space: pre-wrap"><%= message.getContenu() %>
         </p>
         <% } %>
         <% } %>
     </div>
+    <style>
+
+        .messageText > * {
+            margin: 0;
+        }
+    </style>
 
     <%@ include file="messagePart/ReactionForm.jsp" %>
 </div>

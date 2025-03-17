@@ -104,7 +104,7 @@ INSERT INTO Utilisateur (username, mail, password) VALUES
 
 INSERT INTO Channel (name) VALUES
 ('General'),
-('Random'),
+('Dev'),
 ('Announcements');
 
 INSERT INTO isAdmin (uid, cid) VALUES
@@ -112,16 +112,43 @@ INSERT INTO isAdmin (uid, cid) VALUES
 (2, 2),
 (3, 3);
 
-INSERT INTO Message (contenu, uid, cid) VALUES
-('Hello World', 1, 1),
-('Bonjour le monde', 2, 1),
-('Hola Mundo', 3, 1),
-('Random message', 1, 2),
-('Another random message', 2, 2),
-('Un autre message random', 3, 2),
-('Announcement', 1, 3),
-('Another announcement', 2, 3),
-('Un autre annonce', 3, 3);
+INSERT INTO Message (contenu, uid, cid) VALUES ('# Bienvenue dans le Channel **general** !
+
+Ce channel est l''endroit idéal pour échanger, partager et discuter de tout ce qui vous intéresse. N''oubliez pas que notre application **supporte le Markdown** pour que vos messages soient encore plus engageants !
+
+### Exemple de ce que vous pouvez faire avec le Markdown :
+
+- **Texte en gras** : `**Texte en gras**` donne **Texte en gras**.
+- _Texte en italique_ : `_Texte en italique_` devient _Texte en italique_.
+- [Liens cliquables](https://rickrolled.com/) : ` [Liens cliquables](https://example.com/) ` vous amène à [example.com](https://rickrolled.com/).
+- Listes à puces :
+  - Item 1
+  - Item 2
+- Code en ligne : `` `code` `` devient `code`.
+
+Utilisez ces fonctionnalités pour rendre vos messages plus clairs et dynamiques !
+
+## Règles à suivre :
+1. **Respect et bienveillance** : Merci de traiter tout le monde avec respect.
+2. **Pas de spam** : Évitez de poster des liens commerciaux ou répétitifs.
+3. **Confidentialité** : Ne partagez pas d''infos personnelles sans autorisation.
+', 1, 1),
+                                               ('```Python
+print("Hello, World!")
+```
+Je comprends pas pourquoi ça marche pas. Quelqu''un aurait une idée ?
+', 1, 2),
+                                               ('Il semble que la syntaxe soit correcte. Assurez-vous d''exécuter le code dans un environnement Python approprié. Que donne le message d''erreur ?',
+                                                2, 2),
+                                               ('
+J''ai découvert une nouvelle librairie pour le développement web : [Flask](https://flask.palletsprojects.com/). Ça a l''air prometteur !
+
+', 2, 2),
+                                               ('**Annonce Importante :**
+Nous avons une mise à jour prévue pour ce vendredi ! Assurez-vous de vérifier vos notifications.
+
+Pour plus d''infos, restez à l''écoute des annonces dans ce channel.
+', 1, 3);
 
 INSERT INTO estAbonne (uid, cid) VALUES
 (1, 1),

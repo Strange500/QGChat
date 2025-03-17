@@ -1,7 +1,7 @@
 const messageList = document.getElementById('messageList');
 if (messageList) {
 
-    messageList.scrollTop = messageList.scrollHeight;
+
 
     const reactSpan = document.querySelectorAll('.reactSpan');
     reactSpan.forEach(span => {
@@ -120,13 +120,35 @@ if (messageList) {
 
     }
 
+    const messages = messageList.querySelectorAll('.messageText');
+
     // check if one message contains the word sheep
-    const messages = messageList.querySelectorAll('p');
     messages.forEach(message => {
         if (message.innerText.toLowerCase().includes('sheep')) {
             displaySheep();
         }
     });
+    const {Marked} = globalThis.marked;
+    const {markedHighlight} = globalThis.markedHighlight;
+    const marked = new Marked(
+        markedHighlight({
+            emptyLangClass: 'hljs',
+            langPrefix: 'hljs language-',
+            highlight(code, lang, info) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                return hljs.highlight(code, {language}).value;
+            }
+        })
+    );
+
+    messages.forEach(message => {
+        const text = message.innerHTML;
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        const clean = DOMPurify.sanitize(textarea.value);
+        message.outerHTML = marked.parse(clean);
+    });
+    messageList.scrollTop = messageList.scrollHeight;
 }
 
 const profileLink = document.getElementById('profileLink');
