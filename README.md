@@ -101,7 +101,7 @@ L'application est accessible à l'adresse suivante : [http://localhost:8080/sae/
 
 ## Modèle Logique de Données (MLD)
 
-`#`: Clé étrangère 
+`#`: Clé étrangère  
 __en gras__: Clé primaire
 
 Utilisateur(__uid__, username, mail, password, profile_picture)
