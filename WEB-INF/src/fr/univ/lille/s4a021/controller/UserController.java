@@ -235,7 +235,7 @@ public class UserController extends AbstractController {
     private void handleSendFriendRequest(int uid, HttpServletRequest req, HttpServletResponse res) throws IOException, BadParameterException, UserNotFoundException, DataAccessException {
         int friendId = parseUidParameter(req);
         friendDAO.sendFriendRequest(uid, friendId);
-        res.sendRedirect("user?action=addFriend");
+        res.sendRedirect(req.getHeader("Referer"));
     }
 
     private void validateProfilePicture(Part imgPart) throws BadParameterException {
