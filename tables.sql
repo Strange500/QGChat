@@ -34,7 +34,7 @@ CREATE TABLE isFriend
     uid1 INT,
     uid2 INT,
     cid  INT,
-    PRIMARY KEY (uid1, uid2),
+    PRIMARY KEY (uid1, uid2, cid),
     FOREIGN KEY (uid1) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
     FOREIGN KEY (uid2) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
     FOREIGN KEY (cid) REFERENCES Channel (cid) ON DELETE CASCADE,
