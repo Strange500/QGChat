@@ -3,17 +3,21 @@ package fr.univ.lille.s4a021.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.univ.lille.s4a021.dto.Channel;
 import fr.univ.lille.s4a021.dto.Message;
+import fr.univ.lille.s4a021.dto.MsgType;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.admin.AdminCreationException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelCreationException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
+import fr.univ.lille.s4a021.exception.dao.message.MessageCreationException;
+import fr.univ.lille.s4a021.exception.dao.message.MessageNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.subscription.SubscriptionNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -59,6 +63,32 @@ public class ApiController extends AbstractController {
         String entity = parts.length > 0 ? parts[1] : "";
 
         switch (entity) {
+            case "messages":
+                try {
+                    if (parts.length == 3) {
+                        Message m = null;
+                        try {
+                            m = messageDAO.getMessageById(Integer.parseInt(parts[2]));
+                        } catch (MessageNotFoundException e) {
+                            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found");
+                            return;
+                        }
+                        if (m.getSenderId() != userId || !adminDAO.userIsAdmin(userId, m.getChannelId())) {
+                            res.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not allowed to delete this message");
+                            return;
+                        }
+                        messageDAO.deleteMessage(m.getMid());
+                        res.setStatus(HttpServletResponse.SC_ACCEPTED);
+                        new ObjectMapper().writeValue(res.getOutputStream(), m);
+                        return;
+                    }
+                    res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Message id is missing");
+                } catch (DataAccessException e) {
+                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting message");
+                } catch (MessageNotFoundException | UserNotFoundException | ChannelNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+                }
+                break;
             case "channels":
                 try {
                     if (parts.length == 3) {
@@ -176,7 +206,30 @@ public class ApiController extends AbstractController {
 
         switch (entity) {
             case "channels":
-                String name = req.getParameter("name");
+                if (parts.length == 3) {
+                    try {
+                        Channel ch = channelDAO.getChannelById(Integer.parseInt(parts[2]));
+                        if (!subscriptionDAO.isSubscribedTo(userId, ch.getCid())) {
+                            res.sendError(HttpServletResponse.SC_FORBIDDEN, "You are not allowed to add messages to this channel");
+                            return;
+                        }
+                        String message = getEscapedParameter(req, "message");
+                        if (message == null) {
+                            res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Message is missing");
+                            return;
+                        }
+                        Message m = messageDAO.createMessage(message, userId, ch.getCid(), MsgType.TEXT);
+                        res.setStatus(HttpServletResponse.SC_CREATED);
+                        res.setContentType("application/json");
+                        new ObjectMapper().writeValue(res.getOutputStream(), m);
+                        return;
+                    } catch (DataAccessException | ChannelNotFoundException | UserNotFoundException |
+                             MessageCreationException e) {
+                        res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        return;
+                    }
+                }
+                String name = getEscapedParameter(req, "name");
                 if (name == null) {
                     res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel name is missing");
                     return;
@@ -191,13 +244,19 @@ public class ApiController extends AbstractController {
                          ChannelNotFoundException | UserNotFoundException e) {
                     res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                 }
-
-
                 break;
 
             default:
                 res.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
+    }
+
+    private String getEscapedParameter(HttpServletRequest req, String parameter) {
+        String param = req.getParameter(parameter);
+        if (param == null) {
+            return null;
+        }
+        return StringEscapeUtils.escapeHtml4(param);
     }
 
     private Integer getUserIdFromToken(String baseToken) {

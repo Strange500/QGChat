@@ -1,0 +1,20 @@
+meta {
+  name: Delete message
+  type: http
+  seq: 2
+}
+
+delete {
+  url: http://localhost:8081/sae/api/messages/:id
+  body: formUrlEncoded
+  auth: basic
+}
+
+params:path {
+  id: 8
+}
+
+auth:basic {
+  username: user1@example.com
+  password: password1
+}

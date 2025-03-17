@@ -1,0 +1,30 @@
+meta {
+  name: Create channel
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8081/sae/api/channels
+  body: formUrlEncoded
+  auth: basic
+}
+
+auth:basic {
+  username: user1@example.com
+  password: password1
+}
+
+body:json {
+  {
+    "name": "test"
+  }
+}
+
+body:form-urlencoded {
+  name: testtt
+}
+
+body:multipart-form {
+  name: test
+}
