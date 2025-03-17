@@ -6,6 +6,7 @@ import fr.univ.lille.s4a021.dto.Message;
 import fr.univ.lille.s4a021.exception.MyDiscordException;
 import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.channel.ChannelNotFoundException;
+import fr.univ.lille.s4a021.exception.dao.subscription.SubscriptionNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -85,6 +86,30 @@ public class ApiController extends AbstractController {
                     res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting channel");
                 } catch (ChannelNotFoundException e) {
                     res.sendError(HttpServletResponse.SC_NOT_FOUND, "Channel not found");
+                }
+                break;
+            case "subscription":
+                try {
+                    if (parts.length == 3) {
+                        Channel ch = null;
+                        try {
+                            ch = channelDAO.getChannelById(Integer.parseInt(parts[2]));
+                        } catch (ChannelNotFoundException e) {
+                            res.sendError(HttpServletResponse.SC_NOT_FOUND, "Channel not found");
+                            return;
+                        }
+                        subscriptionDAO.unsubscribeUser(userId, ch.getCid());
+                        res.setStatus(HttpServletResponse.SC_ACCEPTED);
+                        new ObjectMapper().writeValue(res.getOutputStream(), ch);
+                        return;
+                    }
+                    res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Channel id is missing");
+                } catch (DataAccessException | UserNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error deleting subscription");
+                } catch (ChannelNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_NOT_FOUND, "Channel not found");
+                } catch (SubscriptionNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_NOT_FOUND, "Subscription not found");
                 }
                 break;
             default:

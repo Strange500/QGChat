@@ -1,0 +1,20 @@
+meta {
+  name: Unsubscribe
+  type: http
+  seq: 4
+}
+
+delete {
+  url: http://localhost:8081/sae/api/subscription/:id
+  body: none
+  auth: basic
+}
+
+params:path {
+  id: 1
+}
+
+auth:basic {
+  username: user1@example.com
+  password: password1
+}
