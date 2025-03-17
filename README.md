@@ -138,34 +138,48 @@ CREATE TABLE Utilisateur (
     CONSTRAINT check_password_not_empty CHECK (password <> '')
 );
 
-CREATE TABLE isFriend (
-    uid1 INT,
-    uid2 INT,
-    PRIMARY KEY (uid1, uid2),
-    FOREIGN KEY (uid1) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-    FOREIGN KEY (uid2) REFERENCES Utilisateur(uid) ON DELETE CASCADE
-);
-
--- Création de la table Channel
 CREATE TABLE Channel (
     cid SERIAL PRIMARY KEY,
     minuteBeforeExpiration INT DEFAULT -1,
     name VARCHAR(1024) NOT NULL
 );
 
--- Création de la table Message
+CREATE TABLE isFriend
+(
+    uid1 INT,
+    uid2 INT,
+    cid  INT,
+    PRIMARY KEY (uid1, uid2, cid),
+    FOREIGN KEY (uid1) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    FOREIGN KEY (uid2) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    FOREIGN KEY (cid) REFERENCES Channel (cid) ON DELETE CASCADE,
+    CHECK ( uid1 <> uid2 )
+);
+
+CREATE TABLE FriendRequest
+(
+    senderUid   INT,
+    receiverUid INT,
+    PRIMARY KEY (senderUid, receiverUid),
+    FOREIGN KEY (senderUid) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    FOREIGN KEY (receiverUid) REFERENCES Utilisateur (uid) ON DELETE CASCADE,
+    CHECK ( senderUid <> receiverUid )
+);
+
+
 CREATE TABLE Message (
     mid SERIAL PRIMARY KEY ,
+    type varchar(1024) NOT NULL default 'text',
     uid INT NOT NULL,
     cid INT NOT NULL,
     contenu TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user FOREIGN KEY (uid) REFERENCES Utilisateur(uid) ON DELETE CASCADE,
-    
-    CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
+    CONSTRAINT fk_channel FOREIGN KEY (cid) REFERENCES Channel (cid) ON DELETE CASCADE,
+    CONSTRAINT check_contenu_not_empty CHECK (contenu <> ''),
+    CONSTRAINT check_type CHECK (type IN ('text', 'image', 'video', 'audio'))
 );
 
--- Table de liaison estAbonne (User - Channel)
 CREATE TABLE estAbonne (
     uid INT,
     cid INT,
@@ -182,7 +196,6 @@ CREATE TABLE isAdmin (
     FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
--- Tabme de liaison likes (Message - Utilisateur)
 CREATE TABLE likes (
     mid INT,
     uid INT,
@@ -451,17 +464,17 @@ SELECT * FROM Channel;
 ![UML](UML.png)
 
 # Liste des Entrées des Contrôleurs
-| Route           | Fonctionnalité              |
-|-----------------|-----------------------------|
-| `/home`         | page principale             |
-| `/user`         | contrôleur des utilisateurs |
-| `/channel`      | contrôleur des channels     |
-| `/message`      | contrôleur des messages     |
+
+| Route      | Fonctionnalité              |
+|------------|-----------------------------|
+| `/home`    | page principale             |
+| `/user`    | contrôleur des utilisateurs |
+| `/channel` | contrôleur des channels     |
+| `/message` | contrôleur des messages     |
+| `/api`     | contrôleur api              |
 
 # Points Techniques Difficiles et Résolutions
 
 - **Sécurité des requêtes SQL** : Utilisation de requêtes préparées pour éviter les injections SQL.
 - **XSS Protection** : Filtrage des entrées utilisateur avec `escapeHtml4`.
 
----
-**Fin du document**

@@ -20,9 +20,6 @@ CREATE TABLE Utilisateur (
                         CONSTRAINT check_password_not_empty CHECK (password <> '')
 );
 
-
-
--- Création de la table Channel
 CREATE TABLE Channel (
                          cid SERIAL PRIMARY KEY,
                          minuteBeforeExpiration INT DEFAULT -1,
@@ -52,7 +49,6 @@ CREATE TABLE FriendRequest
 );
 
 
--- Création de la table Message
 CREATE TABLE Message (
                          mid SERIAL PRIMARY KEY ,
                          type varchar(1024) NOT NULL default 'text',
@@ -66,7 +62,6 @@ CREATE TABLE Message (
                          CONSTRAINT check_type CHECK (type IN ('text', 'image', 'video', 'audio'))
 );
 
--- Table de liaison estAbonne (User - Channel)
 CREATE TABLE estAbonne (
                            uid INT,
                            cid INT,
@@ -83,7 +78,6 @@ CREATE TABLE isAdmin (
                            FOREIGN KEY (cid) REFERENCES Channel(cid) ON DELETE CASCADE
 );
 
--- Tabme de liaison likes (Message - Utilisateur)
 CREATE TABLE likes (
                        mid INT,
                        uid INT,
