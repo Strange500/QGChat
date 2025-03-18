@@ -84,7 +84,7 @@ public class MessageDAOSql extends DaoSql implements MessageDAO {
             ResultSet rs = stmt.executeQuery();
             List<Message>r =  buildMessagesFromResultSet(rs);
             if (!r.isEmpty()) {
-                return r.getFirst();
+                return r.get(0);
             }
         } catch (SQLException e) {
             throw new DataAccessException("Error while getting message by id: " + e.getMessage(), e);

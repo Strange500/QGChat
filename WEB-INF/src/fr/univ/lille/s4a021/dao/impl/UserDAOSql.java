@@ -6,7 +6,6 @@ import fr.univ.lille.s4a021.exception.dao.DataAccessException;
 import fr.univ.lille.s4a021.exception.dao.user.UserCreationException;
 import fr.univ.lille.s4a021.exception.dao.user.UserNotFoundException;
 import fr.univ.lille.s4a021.exception.dao.user.UserUpdateException;
-import org.apache.tomcat.dbcp.dbcp2.SQLExceptionList;
 
 import java.sql.*;
 import java.util.*;
@@ -118,7 +117,7 @@ public class UserDAOSql extends DaoSql implements UserDAO {
         if (users.isEmpty()) {
             throw new UserNotFoundException("User not found");
         }
-        return users.getFirst();
+        return users.get(0);
     }
 
     void buildUsers(List<User> users, ResultSet rs) throws SQLException {

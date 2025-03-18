@@ -48,7 +48,7 @@ public abstract class AbstractController extends HttpServlet {
 
     public static void handleError(Exception exception, HttpServletRequest req, HttpServletResponse res) {
         int errorCode = getErrorCode(exception);
-        String message = exception.getMessage();
+        String message = StringEscapeUtils.escapeHtml4(exception.getMessage());
 
         if (Config.DEBUG) {
             req.setAttribute("exception", exception);
@@ -62,14 +62,19 @@ public abstract class AbstractController extends HttpServlet {
 
     public static int getErrorCode(Exception exception) {
         if (exception instanceof MyDiscordException) {
-            return switch (exception) {
-                case NotFoundException e -> HttpServletResponse.SC_NOT_FOUND;
-                case CreationException e1 -> HttpServletResponse.SC_BAD_REQUEST;
-                case BadParameterException e3 -> HttpServletResponse.SC_BAD_REQUEST;
-                case UpdateException e2 -> HttpServletResponse.SC_BAD_REQUEST;
-                case UnauthorizedException e -> HttpServletResponse.SC_UNAUTHORIZED;
-                default -> HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-            };
+            if (exception instanceof UnauthorizedException) {
+                return HttpServletResponse.SC_UNAUTHORIZED;
+            } else if (exception instanceof NotFoundException) {
+                return HttpServletResponse.SC_NOT_FOUND;
+            } else if (exception instanceof BadParameterException) {
+                return HttpServletResponse.SC_BAD_REQUEST;
+            } else if (exception instanceof UpdateException) {
+                return HttpServletResponse.SC_BAD_REQUEST;
+            } else if (exception instanceof CreationException) {
+                return HttpServletResponse.SC_BAD_REQUEST;
+            } else {
+                return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+            }
         }
         return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     }
