@@ -9,7 +9,13 @@ geometry: margin=2.5cm
 ---
 
 # Description Générale de l'Application
-QGChat est une application web permettant aux utilisateurs de créer et gérer des fils de discussion avec un ou plusieurs participants. Chaque utilisateur peut poster et lire des messages dans ces fils. L’application suit une architecture MVC en JEE, avec une interface responsive compatible avec ordinateur et mobile.
+
+QGChat est une application web permettant aux utilisateurs de créer et gérer des fils de discussion avec un ou plusieurs
+participants.  
+Chaque utilisateur peut poster mes messages (texte, markdown, video, audio) et lire des messages dans ces fils, réagir
+aux messages avec des emojis, et personnaliser son profil.
+Des conversations privées sont également possibles entre amis.
+L’application suit une architecture MVC en JEE, avec une interface responsive compatible avec ordinateur et mobile.
 
 ## Fonctionnalités
 
@@ -24,6 +30,7 @@ QGChat est une application web permettant aux utilisateurs de créer et gérer d
 - **Amis** : Les utilisateurs peuvent ajouter des amis et envoyer des messages privés.
 - **Personnalisation** : Les utilisateurs peuvent modifier leur profil (photo de profil, nom d'utilisateur, mail).
 - **Configuration** : Le serveur est configurable via un fichier `config.yml` dans son dossier `WEB-INF/classes`. (debug, taille max des fichiers, connexion à la base de données).
+- **API REST** : L'application expose une API REST, permettant de gérer les channels, les messages, les abonnements.
 
 
 # Installation et Utilisation
@@ -462,6 +469,36 @@ SELECT * FROM Channel;
 # UML de l’Application
 [voir ici](UML.png)
 ![UML](UML.png)
+
+## Architecture Générale de l’Application
+
+L'application suit une architecture MVC en JEE.  
+Les contrôleurs sont chargés de gérer les requêtes HTTP et de renvoyer les réponses.  
+Les contrôleurs utilisent les DAO pour accéder à la base de données.  
+Les DTO sont utilisés pour représenter les objets de la base de données.
+
+### Abstract Controller
+
+La classe `AbstractController` est une classe abstraite qui contient des méthodes utilitaires pour les contrôleurs.
+elle prédéfini la methode `service` qui est appelée par le servlet pour traiter les requêtes. Elle permet alors au
+classe fille de definir `processNoAuthAction` et `processAction`.  
+l'une permet d'effectuer des actions qui ne necessitent pas d'authentification et l'autre qui necessite une
+authentification.
+AbstractController permet aussi de gérer les exceptions et de les renvoyer au client.
+
+### Enum JSP
+
+L'enum `JSP` contient les chemins des fichiers JSP utilisés par les contrôleurs.
+Pour chaque JSP, on peut redéfinir la méthode `prepare` pour initialiser les attributs de la requête. Ce qui permet au
+jsp de n'utiliser que les attributs de la requête.
+pour lancer la JSP il suffit d'appleler la methode `launch` de l'enum.
+
+### DAO
+
+Nous avons abstrait les classes DAO pour permettre une meilleure modularité et une meilleure gestion des exceptions.
+Chaque classe DAO implémente une interface DAO qui définit les méthodes de base pour accéder à la base de données.
+Deplus aucune exception liée à la base de données n'est renvoyée, a la place on renvoie des exceptions personnalisées
+comme DataAccessException, NotFoundException, UpdateException, CreationException.
 
 # Liste des Entrées des Contrôleurs
 

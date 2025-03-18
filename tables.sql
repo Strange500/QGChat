@@ -127,6 +127,8 @@ Utilisez ces fonctionnalités pour rendre vos messages plus clairs et dynamiques
 2. **Pas de spam** : Évitez de poster des liens commerciaux ou répétitifs.
 3. **Confidentialité** : Ne partagez pas d''infos personnelles sans autorisation.
 ', 1, 1),
+                                               ('Ok, merci pour les infos !', 2, 1),
+                                               ('# Bienvenue dans le Channel **Dev** !', 2, 2),
                                                ('```Python
 print("Hello, World!")
 ```

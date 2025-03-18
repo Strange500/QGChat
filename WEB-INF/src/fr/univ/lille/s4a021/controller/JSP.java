@@ -83,6 +83,7 @@ public enum JSP {
     EDIT_USER("editUser.jsp") {
         @Override
         public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+            req.setAttribute("referer", "home");
             Integer uid = (Integer) req.getAttribute("id");
             String userProfilePicture = this.userDAO.getUserProfilePicture(Util.getUid(req.getSession()));
             User currentUser = userDAO.getUserById(uid);
@@ -119,6 +120,7 @@ public enum JSP {
             req.setAttribute("currentUser", currentUser);
 
             String channelID = AbstractController.getEscapedParameter(req, "channelID");
+            req.setAttribute("referer", "home?action=view&channelID=" + channelID);
             if (channelID == null) {
                 res.sendRedirect("home");
                 return;
@@ -137,6 +139,7 @@ public enum JSP {
     CREATE_CHANNEL("createChannel.jsp") {
         @Override
         public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+            req.setAttribute("referer", "home");
             Integer uid = (Integer) req.getAttribute("id");
             String userProfilePicture = this.userDAO.getUserProfilePicture(Util.getUid(req.getSession()));
             User currentUser = userDAO.getUserById(uid);
@@ -158,6 +161,7 @@ public enum JSP {
 
             int chanelID = Integer.parseInt(AbstractController.getEscapedParameter(req, "channelID"));
             Channel channel = channelDAO.getChannelById(chanelID);
+            req.setAttribute("referer", "home?action=view&channelID=" + chanelID);
             String token = new JwtManager().createJwtForChannelLink(uid, chanelID);
             String url = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getContextPath() + "/channel?action=join&token=" + token;
             req.setAttribute("channel", channel);
@@ -167,6 +171,7 @@ public enum JSP {
     JOIN("join.jsp") {
         @Override
         public void prepare(HttpServletRequest req, HttpServletResponse res) throws MyDiscordException {
+            req.setAttribute("referer", "home");
             Integer uid = (Integer) req.getAttribute("id");
             String userProfilePicture = this.userDAO.getUserProfilePicture(Util.getUid(req.getSession()));
             User currentUser = userDAO.getUserById(uid);
