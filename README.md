@@ -10,28 +10,31 @@ geometry: margin=2.5cm
 
 # Description Générale de l'Application
 
-QGChat est une application web permettant aux utilisateurs de créer et gérer des fils de discussion avec un ou plusieurs
-participants.  
-Chaque utilisateur peut poster mes messages (texte, markdown, video, audio) et lire des messages dans ces fils, réagir
-aux messages avec des emojis, et personnaliser son profil.
-Des conversations privées sont également possibles entre amis.
-L’application suit une architecture MVC en JEE, avec une interface responsive compatible avec ordinateur et mobile.
+QGChat est une application web permettant aux utilisateurs de créer et de gérer des fils de discussion avec un ou
+plusieurs participants. Chaque utilisateur peut poster des messages (texte, markdown, vidéo, audio), lire des messages
+dans ces fils, réagir aux messages avec des emojis et personnaliser son profil. Des conversations privées sont également
+possibles entre amis. L’application suit une architecture MVC en JEE, avec une interface responsive compatible avec les
+ordinateurs et les mobiles.
 
 ## Fonctionnalités
 
 - **Authentification** : Les utilisateurs peuvent s'inscrire, se connecter et se déconnecter.
 - **Création de Channels** : Les utilisateurs peuvent créer des channels.
-- **Partage de Channels** : Les utilisateurs peuvent partager des channels avec d'autres utilisateurs via un lien ou un QR code proteger via des tokens JWT temporaires.
-- **Messages** : Les utilisateurs peuvent poster des messages dans les channels (texte, images, video, audio), les modifier et les supprimer si ils sont les auteurs.
+- **Partage de Channels** : Les utilisateurs peuvent partager des channels avec d'autres utilisateurs via un lien ou un
+  QR code, protégés par des tokens JWT temporaires.
+- **Messages** : Les utilisateurs peuvent poster des messages dans les channels (texte, images, vidéo, audio), les
+  modifier et les supprimer s'ils en sont les auteurs.
 - **Markdown** : Les utilisateurs peuvent utiliser la syntaxe Markdown pour formater leurs messages.
 - **Réactions** : Les utilisateurs peuvent réagir aux messages avec des emojis.
-- **Abonnements** : Les utilisateurs peuvent s'abonner à des channels si ils ont été invités ou ajoutés.
-- **Administration** : Les utilisateurs peuvent être administrateurs de channels (ajouter des membres, supprimer des messages, promouvoir des administrateurs, changer le nom, durée de vie des messages).
+- **Abonnements** : Les utilisateurs peuvent s'abonner à des channels s'ils ont été invités ou ajoutés.
+- **Administration** : Les utilisateurs peuvent être administrateurs de channels (ajouter des membres, supprimer des
+  messages, promouvoir des administrateurs, changer le nom et la durée de vie des messages).
 - **Amis** : Les utilisateurs peuvent ajouter des amis et envoyer des messages privés.
-- **Personnalisation** : Les utilisateurs peuvent modifier leur profil (photo de profil, nom d'utilisateur, mail).
-- **Configuration** : Le serveur est configurable via un fichier `config.yml` dans son dossier `WEB-INF/classes`. (debug, taille max des fichiers, connexion à la base de données).
-- **API REST** : L'application expose une API REST, permettant de gérer les channels, les messages, les abonnements.
-
+- **Personnalisation** : Les utilisateurs peuvent modifier leur profil (photo de profil, nom d'utilisateur, adresse
+  e-mail).
+- **Configuration** : Le serveur est configurable via un fichier `config.yml` dans son dossier `WEB-INF/classes` (debug,
+  taille maximale des fichiers, connexion à la base de données).
+- **API REST** : L'application expose une API REST, permettant de gérer les channels, les messages et les abonnements.
 
 # Installation et Utilisation
 
@@ -324,145 +327,113 @@ SELECT * FROM Channel;
 # Arborescence Globale de l’Application
 ```
 /Projet_SAE
-├───res
-│   └───documentation
-│           MCD.png
-│           SI.PNG
-│
-├───scripts
-│       home.js
-│
-└───WEB-INF
-    │   WEB-INF.iml
-    │   web.xml
+├── README.md
+├── scripts
+│   └── home.js
+├── tables.sql
+├── UML.png
+└── WEB-INF
+    ├── classes
+    │   ├── config.yml
+    │   ├── default1.png
+    │   ├── default2.png
+    │   ├── default3.png
+    │   ├── default4.png
     │
-    ├───classes
-    │   │   config.yml
-    │   │   default1.png
-    │   │   default2.png
-    │   │   default3.png
-    │   └───default4.png
+    ├── jsp
+    │   ├── components
+    │   │   ├── head.jsp
+    │   │   ├── message.jsp
+    │   │   ├── messagePart
+    │   │   │   ├── DeleteAndAditForm.jsp
+    │   │   │   ├── ReactionForm.jsp
+    │   │   │   └── UserProfile.jsp
+    │   │   └── TopBar.jsp
+    │   ├── createChannel.jsp
+    │   ├── editUser.jsp
+    │   ├── error.jsp
+    │   ├── friend.jsp
+    │   ├── home.jsp
+    │   ├── join.jsp
+    │   ├── login.jsp
+    │   ├── ModifChannel.jsp
+    │   └── share.jsp
     │
-    ├───jsp
-    │   │   createChannel.jsp
-    │   │   editUser.jsp
-    │   │   error.jsp
-    │   │   friend.jsp
-    │   │   home.jsp
-    │   │   join.jsp
-    │   │   login.jsp
-    │   │   ModifChannel.jsp
-    │   │   share.jsp
-    │   │
-    │   └───components
-    │       │   message.jsp
-    │       │   TopBar.jsp
-    │       │
-    │       └───messagePart
-    │               DeleteAndAditForm.jsp
-    │               ReactionForm.jsp
-    │               UserProfile.jsp
-    │
-    ├───lib
-    │       jackson-annotations-2.15.3.jar
-    │       jackson-core-2.15.3.jar
-    │       jackson-databind-2.15.3.jar
-    │       jackson-dataformat-xml-2.15.3.jar
-    │       jjwt-api-0.12.5.jar
-    │       jjwt-impl-0.12.5.jar
-    │       jjwt-jackson-0.12.5.jar
-    │       postgresql-42.7.5.jar
-    │       snakeyaml-2.4.jar
-    │
-    └───src
-        └───fr
-            └───univ
-                └───lille
-                    └───s4a021
-                        │   Config.java
-                        │
-                        ├───controller
-                        │       AbstractController.java
-                        │       ChannelController.java
-                        │       JSP.java
-                        │       MainController.java
-                        │       MessageController.java
-                        │       UserController.java
-                        │
-                        ├───dao
-                        │   │   AdminsDAO.java
-                        │   │   ChannelDAO.java
-                        │   │   FriendDAO.java
-                        │   │   MessageDAO.java
-                        │   │   ReactionDAO.java
-                        │   │   SubscriptionDAO.java
-                        │   │   UserDAO.java
-                        │   │
-                        │   └───impl
-                        │           AdminsDAOSql.java
-                        │           ChannelDAOSql.java
-                        │           DaoSql.java
-                        │           FriendDAOSql.java
-                        │           MessageDAOSql.java
-                        │           ReactionDaoSql.java
-                        │           SubscriptionDAOSql.java
-                        │           UserDAOSql.java
-                        │
-                        ├───dto
-                        │       Channel.java
-                        │       ImgMessage.java
-                        │       Message.java
-                        │       User.java
-                        │
-                        ├───exception
-                        │   │   BadParameterException.java
-                        │   │   ConfigErrorException.java
-                        │   │   MyDiscordException.java
-                        │   │   UnauthorizedException.java
-                        │   │
-                        │   └───dao
-                        │       │   CreationException.java
-                        │       │   DaoException.java
-                        │       │   DataAccessException.java
-                        │       │   NotFoundException.java
-                        │       │   UpdateException.java
-                        │       │
-                        │       ├───admin
-                        │       │       AdminCreationException.java
-                        │       │       AdminNotFoundException.java
-                        │       │
-                        │       ├───channel
-                        │       │       ChannelCreationException.java
-                        │       │       ChannelNotFoundException.java
-                        │       │       ChannelUpdateException.java
-                        │       │
-                        │       ├───message
-                        │       │       MessageCreationException.java
-                        │       │       MessageNotFoundException.java
-                        │       │       MessageUpdateException.java
-                        │       │
-                        │       ├───reaction
-                        │       │       ReactionCreationException.java
-                        │       │       ReactionNotFoundException.java
-                        │       │       ReactionUpdateException.java
-                        │       │
-                        │       │
-                        │       ├───subscription
-                        │       │       SubscriptionNotFoundException.java
-                        │       │
-                        │       └───user
-                        │               UserCreationException.java
-                        │               UserNotFoundException.java
-                        │               UserUpdateException.java
-                        │
-                        ├───model
-                        │   └───bdd
-                        │           Connect.java
-                        │           Util.java
-                        │
-                        └───util
-                                JwtManager.java
-                                Pair.java
+    ├── src
+    │   └── fr
+    │       └── univ
+    │           └── lille
+    │               └── s4a021
+    │                   ├── Config.java
+    │                   ├── controller
+    │                   │   ├── AbstractController.java
+    │                   │   ├── ApiController.java
+    │                   │   ├── ChannelController.java
+    │                   │   ├── JSP.java
+    │                   │   ├── MainController.java
+    │                   │   ├── MessageController.java
+    │                   │   └── UserController.java
+    │                   ├── dao
+    │                   │   ├── AdminsDAO.java
+    │                   │   ├── ChannelDAO.java
+    │                   │   ├── FriendDAO.java
+    │                   │   ├── impl
+    │                   │   │   ├── AdminsDAOSql.java
+    │                   │   │   ├── ChannelDAOSql.java
+    │                   │   │   ├── DaoSql.java
+    │                   │   │   ├── FriendDAOSql.java
+    │                   │   │   ├── MessageDAOSql.java
+    │                   │   │   ├── ReactionDaoSql.java
+    │                   │   │   ├── SubscriptionDAOSql.java
+    │                   │   │   └── UserDAOSql.java
+    │                   │   ├── MessageDAO.java
+    │                   │   ├── ReactionDAO.java
+    │                   │   ├── SubscriptionDAO.java
+    │                   │   └── UserDAO.java
+    │                   ├── dto
+    │                   │   ├── Channel.java
+    │                   │   ├── Message.java
+    │                   │   ├── MsgType.java
+    │                   │   └── User.java
+    │                   ├── exception
+    │                   │   ├── BadParameterException.java
+    │                   │   ├── ConfigErrorException.java
+    │                   │   ├── dao
+    │                   │   │   ├── admin
+    │                   │   │   │   ├── AdminCreationException.java
+    │                   │   │   │   └── AdminNotFoundException.java
+    │                   │   │   ├── channel
+    │                   │   │   │   ├── ChannelCreationException.java
+    │                   │   │   │   ├── ChannelNotFoundException.java
+    │                   │   │   │   └── ChannelUpdateException.java
+    │                   │   │   ├── CreationException.java
+    │                   │   │   ├── DaoException.java
+    │                   │   │   ├── DataAccessException.java
+    │                   │   │   ├── message
+    │                   │   │   │   ├── MessageCreationException.java
+    │                   │   │   │   ├── MessageNotFoundException.java
+    │                   │   │   │   └── MessageUpdateException.java
+    │                   │   │   ├── NotFoundException.java
+    │                   │   │   ├── reaction
+    │                   │   │   │   ├── ReactionCreationException.java
+    │                   │   │   │   ├── ReactionNotFoundException.java
+    │                   │   │   │   └── ReactionUpdateException.java
+    │                   │   │   ├── subscription
+    │                   │   │   │   └── SubscriptionNotFoundException.java
+    │                   │   │   ├── UpdateException.java
+    │                   │   │   └── user
+    │                   │   │       ├── UserCreationException.java
+    │                   │   │       ├── UserNotFoundException.java
+    │                   │   │       └── UserUpdateException.java
+    │                   │   ├── MyDiscordException.java
+    │                   │   └── UnauthorizedException.java
+    │                   ├── model
+    │                   │   └── bdd
+    │                   │       ├── Connect.java
+    │                   │       └── Util.java
+    │                   └── util
+    │                       ├── JwtManager.java
+    │                       └── Pair.java
 
 ```
 
@@ -472,33 +443,33 @@ SELECT * FROM Channel;
 
 ## Architecture Générale de l’Application
 
-L'application suit une architecture MVC en JEE.  
-Les contrôleurs sont chargés de gérer les requêtes HTTP et de renvoyer les réponses.  
-Les contrôleurs utilisent les DAO pour accéder à la base de données.  
-Les DTO sont utilisés pour représenter les objets de la base de données.
+L'application suit une architecture MVC en JEE. Les contrôleurs sont chargés de gérer les requêtes HTTP et de renvoyer
+les réponses.  
+Ils utilisent les DAO pour accéder à la base de données, tandis que les DTO sont utilisés pour représenter les objets de
+la base de données.
 
 ### Abstract Controller
 
-La classe `AbstractController` est une classe abstraite qui contient des méthodes utilitaires pour les contrôleurs.
-elle prédéfini la methode `service` qui est appelée par le servlet pour traiter les requêtes. Elle permet alors au
-classe fille de definir `processNoAuthAction` et `processAction`.  
-l'une permet d'effectuer des actions qui ne necessitent pas d'authentification et l'autre qui necessite une
-authentification.
-AbstractController permet aussi de gérer les exceptions et de les renvoyer au client.
+La classe `AbstractController` est une classe abstraite qui contient des méthodes utilitaires pour les contrôleurs.  
+Elle prédéfinit la méthode `service`, qui est appelée par le servlet pour traiter les requêtes.  
+Cela permet aux classes filles de définir `processNoAuthAction` et `processAction`.  
+La première permet d'effectuer des actions qui ne nécessitent pas d'authentification, tandis que l'autre nécessite une
+authentification. `AbstractController` permet également de gérer les exceptions et de les renvoyer au client.
 
 ### Enum JSP
 
-L'enum `JSP` contient les chemins des fichiers JSP utilisés par les contrôleurs.
-Pour chaque JSP, on peut redéfinir la méthode `prepare` pour initialiser les attributs de la requête. Ce qui permet au
-jsp de n'utiliser que les attributs de la requête.
-pour lancer la JSP il suffit d'appleler la methode `launch` de l'enum.
+L'énumération `JSP` contient les chemins des fichiers JSP utilisés par les contrôleurs.  
+Pour chaque JSP, il est possible de redéfinir la méthode `prepare` afin d'initialiser les attributs de la requête, ce
+qui permet au JSP d'utiliser uniquement les attributs de la requête.  
+Pour lancer la JSP, il suffit d'appeler la méthode `launch` de l'énumération.
 
 ### DAO
 
-Nous avons abstrait les classes DAO pour permettre une meilleure modularité et une meilleure gestion des exceptions.
-Chaque classe DAO implémente une interface DAO qui définit les méthodes de base pour accéder à la base de données.
-Deplus aucune exception liée à la base de données n'est renvoyée, a la place on renvoie des exceptions personnalisées
-comme DataAccessException, NotFoundException, UpdateException, CreationException.
+Nous avons abstrait les classes DAO pour permettre une meilleure modularité et une gestion plus efficace des
+exceptions.  
+Chaque classe DAO implémente une interface DAO qui définit les méthodes de base pour accéder à la base de données.  
+De plus, aucune exception liée à la base de données n'est renvoyée ; à la place, nous renvoyons des exceptions
+personnalisées telles que `DataAccessException`, `NotFoundException`, `UpdateException`, et `CreationException`.
 
 # Liste des Entrées des Contrôleurs
 
