@@ -65,7 +65,7 @@ public class MessageController extends AbstractController {
     }
 
     private void handleSendMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws ServletException, IOException, MessageCreationException, ChannelNotFoundException, DataAccessException, BadParameterException, MessageNotFoundException, MessageUpdateException {
-        String channelID = req.getParameter("channelID");
+        String channelID = this.getEscapedParameter(req, "channelID");
         if (checkSubscription(uid, channelID)) {
             sendMessage(req, channelID);
             res.sendRedirect("home?action=view&channelID=" + channelID);
@@ -115,7 +115,7 @@ public class MessageController extends AbstractController {
         for (Part part : parts) {
             if (part.getName().equals("img")) {
                 if (part.getSize() == 0) continue;
-                String newMsg = formatMessage(req.getParameter("message"), part);
+                String newMsg = formatMessage(this.getEscapedParameter(req, "message"), part);
                 MsgType type = getMsgType(part);
                 checkFileSize(part, type);
                 messageDAO.createMessage(newMsg, usr, channel.getCid(), type);
@@ -123,8 +123,9 @@ public class MessageController extends AbstractController {
             }
         }
         if (done) return;
-        if (req.getParameter("message") == null || req.getParameter("message").isEmpty()) return;
-        String newMsg = StringEscapeUtils.escapeHtml4(req.getParameter("message"));
+        if (this.getEscapedParameter(req, "message") == null || this.getEscapedParameter(req, "message").isEmpty())
+            return;
+        String newMsg = StringEscapeUtils.escapeHtml4(this.getEscapedParameter(req, "message"));
         MsgType type = MsgType.TEXT;
         if (lastMessage != null && isWithinTimeFrame(lastMessage.getTimestamp(), 5*60) && lastMessage.getType() == MsgType.TEXT) {
             String mergedContent = lastMessage.getContenu() + "\n" + newMsg;
@@ -181,8 +182,8 @@ public class MessageController extends AbstractController {
     }
 
     private void handleLikeMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, UserNotFoundException, MessageNotFoundException, ReactionUpdateException, ReactionCreationException, ReactionNotFoundException, DataAccessException {
-        int mid = Integer.parseInt(req.getParameter("mid"));
-        String emoji = req.getParameter("emoji");
+        int mid = Integer.parseInt(this.getEscapedParameter(req, "mid"));
+        String emoji = this.getEscapedParameter(req, "emoji");
         int channelId = messageDAO.getMessageById(mid).getChannelId();
 
         if (checkSubscription(uid, String.valueOf(channelId))) {
@@ -222,7 +223,7 @@ public class MessageController extends AbstractController {
     }
 
     private void handleDeleteMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, MessageNotFoundException, DataAccessException, UserNotFoundException, ChannelNotFoundException {
-        int mid = Integer.parseInt(req.getParameter("mid"));
+        int mid = Integer.parseInt(this.getEscapedParameter(req, "mid"));
         Message message = messageDAO.getMessageById(mid);
         if (!hasDeletePermission(uid, message)) return;
         messageDAO.deleteMessage(mid);
@@ -240,8 +241,8 @@ public class MessageController extends AbstractController {
     }
 
     private void handleEditMessage(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, MessageNotFoundException, DataAccessException, UserNotFoundException, ChannelNotFoundException, MessageUpdateException {
-        int mid = Integer.parseInt(req.getParameter("mid"));
-        String newMessageContent = req.getParameter("message");
+        int mid = Integer.parseInt(this.getEscapedParameter(req, "mid"));
+        String newMessageContent = this.getEscapedParameter(req, "message");
         Message message = messageDAO.getMessageById(mid);
         int channelId = message.getChannelId();
         if (!hasEditPermission(uid, message)) {
@@ -254,7 +255,7 @@ public class MessageController extends AbstractController {
             return;
         }
 
-        message.setContenu(StringEscapeUtils.escapeHtml4(newMessageContent));
+        message.setContenu(newMessageContent);
         messageDAO.updateMessage(mid, message.getContenu());
         res.sendRedirect("home?action=view&channelID=" + channelId);
 

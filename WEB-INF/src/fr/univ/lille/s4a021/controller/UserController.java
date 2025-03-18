@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
-import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,9 +83,12 @@ public class UserController extends AbstractController {
     }
 
     private void handleUserRegistration(HttpServletRequest req, HttpServletResponse res) throws IOException, UserCreationException, DataAccessException, UserNotFoundException, UserUpdateException {
-        String username = StringEscapeUtils.escapeHtml4(req.getParameter("username"));
-        String mail = StringEscapeUtils.escapeHtml4(req.getParameter("mail"));
+        String username = this.getEscapedParameter(req, "username");
+        String mail = this.getEscapedParameter(req, "mail");
         String password = req.getParameter("password");
+        if (this.parameterContainsUnauthorizedChars(req, "username") || this.parameterContainsUnauthorizedChars(req, "mail")) {
+            throw new UserCreationException("Invalid characters in username or mail");
+        }
         if (password == null || password.isEmpty()) {
             throw new UserCreationException("Password cannot be empty");
         }
@@ -205,8 +207,11 @@ public class UserController extends AbstractController {
             throw new UnauthorizedException("Unauthorized");
         }
 
-        String username = req.getParameter("username");
-        String email = req.getParameter("email");
+        String username = this.getEscapedParameter(req, "username");
+        String email = this.getEscapedParameter(req, "email");
+        if (this.parameterContainsUnauthorizedChars(req, "username") || this.parameterContainsUnauthorizedChars(req, "email")) {
+            throw new BadParameterException("Invalid characters in username or email");
+        }
         if (username == null || username.isEmpty()) {
             throw new BadParameterException("Username cannot be empty");
         }
@@ -251,8 +256,8 @@ public class UserController extends AbstractController {
     }
 
     private boolean authenticateUser(HttpServletRequest req) throws DataAccessException, UserNotFoundException {
-        String mail = req.getParameter("mail");
-        String password = req.getParameter("password");
+        String mail = this.getEscapedParameter(req, "mail");
+        String password = this.getEscapedParameter(req, "password");
 
         if (mail == null || password == null) {
             return false;
@@ -270,7 +275,7 @@ public class UserController extends AbstractController {
     }
 
     private int parseUidParameter(HttpServletRequest req) throws BadParameterException {
-        String uidParam = req.getParameter("uid");
+        String uidParam = this.getEscapedParameter(req, "uid");
         if (uidParam == null) {
             throw new BadParameterException("UID cannot be null");
         }

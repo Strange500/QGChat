@@ -17,7 +17,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -251,13 +250,6 @@ public class ApiController extends AbstractController {
         }
     }
 
-    private String getEscapedParameter(HttpServletRequest req, String parameter) {
-        String param = req.getParameter(parameter);
-        if (param == null) {
-            return null;
-        }
-        return StringEscapeUtils.escapeHtml4(param);
-    }
 
     private Integer getUserIdFromToken(String baseToken) {
         try {

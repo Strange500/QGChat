@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.apache.tomcat.jakartaee.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 
@@ -83,11 +84,36 @@ public abstract class AbstractController extends HttpServlet {
         jsp.launch(req, res);
     }
 
+    public static String getEscapedParameter(HttpServletRequest req, String parameter) {
+        String param = req.getParameter(parameter);
+        if (param == null) {
+            return null;
+        }
+        return StringEscapeUtils.escapeHtml4(param);
+    }
+
+    public static String[] getEscapedParameterValues(HttpServletRequest req, String parameter) {
+        String[] params = req.getParameterValues(parameter);
+        if (params == null) {
+            return null;
+        }
+        for (int i = 0; i < params.length; i++) {
+            params[i] = StringEscapeUtils.escapeHtml4(params[i]);
+        }
+        return params;
+
+    }
+
+    public static boolean parameterContainsUnauthorizedChars(HttpServletRequest req, String parameter) {
+        String escaped = getEscapedParameter(req, parameter);
+        return !escaped.equals(req.getParameter(parameter));
+    }
+
 
 
     protected void service(HttpServletRequest req, HttpServletResponse res) {
         HttpSession session = req.getSession();
-        String action = req.getParameter("action");
+        String action = this.getEscapedParameter(req, "action");
         try {
 
             processNoAuthAction(action, req, res);

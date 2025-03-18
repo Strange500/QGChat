@@ -43,7 +43,7 @@ public enum JSP {
             List<User> pendingFriendRequests = friendDAO.getFriendRequestSent(uid);
             req.setAttribute("pendingFriendRequests", pendingFriendRequests);
 
-            int channelToViewId = req.getParameter("channelID") == null ? -1 : Integer.parseInt(req.getParameter("channelID"));
+            int channelToViewId = AbstractController.getEscapedParameter(req, "channelID") == null ? -1 : Integer.parseInt(AbstractController.getEscapedParameter(req, "channelID"));
             boolean friendChannel = friendChannels.stream().anyMatch(pair -> pair.getSecond().getCid() == channelToViewId);
             req.setAttribute("friendChannel", friendChannel);
             boolean showChannel = subscribedChannels.stream().anyMatch(channel -> channel.getCid() == channelToViewId);
@@ -56,7 +56,7 @@ public enum JSP {
                     req.setAttribute("listAdmins", listAdmins);
                     req.setAttribute("isAdmin", isAdmin);
                 }
-                int editMid = req.getParameter("editMid") == null ? -1 : Integer.parseInt(req.getParameter("editMid"));
+                int editMid = AbstractController.getEscapedParameter(req, "editMid") == null ? -1 : Integer.parseInt(AbstractController.getEscapedParameter(req, "editMid"));
                 String sendError = req.getAttribute("senderror") == null ? "" : req.getAttribute("senderror").toString();
                 Channel channel = channelDAO.getChannelById(channelToViewId);
                 List<Message> messages = messageDAO.getMessageByChannelId(channelToViewId);
@@ -118,7 +118,7 @@ public enum JSP {
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
 
-            String channelID = req.getParameter("channelID");
+            String channelID = AbstractController.getEscapedParameter(req, "channelID");
             if (channelID == null) {
                 res.sendRedirect("home");
                 return;
@@ -156,7 +156,7 @@ public enum JSP {
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
 
-            int chanelID = Integer.parseInt(req.getParameter("channelID"));
+            int chanelID = Integer.parseInt(AbstractController.getEscapedParameter(req, "channelID"));
             Channel channel = channelDAO.getChannelById(chanelID);
             String token = new JwtManager().createJwtForChannelLink(uid, chanelID);
             String url = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getContextPath() + "/channel?action=join&token=" + token;
@@ -173,7 +173,7 @@ public enum JSP {
             req.setAttribute("UserProfilePicture", userProfilePicture);
             req.setAttribute("currentUser", currentUser);
 
-            String token = req.getParameter("token");
+            String token = AbstractController.getEscapedParameter(req, "token");
             if (token == null) {
                 AbstractController.handleError(new IllegalArgumentException("The token is missing"), req, res);
                 return;

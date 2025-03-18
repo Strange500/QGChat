@@ -39,11 +39,11 @@ public class ChannelController extends AbstractController {
     private static final String ACTION_QUIT = "quit";
 
     private void handleCreateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, ChannelCreationException, DataAccessException, UserNotFoundException, ChannelNotFoundException, AdminCreationException {
-        String name = req.getParameter("name");
+        String name = this.getEscapedParameter(req, "name");
         if (name == null || name.isEmpty()) {
             throw new BadParameterException("Channel name cannot be empty");
         }
-        List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
+        List<Integer> subscribers = extractUserIds(this.getEscapedParameterValues(req, "users"));
         subscribers.add(Util.getUid(req.getSession()));
 
         Channel channel = channelDAO.createChannel(name);
@@ -54,7 +54,7 @@ public class ChannelController extends AbstractController {
     }
 
     private void handleDeleteChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, DataAccessException, ChannelNotFoundException, UnauthorizedException {
-        int cid = Integer.parseInt(req.getParameter("channelID"));
+        int cid = Integer.parseInt(this.getEscapedParameter(req, "channelID"));
         if (!isAuthorized(uid, cid)) {
             throw new UnauthorizedException("Unauthorized");
         }
@@ -64,16 +64,16 @@ public class ChannelController extends AbstractController {
     }
 
     private void handleUpdateChannel(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, BadParameterException, UnauthorizedException, DataAccessException, ChannelNotFoundException, UserNotFoundException, ChannelUpdateException, AdminCreationException {
-        int cid = Integer.parseInt(req.getParameter("channelID"));
+        int cid = Integer.parseInt(this.getEscapedParameter(req, "channelID"));
         if (!isAuthorized(uid, cid)) {
             throw new UnauthorizedException("Unauthorized");
         }
-        String newName = req.getParameter("name");
-        int expiration = Integer.parseInt(req.getParameter("expiration"));
-        List<Integer> subscribers = extractUserIds(req.getParameterValues("users"));
+        String newName = this.getEscapedParameter(req, "name");
+        int expiration = Integer.parseInt(this.getEscapedParameter(req, "expiration"));
+        List<Integer> subscribers = extractUserIds(this.getEscapedParameterValues(req, "users"));
         subscribers.add(uid);
 
-        List<Integer> admins = extractUserIds(req.getParameterValues("admins"));
+        List<Integer> admins = extractUserIds(this.getEscapedParameterValues(req, "admins"));
         if (!areAllAdminsSubscribers(subscribers, admins)) {
             return;
         }
@@ -99,13 +99,13 @@ public class ChannelController extends AbstractController {
     }
 
     private void handleShareChannel(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException, MyDiscordException {
-        String channelID = req.getParameter("channelID");
+        String channelID = this.getEscapedParameter(req, "channelID");
         req.setAttribute("channelID", channelID);
         forwardToJSP(req, res, JSP.SHARE_CHANNEL);
     }
 
     private void handleUnsubscribeUser(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, UserNotFoundException, ChannelNotFoundException, SubscriptionNotFoundException, DataAccessException {
-        int cid = Integer.parseInt(req.getParameter("channelID"));
+        int cid = Integer.parseInt(this.getEscapedParameter(req, "channelID"));
         subscriptionDAO.unsubscribeUser(uid, cid);
         res.sendRedirect("home");
 
@@ -134,7 +134,7 @@ public class ChannelController extends AbstractController {
     }
 
     private void handleAcceptInvite(HttpServletRequest req, HttpServletResponse res, int uid) throws IOException, DataAccessException, ChannelNotFoundException, UserNotFoundException, SubscriptionNotFoundException, UnauthorizedException {
-        String token = req.getParameter("token");
+        String token = this.getEscapedParameter(req, "token");
         Pair<Integer, Integer> uidAndCid ;
         try {
             uidAndCid = new JwtManager().getUidAndCidFromChannelInviteToken(token);
