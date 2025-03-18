@@ -481,6 +481,8 @@ personnalisées telles que `DataAccessException`, `NotFoundException`, `UpdateEx
 | `/message` | contrôleur des messages     |
 | `/api`     | contrôleur api              |
 
+Un dossier `bruno` a été ajouté dans le dossier `res/bruno`. Il contient des requêtes HTTP pour tester l'API.
+
 # Points Techniques Difficiles et Résolutions
 
 - **Sécurité des requêtes SQL** : Utilisation de requêtes préparées pour éviter les injections SQL.
