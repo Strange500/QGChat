@@ -1,13 +1,3 @@
----
-title: "Rapport SAé S4.A02.1 : Web Backend"
-author: "Theron Milan, Roget Benjamin"
-date: "2024-2025"
-groupe: "Groupe X"
-supervisor: "Philippe Mathieu"
-documentclass: article
-geometry: margin=2.5cm
----
-
 # Description Générale de l'Application
 
 QGChat est une application web permettant aux utilisateurs de créer et de gérer des fils de discussion avec un ou
