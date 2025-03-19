@@ -428,8 +428,8 @@ SELECT * FROM Channel;
 ```
 
 # UML de l’Application
-[voir ici](UML.png)
-![UML](UML.png)
+[voir ici](./UML.png)
+![UML](./UML.png)
 
 ## Architecture Générale de l’Application
 
